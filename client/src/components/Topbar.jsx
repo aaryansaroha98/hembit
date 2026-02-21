@@ -79,10 +79,18 @@ export function Topbar() {
   };
 
   return (
-    <header className={`topbar-wrap${useOverlayHeader ? ' topbar-wrap-overlay' : ''}`} onMouseLeave={() => setOpenMenu('')}>
+    <header
+      className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}`}
+      onMouseLeave={() => setOpenMenu('')}
+    >
       <div className="topbar">
-        <button className="menu-toggle" type="button" onClick={() => setMobileOpen(!mobileOpen)}>
-          MENU
+        <button
+          className="menu-toggle"
+          type="button"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+        >
+          <span className={`menu-toggle-icon${mobileOpen ? ' is-open' : ''}`} aria-hidden="true" />
         </button>
 
         <nav className="topbar-left">
@@ -118,6 +126,14 @@ export function Topbar() {
       </div>
 
       {openMenu && <button type="button" className="menu-backdrop" onClick={() => setOpenMenu('')} aria-label="Close menu" />}
+      {mobileOpen && (
+        <button
+          type="button"
+          className="menu-backdrop mobile-menu-backdrop"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close mobile menu"
+        />
+      )}
       {renderMenu()}
 
       {mobileOpen && (
