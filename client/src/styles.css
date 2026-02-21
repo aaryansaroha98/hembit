@@ -36,6 +36,7 @@ body {
 
 body.home-view {
   overflow-y: auto;
+  overscroll-behavior-y: none;
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
 }

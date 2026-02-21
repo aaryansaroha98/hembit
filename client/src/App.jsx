@@ -22,8 +22,195 @@ function MainLayout({ children }) {
   const isHome = location.pathname === '/';
 
   useEffect(() => {
+    let unlockTimer = null;
+    let isLocked = false;
+    let touchStartY = null;
+    let touchStartX = null;
+    const prefersReducedMotion =
+      typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const scrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
+    const lockDurationMs = prefersReducedMotion ? 220 : 760;
+
+    const getSections = () => Array.from(document.querySelectorAll('.hero-page, .site-footer--home'));
+
+    const getCurrentIndex = (sections) => {
+      if (!sections.length) {
+        return -1;
+      }
+
+      const probeY = window.scrollY + window.innerHeight * 0.35;
+      let currentIndex = 0;
+
+      for (let index = 0; index < sections.length; index += 1) {
+        if (sections[index].offsetTop <= probeY) {
+          currentIndex = index;
+        }
+      }
+
+      return currentIndex;
+    };
+
+    const shouldIgnoreTarget = (target) => target?.closest?.('.mobile-panel, .mega-menu');
+    const isOverlayMenuOpen = () => Boolean(document.querySelector('.mobile-panel, .mega-menu'));
+
+    const goToIndex = (index) => {
+      const sections = getSections();
+      if (!sections.length) {
+        return;
+      }
+
+      const targetIndex = Math.max(0, Math.min(index, sections.length - 1));
+      const targetTop = sections[targetIndex].offsetTop;
+
+      if (Math.abs(window.scrollY - targetTop) < 2) {
+        return;
+      }
+
+      isLocked = true;
+      if (unlockTimer) {
+        window.clearTimeout(unlockTimer);
+      }
+
+      window.scrollTo({ top: targetTop, behavior: scrollBehavior });
+      unlockTimer = window.setTimeout(() => {
+        isLocked = false;
+      }, lockDurationMs);
+    };
+
+    const stepSlides = (direction) => {
+      if (isLocked) {
+        return;
+      }
+
+      const sections = getSections();
+      if (!sections.length) {
+        return;
+      }
+
+      const currentIndex = getCurrentIndex(sections);
+      const nextIndex = currentIndex + direction;
+
+      if (nextIndex < 0 || nextIndex >= sections.length) {
+        return;
+      }
+
+      goToIndex(nextIndex);
+    };
+
+    const onWheel = (event) => {
+      if (!isHome || isOverlayMenuOpen() || shouldIgnoreTarget(event.target)) {
+        return;
+      }
+
+      if (Math.abs(event.deltaY) < 12) {
+        return;
+      }
+
+      event.preventDefault();
+      stepSlides(event.deltaY > 0 ? 1 : -1);
+    };
+
+    const onKeyDown = (event) => {
+      if (!isHome || isOverlayMenuOpen()) {
+        return;
+      }
+
+      const targetTag = event.target?.tagName?.toLowerCase();
+      if (targetTag === 'input' || targetTag === 'select' || targetTag === 'textarea' || event.target?.isContentEditable) {
+        return;
+      }
+
+      if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') {
+        event.preventDefault();
+        stepSlides(1);
+      } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
+        event.preventDefault();
+        stepSlides(-1);
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        goToIndex(0);
+      } else if (event.key === 'End') {
+        event.preventDefault();
+        const sections = getSections();
+        if (sections.length) {
+          goToIndex(sections.length - 1);
+        }
+      }
+    };
+
+    const onTouchStart = (event) => {
+      if (!isHome || isOverlayMenuOpen() || shouldIgnoreTarget(event.target) || event.touches.length !== 1) {
+        return;
+      }
+
+      touchStartY = event.touches[0].clientY;
+      touchStartX = event.touches[0].clientX;
+    };
+
+    const onTouchMove = (event) => {
+      if (!isHome || isOverlayMenuOpen() || touchStartY === null || touchStartX === null || shouldIgnoreTarget(event.target)) {
+        return;
+      }
+
+      const currentTouch = event.touches[0];
+      const deltaY = touchStartY - currentTouch.clientY;
+      const deltaX = touchStartX - currentTouch.clientX;
+
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        event.preventDefault();
+      }
+    };
+
+    const onTouchEnd = (event) => {
+      if (
+        !isHome ||
+        isOverlayMenuOpen() ||
+        touchStartY === null ||
+        touchStartX === null ||
+        shouldIgnoreTarget(event.target)
+      ) {
+        touchStartY = null;
+        touchStartX = null;
+        return;
+      }
+
+      const touch = event.changedTouches[0];
+      const deltaY = touchStartY - touch.clientY;
+      const deltaX = touchStartX - touch.clientX;
+
+      touchStartY = null;
+      touchStartX = null;
+
+      if (Math.abs(deltaY) < 48 || Math.abs(deltaY) < Math.abs(deltaX)) {
+        return;
+      }
+
+      stepSlides(deltaY > 0 ? 1 : -1);
+    };
+
     document.body.classList.toggle('home-view', isHome);
-    return () => document.body.classList.remove('home-view');
+    if (isHome) {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      window.addEventListener('wheel', onWheel, { passive: false });
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('touchstart', onTouchStart, { passive: true });
+      window.addEventListener('touchmove', onTouchMove, { passive: false });
+      window.addEventListener('touchend', onTouchEnd, { passive: true });
+    }
+
+    return () => {
+      document.body.classList.remove('home-view');
+
+      if (unlockTimer) {
+        window.clearTimeout(unlockTimer);
+      }
+
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
   }, [isHome]);
 
   return (
