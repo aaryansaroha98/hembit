@@ -10,6 +10,7 @@
   --white: #ffffff;
   --danger: #b4543e;
   --max-width: 1380px;
+  --topbar-height: 80px;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --t-fast: 180ms;
   --t-med: 340ms;
@@ -34,7 +35,9 @@ body {
 }
 
 body.home-view {
+  overflow-y: auto;
   scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
 }
 
 a,
@@ -67,9 +70,20 @@ main {
   animation: pageEnter 420ms var(--ease);
 }
 
-body.home-view .hero-slider,
+body.home-view main {
+  min-height: auto;
+}
+
+body.home-view .hero-page,
 body.home-view .site-footer--home {
   scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.home-view {
+    scroll-behavior: auto;
+  }
 }
 
 @keyframes pageEnter {
@@ -301,38 +315,45 @@ body.home-view .site-footer--home {
 /* Home / Hero */
 .hero-slider {
   position: relative;
-  overflow: hidden;
-  height: 100vh;
   background: #000;
 }
 
-.hero-track {
+.hero-page {
   position: relative;
-  height: 100%;
+  min-height: calc(100svh - var(--topbar-height));
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0.62;
+  transform: translateY(44px);
+  transition: opacity 520ms var(--ease), transform 760ms var(--ease);
+  will-change: opacity, transform;
 }
 
-.hero-slide {
+.hero-page.is-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-media {
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  transition: transform 840ms var(--ease), opacity 760ms var(--ease);
-  will-change: transform, opacity;
 }
 
-.hero-slide img,
-.hero-slide video {
+.hero-media img,
+.hero-media video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transform: scale(1.015);
+  transform: scale(1.03);
   transition: transform 1200ms var(--ease);
 }
 
-.hero-slide.is-active img,
-.hero-slide.is-active video {
+.hero-page.is-active .hero-media img,
+.hero-page.is-active .hero-media video {
   transform: scale(1);
 }
 
@@ -354,7 +375,7 @@ body.home-view .site-footer--home {
   transition: opacity 540ms var(--ease), transform 700ms var(--ease);
 }
 
-.hero-slide.is-active .hero-overlay {
+.hero-page.is-active .hero-overlay {
   opacity: 1;
   transform: translateY(0);
 }
@@ -393,14 +414,22 @@ body.home-view .site-footer--home {
 }
 
 .slider-dots {
-  position: absolute;
+  position: fixed;
   right: min(4vw, 48px);
-  top: 50%;
+  top: calc(50% + (var(--topbar-height) / 2));
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
   z-index: 5;
+  opacity: 1;
+  transition: opacity 240ms var(--ease), transform 300ms var(--ease);
+  pointer-events: none;
+}
+
+.slider-dots.hidden {
+  opacity: 0;
+  transform: translateY(-50%) translateX(12px);
 }
 
 .slider-dots button {
@@ -411,6 +440,7 @@ body.home-view .site-footer--home {
   background: rgba(255, 255, 255, 0.38);
   padding: 0;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .slider-dots button.active {
@@ -1326,14 +1356,14 @@ textarea {
 /* Home Footer Slide Page */
 .site-footer--home {
   background: #e7e7e7;
-  min-height: 100vh;
+  min-height: calc(100svh - var(--topbar-height));
   display: flex;
   align-items: stretch;
   border-top: 0;
 }
 
 .site-footer--home .footer-inner {
-  min-height: 100vh;
+  min-height: calc(100svh - var(--topbar-height));
   display: grid;
   grid-template-rows: auto 1fr auto;
   padding: 0;
@@ -1547,6 +1577,10 @@ textarea {
 }
 
 @media (max-width: 900px) {
+  :root {
+    --topbar-height: 70px;
+  }
+
   .menu-toggle {
     display: inline-flex;
   }
@@ -1716,7 +1750,7 @@ textarea {
   }
 
   .site-footer--home {
-    min-height: 100vh;
+    min-height: calc(100svh - var(--topbar-height));
   }
 
   .site-footer--home .footer-main-grid {

@@ -3,131 +3,113 @@ import { Link } from 'react-router-dom';
 
 export function HeroSlider({ slides }) {
   const orderedSlides = useMemo(() => [...slides].sort((a, b) => a.order - b.order), [slides]);
-  const [index, setIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [showDots, setShowDots] = useState(true);
   const sliderRef = useRef(null);
-  const wheelLockRef = useRef(false);
-  const touchStartYRef = useRef(0);
-  const maxIndex = Math.max(orderedSlides.length - 1, 0);
+  const sectionRefs = useRef([]);
 
   useEffect(() => {
-    if (index > orderedSlides.length - 1) {
-      setIndex(0);
-    }
-  }, [index, orderedSlides.length]);
+    sectionRefs.current = sectionRefs.current.slice(0, orderedSlides.length);
+    setActiveIndex((prevIndex) => Math.min(prevIndex, Math.max(orderedSlides.length - 1, 0)));
+  }, [orderedSlides.length]);
 
   useEffect(() => {
-    const node = sliderRef.current;
-    if (!node || orderedSlides.length <= 1) {
+    if (!orderedSlides.length) {
       return;
     }
 
-    const releaseLock = () => {
-      wheelLockRef.current = false;
-    };
+    const slideObserver = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries.filter((entry) => entry.isIntersecting);
+        if (!visibleEntries.length) {
+          return;
+        }
 
-    const onWheel = (event) => {
-      if (wheelLockRef.current) {
-        event.preventDefault();
-        return;
+        const topEntry = visibleEntries.sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        const idx = Number(topEntry.target.getAttribute('data-slide-index'));
+        if (!Number.isNaN(idx)) {
+          setActiveIndex(idx);
+        }
+      },
+      {
+        threshold: [0.45, 0.6, 0.75],
+        rootMargin: '0px 0px -8% 0px',
       }
+    );
 
-      const stepDown = event.deltaY > 12;
-      const stepUp = event.deltaY < -12;
-
-      if (stepDown && index < maxIndex) {
-        event.preventDefault();
-        wheelLockRef.current = true;
-        setIndex((prev) => Math.min(prev + 1, maxIndex));
-        window.setTimeout(releaseLock, 850);
-        return;
+    for (const section of sectionRefs.current) {
+      if (section) {
+        slideObserver.observe(section);
       }
+    }
 
-      if (stepUp && index > 0) {
-        event.preventDefault();
-        wheelLockRef.current = true;
-        setIndex((prev) => Math.max(prev - 1, 0));
-        window.setTimeout(releaseLock, 850);
-      }
-    };
+    return () => slideObserver.disconnect();
+  }, [orderedSlides.length]);
 
-    node.addEventListener('wheel', onWheel, { passive: false });
-    return () => node.removeEventListener('wheel', onWheel);
-  }, [index, maxIndex, orderedSlides.length]);
+  useEffect(() => {
+    const node = sliderRef.current;
+    if (!node) {
+      return;
+    }
+
+    const sliderObserver = new IntersectionObserver(
+      ([entry]) => {
+        setShowDots(entry?.isIntersecting ?? false);
+      },
+      { threshold: 0.02 }
+    );
+
+    sliderObserver.observe(node);
+    return () => sliderObserver.disconnect();
+  }, []);
 
   if (!orderedSlides.length) {
     return null;
   }
 
   return (
-    <section
-      className="hero-slider"
-      ref={sliderRef}
-      onTouchStart={(event) => {
-        touchStartYRef.current = event.touches[0].clientY;
-      }}
-      onTouchEnd={(event) => {
-        const touchEndY = event.changedTouches[0].clientY;
-        const delta = touchStartYRef.current - touchEndY;
-
-        if (Math.abs(delta) < 45) {
-          return;
-        }
-
-        if (delta > 0 && index < maxIndex) {
-          setIndex((prev) => Math.min(prev + 1, maxIndex));
-          return;
-        }
-
-        if (delta < 0 && index > 0) {
-          setIndex((prev) => Math.max(prev - 1, 0));
-        }
-      }}
-    >
-      <div className="hero-track">
-        {orderedSlides.map((slide, slideIndex) => (
-          <article
-            className={`hero-slide${slideIndex === index ? ' is-active' : ''}`}
+    <section className="hero-slider" ref={sliderRef}>
+      <div className={`slider-dots${showDots ? '' : ' hidden'}`}>
+        {orderedSlides.map((slide, dotIndex) => (
+          <button
             key={slide.id}
-            style={{
-              transform:
-                slideIndex === index
-                  ? 'translate3d(0, 0, 0)'
-                  : slideIndex < index
-                    ? slideIndex === index - 1
-                      ? 'translate3d(0, -12%, 0)'
-                      : 'translate3d(0, -18%, 0)'
-                    : 'translate3d(0, 100%, 0)',
-              opacity: slideIndex < index - 1 ? 0 : 1,
-              zIndex: slideIndex === index ? 30 : slideIndex > index ? 20 : 10,
-              pointerEvents: slideIndex === index ? 'auto' : 'none',
-            }}
-          >
+            type="button"
+            className={dotIndex === activeIndex ? 'active' : ''}
+            onClick={() =>
+              sectionRefs.current[dotIndex]?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+              })
+            }
+            aria-label={`Go to slide ${dotIndex + 1}`}
+          />
+        ))}
+      </div>
+
+      {orderedSlides.map((slide, slideIndex) => (
+        <article
+          className={`hero-page${slideIndex === activeIndex ? ' is-active' : ''}`}
+          key={slide.id}
+          data-slide-index={slideIndex}
+          ref={(node) => {
+            sectionRefs.current[slideIndex] = node;
+          }}
+        >
+          <div className="hero-media">
             {slide.type === 'video' ? (
               <video src={slide.url} autoPlay muted loop playsInline preload="metadata" />
             ) : (
               <img src={slide.url} alt={slide.title} />
             )}
-            <div className="hero-slide-mask" />
-            <div className="hero-overlay">
-              <p className="hero-overline">{slide.subtitle}</p>
-              <h1>{slide.title}</h1>
-              <Link to={slide.ctaLink || '/shop'}>{slide.ctaLabel || 'Discover'}</Link>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <div className="slider-dots">
-        {orderedSlides.map((slide, dotIndex) => (
-          <button
-            key={slide.id}
-            type="button"
-            className={dotIndex === index ? 'active' : ''}
-            onClick={() => setIndex(dotIndex)}
-            aria-label={`Go to slide ${dotIndex + 1}`}
-          />
-        ))}
-      </div>
+          </div>
+          <div className="hero-slide-mask" />
+          <div className="hero-overlay">
+            <p className="hero-overline">{slide.subtitle}</p>
+            <h1>{slide.title}</h1>
+            <Link to={slide.ctaLink || '/shop'}>{slide.ctaLabel || 'Discover'}</Link>
+          </div>
+        </article>
+      ))}
     </section>
   );
 }
