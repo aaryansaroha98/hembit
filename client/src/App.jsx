@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Topbar } from './components/Topbar';
 import { Footer } from './components/Footer';
@@ -18,9 +19,15 @@ import { AdminPage } from './pages/AdminPage';
 
 function MainLayout({ children }) {
   const location = useLocation();
+  const isHome = location.pathname === '/';
+
+  useEffect(() => {
+    document.body.classList.toggle('home-view', isHome);
+    return () => document.body.classList.remove('home-view');
+  }, [isHome]);
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${isHome ? ' app-shell-home' : ''}`}>
       <Topbar />
       <main key={`${location.pathname}${location.search}`} className="page-transition">
         {children}

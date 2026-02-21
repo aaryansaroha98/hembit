@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 
 export function Footer() {
+  const location = useLocation();
+  const isHome = location.pathname === '/';
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
@@ -18,44 +20,53 @@ export function Footer() {
   };
 
   return (
-    <footer className="site-footer">
+    <footer className={`site-footer ${isHome ? 'site-footer--home' : 'site-footer--compact'}`}>
       <div className="footer-inner">
         <div className="footer-main-grid">
-          <div className="footer-link-columns">
-            <nav className="footer-links">
-              <Link to="/our-story">ABOUT US</Link>
-              <Link to="/founder-story">FOUNDER STORY</Link>
-              <Link to="/services">SERVICES</Link>
-              <a href="mailto:support@hembit.in">EMAIL US</a>
-              <Link to="/privacy-policy">PRIVACY NOTICE</Link>
-            </nav>
-
-            <nav className="footer-links footer-links-secondary">
-              <Link to="/terms-of-use">TERMS OF USE</Link>
-              <Link to="/order-tracking">ORDER TRACKING</Link>
-              <Link to="/shop">SHOP</Link>
-            </nav>
-          </div>
-
-          <form className="newsletter-form" onSubmit={subscribe}>
-            <label htmlFor="newsletter">NEWSLETTER</label>
-            <div>
-              <input
-                id="newsletter"
-                type="email"
-                placeholder="Enter email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <button type="submit">JOIN</button>
+          {isHome && (
+            <div className="footer-col footer-version-col">
+              <p className="footer-version">INDIA VERSION - ENGLISH</p>
             </div>
-            {message && <small>{message}</small>}
-          </form>
+          )}
+
+          <nav className="footer-links footer-col footer-links-main">
+            <Link to="/our-story">ABOUT US</Link>
+            <Link to="/founder-story">FOUNDER STORY</Link>
+            <Link to="/services">SERVICES</Link>
+          </nav>
+
+          <nav className="footer-links footer-col footer-links-legal">
+            <Link to="/privacy-policy">PRIVACY NOTICE</Link>
+            <Link to="/terms-of-use">TERMS OF USE</Link>
+          </nav>
+
+          {isHome ? (
+            <div className="footer-col footer-col-newsletter">
+              <Link to="/services" className="footer-newsletter-link">
+                NEWSLETTER &gt;
+              </Link>
+            </div>
+          ) : (
+            <form className="newsletter-form" onSubmit={subscribe}>
+              <label htmlFor="newsletter">NEWSLETTER</label>
+              <div>
+                <input
+                  id="newsletter"
+                  type="email"
+                  placeholder="Enter your email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <button type="submit">JOIN</button>
+              </div>
+              {message && <small>{message}</small>}
+            </form>
+          )}
         </div>
 
         <div className="footer-bottom-row">
-          <p className="footer-version">INDIA VERSION - ENGLISH</p>
+          {!isHome && <p className="footer-version">INDIA VERSION - ENGLISH</p>}
           <div className="footer-socials">
             <a href="https://www.instagram.com/hembit.in?igsh=MXNkajJ4cHp2b3FxMQ==" target="_blank" rel="noreferrer">
               Instagram

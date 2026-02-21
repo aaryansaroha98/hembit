@@ -27,7 +27,13 @@ export function requireAuth(req, res, next) {
       id: user.id,
       name: user.name,
       email: user.email,
+      mobile: user.mobile || '',
+      country: user.country || '',
+      pincode: user.pincode || '',
+      gender: user.gender || '',
+      age: Number.isFinite(user.age) ? user.age : null,
       role: user.role,
+      addresses: user.addresses || [],
     };
     return next();
   } catch {

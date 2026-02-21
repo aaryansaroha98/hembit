@@ -126,6 +126,11 @@ publicRouter.get('/content/:key', (req, res) => {
   return res.json({ content: db.content[key] });
 });
 
+publicRouter.get('/settings', (_req, res) => {
+  const db = readDb();
+  res.json({ settings: db.settings });
+});
+
 publicRouter.get('/hb-productions', (req, res) => {
   const db = readDb();
   res.json({ posts: db.hbProductions });

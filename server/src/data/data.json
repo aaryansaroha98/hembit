@@ -1,50 +1,74 @@
 {
   "slides": [
     {
-      "id": "slide_xi01702nmlwogpjx",
-      "title": "dsaasd",
-      "subtitle": "did",
+      "id": "slide_owmp449jmlwpe5tw",
+      "title": "sdfsd",
+      "subtitle": "feds",
       "type": "image",
-      "url": "/Users/aaryansaroha/Downloads/00a2d544-7ac4-40ab-aa38-bd450d3bf239.JPG",
+      "url": "http://localhost:5001/uploads/media_en65za2qmlwpe1jz.png",
       "ctaLabel": "Discover",
       "ctaLink": "/shop",
-      "order": 1
+      "order": 2
+    },
+    {
+      "id": "slide_r07s0b9fmlwpeo71",
+      "title": "zxcz",
+      "subtitle": "cxcx",
+      "type": "image",
+      "url": "http://localhost:5001/uploads/media_14blwx92mlwpenic.png",
+      "ctaLabel": "Discover",
+      "ctaLink": "/shop",
+      "order": 2
+    },
+    {
+      "id": "slide_fzevcwtpmlwpf0ev",
+      "title": "ssad",
+      "subtitle": "did",
+      "type": "image",
+      "url": "http://localhost:5001/uploads/media_zym8mg2smlwpew3j.jpg",
+      "ctaLabel": "sDiscover",
+      "ctaLink": "/shop",
+      "order": 3
+    },
+    {
+      "id": "slide_s6fjx2tlmlwqe7s7",
+      "title": "says",
+      "subtitle": "",
+      "type": "video",
+      "url": "http://localhost:5001/uploads/media_j3s3hya2mlwqdtcl.mov",
+      "ctaLabel": "Discover",
+      "ctaLink": "/shop",
+      "order": 4
     }
   ],
   "categories": [
     {
-      "id": "cat_men",
+      "id": "cat_aizgx6almlwpbzne",
       "name": "Men",
-      "slug": "men",
+      "slug": "123",
       "order": 1,
       "series": [
         {
-          "id": "ser_signature",
-          "name": "Signature Series",
-          "slug": "signature-series"
-        },
-        {
-          "id": "ser_raw",
-          "name": "Raw Contrast Series",
-          "slug": "raw-contrast-series"
+          "id": "ser_56cl6rl6mlwpcfo8",
+          "name": "ARJAN ESSENTIALS",
+          "slug": "133"
         }
       ]
     }
   ],
   "products": [
     {
-      "id": "prd_1",
-      "name": "Monochrome Signature Shirt",
-      "slug": "monochrome-signature-shirt",
-      "categoryId": "cat_men",
-      "seriesId": "ser_signature",
-      "price": 3999,
+      "id": "prd_p3ratkrfmlwpdfcq",
+      "name": "PATANDAR OX1",
+      "slug": "34",
+      "categoryId": "cat_aizgx6almlwpbzne",
+      "seriesId": "ser_56cl6rl6mlwpcfo8",
+      "price": 2300,
       "currency": "INR",
-      "description": "Structured cotton shirt with contrast stitch details.",
-      "details": "Premium cotton twill, hidden placket, dry clean recommended.",
+      "description": "dfdsf",
+      "details": "dsfdsfds",
       "images": [
-        "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=1200&q=80",
-        "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80"
+        "https://saint-laurent.dam.kering.com/asset/7cddf510-ce9b-46dc-a965-17962445cd60/Large/864783Y271W4009_A.jpg?v=2"
       ],
       "sizes": [
         "S",
@@ -52,9 +76,9 @@
         "L",
         "XL"
       ],
-      "stock": 20,
-      "featured": true,
-      "createdAt": "2026-02-20T10:00:00.000Z"
+      "stock": 12,
+      "featured": false,
+      "createdAt": "2026-02-21T19:19:33.626Z"
     }
   ],
   "content": {
@@ -81,12 +105,12 @@
   },
   "hbProductions": [
     {
-      "id": "blog_1",
-      "title": "Inside the HEMBIT Shirt Program",
-      "excerpt": "Fabric research, fit trials, and final detailing process.",
-      "image": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=1200&q=80",
-      "body": "Our team develops each shirt through iterative pattern revisions and final garment tests.",
-      "createdAt": "2026-02-20T10:00:00.000Z"
+      "id": "blog_6d5abx4tmlwsacjm",
+      "title": "The summer walk",
+      "excerpt": "",
+      "image": "https://saint-laurent.dam.kering.com/m/74ed972e23536336/ecom-EXPORT_DESK.jpg",
+      "body": "Best",
+      "createdAt": "2026-02-21T20:41:08.866Z"
     }
   ],
   "users": [
@@ -98,11 +122,109 @@
       "role": "admin",
       "isVerified": true,
       "createdAt": "2026-02-21T18:23:15.547Z",
-      "addresses": []
+      "addresses": [],
+      "mobile": "",
+      "country": "",
+      "pincode": "",
+      "gender": "",
+      "age": null
+    },
+    {
+      "id": "usr_ktm1b7ugmlws1v9g",
+      "name": "Aaryan Saroha",
+      "email": "aaryansaroha12@gmail.com",
+      "passwordHash": "$2a$10$iLqrS.g7D978WLqQ98nzIulO5E8T4pagOSUCzT/z2KJdZaTmfYjFO",
+      "role": "customer",
+      "isVerified": true,
+      "addresses": [],
+      "createdAt": "2026-02-21T20:34:33.220Z",
+      "mobile": "",
+      "country": "",
+      "pincode": "",
+      "gender": "",
+      "age": null
     }
   ],
   "otpRequests": [],
-  "orders": [],
-  "newsletterSubscribers": [],
-  "mailLogs": []
+  "orders": [
+    {
+      "id": "ord_7qcp7xy9mlwpg53x",
+      "userId": "usr_jr7guv83mlwnd0rj",
+      "customer": {
+        "name": "HEMBIT Admin",
+        "email": "admin@hembit.in"
+      },
+      "items": [
+        {
+          "productId": "prd_p3ratkrfmlwpdfcq",
+          "name": "PATANDAR OX1",
+          "size": "M",
+          "quantity": 1,
+          "price": 2300,
+          "image": "https://saint-laurent.dam.kering.com/asset/7cddf510-ce9b-46dc-a965-17962445cd60/Large/864783Y271W4009_A.jpg?v=2",
+          "lineTotal": 2300
+        }
+      ],
+      "address": {
+        "line1": "",
+        "line2": "",
+        "city": "",
+        "state": "",
+        "postalCode": "",
+        "country": "India"
+      },
+      "total": 2300,
+      "paymentMethod": "razorpay",
+      "paymentStatus": "paid",
+      "status": "Packed",
+      "timeline": [
+        {
+          "status": "Order Created",
+          "at": "2026-02-21T19:21:40.317Z"
+        },
+        {
+          "status": "Pending Confirmation",
+          "at": "2026-02-21T19:21:40.317Z"
+        },
+        {
+          "status": "Payment Successful",
+          "at": "2026-02-21T19:21:41.045Z"
+        },
+        {
+          "status": "Confirmed",
+          "at": "2026-02-21T19:21:41.045Z"
+        },
+        {
+          "status": "Packed",
+          "at": "2026-02-21T20:39:07.801Z"
+        }
+      ],
+      "createdAt": "2026-02-21T19:21:40.317Z",
+      "updatedAt": "2026-02-21T20:39:07.801Z",
+      "paymentId": "manual_dev_mode"
+    }
+  ],
+  "newsletterSubscribers": [
+    {
+      "id": "nws_vey6mnt3mlws7k4b",
+      "email": "aaryansaroha12@gmail.com",
+      "subscribedAt": "2026-02-21T20:38:58.715Z"
+    }
+  ],
+  "mailLogs": [
+    {
+      "id": "mail_2ywbq9g9mlws7wk7",
+      "subject": "sdsa",
+      "body": "did",
+      "recipientCount": 1,
+      "sentAt": "2026-02-21T20:39:14.839Z"
+    }
+  ],
+  "settings": {
+    "serviceContact": {
+      "supportEmail": "hembit.info@gmail.com",
+      "contactNumber": "+91 9817912095",
+      "contactHours": "Mon-Sat 9AM-7PM IST"
+    }
+  }
 }

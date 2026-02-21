@@ -30,6 +30,39 @@ function getExtFromMime(mime) {
   return '';
 }
 
+function dedupeEmails(values) {
+  const set = new Set();
+  const result = [];
+
+  for (const value of values) {
+    const email = String(value || '').trim().toLowerCase();
+    if (!email || set.has(email)) {
+      continue;
+    }
+    set.add(email);
+    result.push(email);
+  }
+
+  return result;
+}
+
+function getAudienceEmails(db, audience) {
+  const userEmails = dedupeEmails(db.users.map((item) => item.email));
+  const subscriberEmails = dedupeEmails(db.newsletterSubscribers.map((item) => item.email));
+
+  if (audience === 'users') {
+    return userEmails;
+  }
+  if (audience === 'subscribers') {
+    return subscriberEmails;
+  }
+  if (audience === 'both') {
+    return dedupeEmails([...userEmails, ...subscriberEmails]);
+  }
+
+  return [];
+}
+
 adminRouter.use(requireAuth, requireAdmin);
 
 adminRouter.post('/media/upload', (req, res) => {
@@ -83,6 +116,7 @@ adminRouter.get('/dashboard', (_req, res) => {
 
   res.json({
     metrics: {
+      users: db.users.length,
       products: db.products.length,
       categories: db.categories.length,
       orders: db.orders.length,
@@ -91,6 +125,27 @@ adminRouter.get('/dashboard', (_req, res) => {
       hbProductionsPosts: db.hbProductions.length,
     },
   });
+});
+
+adminRouter.get('/users', (_req, res) => {
+  const db = readDb();
+  const users = db.users
+    .map((item) => ({
+      id: item.id,
+      name: item.name || '',
+      email: item.email || '',
+      mobile: item.mobile || '',
+      country: item.country || '',
+      pincode: item.pincode || '',
+      gender: item.gender || '',
+      age: Number.isFinite(item.age) ? item.age : null,
+      role: item.role || 'customer',
+      isVerified: Boolean(item.isVerified),
+      createdAt: item.createdAt || null,
+    }))
+    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+
+  res.json({ users, count: users.length });
 });
 
 adminRouter.get('/products', (_req, res) => {
@@ -372,6 +427,31 @@ adminRouter.put('/content/:key', (req, res) => {
   return res.json({ message: 'Content updated' });
 });
 
+adminRouter.get('/settings', (_req, res) => {
+  const db = readDb();
+  res.json({ settings: db.settings });
+});
+
+adminRouter.put('/settings', (req, res) => {
+  const incoming = req.body?.serviceContact || {};
+
+  let settings;
+  writeDb((db) => {
+    db.settings = db.settings || {};
+    const current = db.settings.serviceContact || {};
+
+    db.settings.serviceContact = {
+      supportEmail: incoming.supportEmail ?? current.supportEmail ?? '',
+      contactNumber: incoming.contactNumber ?? current.contactNumber ?? '',
+      contactHours: incoming.contactHours ?? current.contactHours ?? '',
+    };
+
+    settings = db.settings;
+  });
+
+  return res.json({ message: 'Settings updated', settings });
+});
+
 adminRouter.get('/hb-productions', (_req, res) => {
   const db = readDb();
   res.json({ posts: db.hbProductions });
@@ -440,6 +520,85 @@ adminRouter.put('/orders/:id/status', (req, res) => {
   }
 
   return res.json({ order: updated });
+});
+
+adminRouter.get('/mail/recipients', (_req, res) => {
+  const db = readDb();
+  const userEmails = getAudienceEmails(db, 'users');
+  const subscriberEmails = getAudienceEmails(db, 'subscribers');
+  const all = dedupeEmails([...userEmails, ...subscriberEmails]);
+
+  return res.json({
+    recipients: {
+      users: userEmails,
+      subscribers: subscriberEmails,
+      both: all,
+    },
+    counts: {
+      users: userEmails.length,
+      subscribers: subscriberEmails.length,
+      both: all.length,
+    },
+  });
+});
+
+adminRouter.post('/mail/send', async (req, res) => {
+  const { subject, body, audience = 'both' } = req.body;
+
+  if (!subject || !body) {
+    return res.status(400).json({ message: 'subject and body are required' });
+  }
+  if (!['users', 'subscribers', 'both'].includes(audience)) {
+    return res.status(400).json({ message: 'audience must be users, subscribers, or both' });
+  }
+
+  const db = readDb();
+  const recipients = getAudienceEmails(db, audience);
+
+  if (!recipients.length) {
+    return res.status(400).json({ message: `No recipients found for audience: ${audience}` });
+  }
+
+  const failures = [];
+  for (const email of recipients) {
+    try {
+      await sendEmail({
+        to: email,
+        subject,
+        html: `<p>${body}</p>`,
+      });
+    } catch (error) {
+      failures.push({ email, error: error.message });
+    }
+  }
+
+  writeDb((state) => {
+    state.mailLogs.unshift({
+      id: createId('mail'),
+      subject,
+      body,
+      audience,
+      recipientCount: recipients.length,
+      sentCount: recipients.length - failures.length,
+      failedCount: failures.length,
+      sentAt: new Date().toISOString(),
+    });
+  });
+
+  if (failures.length) {
+    return res.status(207).json({
+      message: `Mail sent to ${recipients.length - failures.length}/${recipients.length} recipients`,
+      sentCount: recipients.length - failures.length,
+      failedCount: failures.length,
+      failures: failures.slice(0, 20),
+    });
+  }
+
+  return res.json({
+    message: `Mail sent to ${recipients.length} recipients`,
+    sentCount: recipients.length,
+    failedCount: 0,
+  });
 });
 
 adminRouter.get('/newsletter', (_req, res) => {

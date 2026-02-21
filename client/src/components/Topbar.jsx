@@ -17,8 +17,7 @@ export function Topbar() {
   const [menuData, setMenuData] = useState({ highlights: [], men: [] });
   const [openMenu, setOpenMenu] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isTop, setIsTop] = useState(true);
-  const { user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { items } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
@@ -28,22 +27,13 @@ export function Topbar() {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => {
-      setIsTop(window.scrollY < 32);
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
     setOpenMenu('');
     setMobileOpen(false);
   }, [location.pathname]);
 
-  const actionLabel = user ? 'ACCOUNT' : 'LOGIN';
+  const actionLabel = isAuthenticated ? 'ACCOUNT' : 'LOGIN';
   const isHome = location.pathname === '/';
-  const useOverlayHeader = isHome && isTop && !openMenu && !mobileOpen;
+  const useOverlayHeader = isHome && !openMenu && !mobileOpen;
 
   const renderMenu = () => {
     if (!openMenu) {
@@ -113,10 +103,14 @@ export function Topbar() {
           HEMBIT
         </Link>
 
+        <button type="button" className="mobile-search" onClick={() => navigate('/shop')} aria-label="Open search">
+          <SearchIcon />
+        </button>
+
         <nav className="topbar-right">
           <Link to="/cart">CART ({items.length})</Link>
           <Link to="/services">SERVICES</Link>
-          <Link to={user ? '/account' : '/signin'}>{actionLabel}</Link>
+          <Link to={isAuthenticated ? '/account' : '/signin'}>{actionLabel}</Link>
           <button type="button" className="search-btn" onClick={() => navigate('/shop')}>
             <SearchIcon />
           </button>
@@ -140,7 +134,7 @@ export function Topbar() {
           <Link to="/cart" onClick={() => setMobileOpen(false)}>
             CART
           </Link>
-          <Link to={user ? '/account' : '/signin'} onClick={() => setMobileOpen(false)}>
+          <Link to={isAuthenticated ? '/account' : '/signin'} onClick={() => setMobileOpen(false)}>
             {actionLabel}
           </Link>
           <Link to="/order-tracking" onClick={() => setMobileOpen(false)}>

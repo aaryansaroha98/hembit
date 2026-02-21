@@ -12,6 +12,18 @@ function createOtp() {
   return `${Math.floor(100000 + Math.random() * 900000)}`;
 }
 
+function normalizeSignupProfile(payload) {
+  return {
+    mobile: String(payload.mobile || '').trim(),
+    country: String(payload.country || '').trim(),
+    pincode: String(payload.pincode || '').trim(),
+    gender: String(payload.gender || '')
+      .trim()
+      .toLowerCase(),
+    age: Number(payload.age),
+  };
+}
+
 function createToken(user) {
   return jwt.sign(
     {
@@ -28,9 +40,18 @@ function createToken(user) {
 
 authRouter.post('/signup/start', async (req, res) => {
   const { name, email, password } = req.body;
+  const profile = normalizeSignupProfile(req.body);
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'name, email, and password are required' });
+  if (!name || !email || !password || !profile.mobile || !profile.country || !profile.pincode || !profile.gender || !profile.age) {
+    return res
+      .status(400)
+      .json({ message: 'name, email, password, mobile, country, pincode, gender, and age are required' });
+  }
+  if (!['male', 'female'].includes(profile.gender)) {
+    return res.status(400).json({ message: 'gender must be either male or female' });
+  }
+  if (!Number.isInteger(profile.age) || profile.age < 13 || profile.age > 120) {
+    return res.status(400).json({ message: 'age must be a valid number between 13 and 120' });
   }
 
   const db = readDb();
@@ -52,7 +73,16 @@ authRouter.post('/signup/start', async (req, res) => {
       email,
       type: 'signup',
       otp,
-      payload: { name, email, passwordHash },
+      payload: {
+        name,
+        email,
+        passwordHash,
+        mobile: profile.mobile,
+        country: profile.country,
+        pincode: profile.pincode,
+        gender: profile.gender,
+        age: profile.age,
+      },
       expiresAt: Date.now() + 10 * 60 * 1000,
       createdAt: new Date().toISOString(),
     });
@@ -94,6 +124,11 @@ authRouter.post('/signup/verify', (req, res) => {
       name: otpRecord.payload.name,
       email: otpRecord.payload.email,
       passwordHash: otpRecord.payload.passwordHash,
+      mobile: otpRecord.payload.mobile || '',
+      country: otpRecord.payload.country || '',
+      pincode: otpRecord.payload.pincode || '',
+      gender: otpRecord.payload.gender || '',
+      age: Number.isFinite(otpRecord.payload.age) ? otpRecord.payload.age : null,
       role: 'customer',
       isVerified: true,
       addresses: [],
@@ -105,7 +140,20 @@ authRouter.post('/signup/verify', (req, res) => {
   });
 
   const token = createToken(user);
-  return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+  return res.json({
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      mobile: user.mobile,
+      country: user.country,
+      pincode: user.pincode,
+      gender: user.gender,
+      age: user.age,
+      role: user.role,
+    },
+  });
 });
 
 authRouter.post('/signin', async (req, res) => {
@@ -136,6 +184,11 @@ authRouter.post('/signin', async (req, res) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      mobile: user.mobile || '',
+      country: user.country || '',
+      pincode: user.pincode || '',
+      gender: user.gender || '',
+      age: Number.isFinite(user.age) ? user.age : null,
       role: user.role,
       addresses: user.addresses || [],
     },

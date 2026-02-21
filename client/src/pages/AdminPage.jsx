@@ -9,8 +9,11 @@ const TABS = [
   'Slides',
   'HB Productions',
   'Content',
+  'Settings',
+  'Users',
   'Orders',
   'Newsletter',
+  'Users & Subscribers Mail',
 ];
 
 export function AdminPage() {
@@ -23,8 +26,20 @@ export function AdminPage() {
   const [slides, setSlides] = useState([]);
   const [posts, setPosts] = useState([]);
   const [content, setContent] = useState({});
+  const [settings, setSettings] = useState({
+    serviceContact: {
+      supportEmail: '',
+      contactNumber: '',
+      contactHours: '',
+    },
+  });
   const [orders, setOrders] = useState([]);
+  const [userList, setUserList] = useState([]);
   const [newsletter, setNewsletter] = useState({ subscribers: [], mails: [] });
+  const [mailRecipients, setMailRecipients] = useState({
+    recipients: { users: [], subscribers: [], both: [] },
+    counts: { users: 0, subscribers: 0, both: 0 },
+  });
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -52,17 +67,30 @@ export function AdminPage() {
   const [slideUploadState, setSlideUploadState] = useState({ loading: false, message: '' });
   const [postForm, setPostForm] = useState({ title: '', excerpt: '', image: '', body: '' });
   const [newsletterForm, setNewsletterForm] = useState({ subject: '', body: '' });
+  const [settingsForm, setSettingsForm] = useState({
+    supportEmail: '',
+    contactNumber: '',
+    contactHours: '',
+  });
+  const [mailForm, setMailForm] = useState({
+    audience: 'both',
+    subject: '',
+    body: '',
+  });
 
   const loadAll = async () => {
-    const [dash, prod, cat, sl, hb, cnt, ord, news] = await Promise.all([
+    const [dash, prod, cat, sl, hb, cnt, sett, usersData, ord, news, recipients] = await Promise.all([
       api.get('/admin/dashboard', token),
       api.get('/admin/products', token),
       api.get('/admin/categories', token),
       api.get('/admin/slides', token),
       api.get('/admin/hb-productions', token),
       api.get('/admin/content', token),
+      api.get('/admin/settings', token),
+      api.get('/admin/users', token),
       api.get('/admin/orders', token),
       api.get('/admin/newsletter', token),
+      api.get('/admin/mail/recipients', token),
     ]);
 
     setDashboard(dash.metrics);
@@ -71,8 +99,16 @@ export function AdminPage() {
     setSlides(sl.slides);
     setPosts(hb.posts);
     setContent(cnt.content);
+    setSettings(sett.settings);
+    setSettingsForm({
+      supportEmail: sett.settings?.serviceContact?.supportEmail || '',
+      contactNumber: sett.settings?.serviceContact?.contactNumber || '',
+      contactHours: sett.settings?.serviceContact?.contactHours || '',
+    });
+    setUserList(usersData.users || []);
     setOrders(ord.orders);
     setNewsletter(news);
+    setMailRecipients(recipients);
   };
 
   useEffect(() => {
@@ -531,6 +567,57 @@ export function AdminPage() {
           </div>
         )}
 
+        {activeTab === 'Settings' && (
+          <div className="admin-block">
+            <h2>Settings</h2>
+            <h3>Service Contact Information</h3>
+            <div className="admin-form-grid">
+              <input
+                placeholder="Support email"
+                value={settingsForm.supportEmail}
+                onChange={(e) => setSettingsForm((prev) => ({ ...prev, supportEmail: e.target.value }))}
+              />
+              <input
+                placeholder="Contact number"
+                value={settingsForm.contactNumber}
+                onChange={(e) => setSettingsForm((prev) => ({ ...prev, contactNumber: e.target.value }))}
+              />
+              <input
+                placeholder="Contact hours"
+                value={settingsForm.contactHours}
+                onChange={(e) => setSettingsForm((prev) => ({ ...prev, contactHours: e.target.value }))}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await api.put(
+                    '/admin/settings',
+                    {
+                      serviceContact: {
+                        supportEmail: settingsForm.supportEmail,
+                        contactNumber: settingsForm.contactNumber,
+                        contactHours: settingsForm.contactHours,
+                      },
+                    },
+                    token
+                  );
+                  setMessage('Settings updated');
+                  loadAll();
+                } catch (error) {
+                  setMessage(error.message);
+                }
+              }}
+            >
+              Save Settings
+            </button>
+            <p>
+              Current: {settings?.serviceContact?.supportEmail} | {settings?.serviceContact?.contactNumber}
+            </p>
+          </div>
+        )}
+
         {activeTab === 'Orders' && (
           <div className="admin-block">
             <h2>Order Management</h2>
@@ -553,6 +640,30 @@ export function AdminPage() {
                   <option>Out for Delivery</option>
                   <option>Delivered</option>
                 </select>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'Users' && (
+          <div className="admin-block">
+            <h2>Users</h2>
+            <p>Total users: {userList.length}</p>
+            {!userList.length && <p>No users found.</p>}
+            {userList.map((user) => (
+              <article key={user.id} className="admin-list-item stacked">
+                <strong>
+                  {user.name || 'Unnamed User'} {user.role === 'admin' ? '(Admin)' : ''}
+                </strong>
+                <p>{user.email || '-'}</p>
+                <p>Mobile: {user.mobile || '-'}</p>
+                <p>
+                  Country: {user.country || '-'} | Pincode: {user.pincode || '-'}
+                </p>
+                <p>
+                  Gender: {user.gender || '-'} | Age: {user.age ?? '-'}
+                </p>
+                <p>Joined: {user.createdAt ? new Date(user.createdAt).toLocaleString() : '-'}</p>
               </article>
             ))}
           </div>
@@ -588,6 +699,67 @@ export function AdminPage() {
               <article key={mail.id} className="admin-list-item stacked">
                 <strong>{mail.subject}</strong>
                 <p>{mail.recipientCount} recipients</p>
+                <p>{new Date(mail.sentAt).toLocaleString()}</p>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'Users & Subscribers Mail' && (
+          <div className="admin-block">
+            <h2>Send Mail to Users and Newsletter Subscribers</h2>
+            <p>
+              Users: {mailRecipients.counts.users} | Newsletter Subscribers: {mailRecipients.counts.subscribers} | Unique
+              Total: {mailRecipients.counts.both}
+            </p>
+            <div className="admin-form-grid">
+              <select
+                value={mailForm.audience}
+                onChange={(e) => setMailForm((prev) => ({ ...prev, audience: e.target.value }))}
+              >
+                <option value="both">Users + Newsletter Subscribers</option>
+                <option value="users">Users only</option>
+                <option value="subscribers">Newsletter subscribers only</option>
+              </select>
+              <input
+                placeholder="Subject"
+                value={mailForm.subject}
+                onChange={(e) => setMailForm((prev) => ({ ...prev, subject: e.target.value }))}
+              />
+              <input
+                disabled
+                value={`Recipients: ${mailRecipients.counts[mailForm.audience] || 0}`}
+                readOnly
+              />
+            </div>
+            <textarea
+              placeholder="Message (HTML/plain text)"
+              value={mailForm.body}
+              onChange={(e) => setMailForm((prev) => ({ ...prev, body: e.target.value }))}
+            />
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const result = await api.post('/admin/mail/send', mailForm, token);
+                  setMessage(result.message);
+                  setMailForm((prev) => ({ ...prev, subject: '', body: '' }));
+                  loadAll();
+                } catch (error) {
+                  setMessage(error.message);
+                }
+              }}
+            >
+              Send Mail
+            </button>
+            <h3>Recent Mail Logs</h3>
+            {newsletter.mails.map((mail) => (
+              <article key={mail.id} className="admin-list-item stacked">
+                <strong>{mail.subject}</strong>
+                <p>Audience: {mail.audience || 'subscribers'}</p>
+                <p>
+                  Sent: {mail.sentCount ?? mail.recipientCount}/{mail.recipientCount} | Failed: {mail.failedCount ?? 0}
+                </p>
                 <p>{new Date(mail.sentAt).toLocaleString()}</p>
               </article>
             ))}
