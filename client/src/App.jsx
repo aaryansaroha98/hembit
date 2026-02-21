@@ -22,14 +22,17 @@ function MainLayout({ children }) {
   const isHome = location.pathname === '/';
 
   useEffect(() => {
-    let unlockTimer = null;
-    let isLocked = false;
+    let animationFrame = null;
+    let wheelResetTimer = null;
+    let wheelAccumulator = 0;
+    let isAnimating = false;
     let touchStartY = null;
     let touchStartX = null;
     const prefersReducedMotion =
       typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const scrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
-    const lockDurationMs = prefersReducedMotion ? 220 : 760;
+    const slideDurationMs = prefersReducedMotion ? 0 : 860;
+    const wheelThreshold = 60;
+    const touchThreshold = 52;
 
     const getSections = () => Array.from(document.querySelectorAll('.hero-page, .site-footer--home'));
 
@@ -38,7 +41,7 @@ function MainLayout({ children }) {
         return -1;
       }
 
-      const probeY = window.scrollY + window.innerHeight * 0.35;
+      const probeY = window.scrollY + window.innerHeight * 0.45;
       let currentIndex = 0;
 
       for (let index = 0; index < sections.length; index += 1) {
@@ -50,12 +53,58 @@ function MainLayout({ children }) {
       return currentIndex;
     };
 
-    const shouldIgnoreTarget = (target) => target?.closest?.('.mobile-panel, .mega-menu');
+    const shouldIgnoreTarget = (target) =>
+      target?.closest?.('.mobile-panel, .mega-menu, input, textarea, select, [contenteditable="true"]');
     const isOverlayMenuOpen = () => Boolean(document.querySelector('.mobile-panel, .mega-menu'));
 
-    const goToIndex = (index) => {
+    const stopAnimation = () => {
+      if (animationFrame) {
+        window.cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+      }
+      isAnimating = false;
+    };
+
+    const animateScrollTo = (targetTop) =>
+      new Promise((resolve) => {
+        const startTop = window.scrollY;
+        const distance = targetTop - startTop;
+
+        if (Math.abs(distance) < 2) {
+          resolve();
+          return;
+        }
+
+        if (slideDurationMs === 0) {
+          window.scrollTo(0, targetTop);
+          resolve();
+          return;
+        }
+
+        const startTime = performance.now();
+        const easeInOutCubic = (value) =>
+          value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
+
+        const tick = (now) => {
+          const progress = Math.min((now - startTime) / slideDurationMs, 1);
+          const easedProgress = easeInOutCubic(progress);
+          window.scrollTo(0, startTop + distance * easedProgress);
+
+          if (progress < 1) {
+            animationFrame = window.requestAnimationFrame(tick);
+            return;
+          }
+
+          animationFrame = null;
+          resolve();
+        };
+
+        animationFrame = window.requestAnimationFrame(tick);
+      });
+
+    const goToIndex = async (index) => {
       const sections = getSections();
-      if (!sections.length) {
+      if (!sections.length || isAnimating) {
         return;
       }
 
@@ -66,19 +115,18 @@ function MainLayout({ children }) {
         return;
       }
 
-      isLocked = true;
-      if (unlockTimer) {
-        window.clearTimeout(unlockTimer);
+      isAnimating = true;
+      wheelAccumulator = 0;
+      if (wheelResetTimer) {
+        window.clearTimeout(wheelResetTimer);
+        wheelResetTimer = null;
       }
-
-      window.scrollTo({ top: targetTop, behavior: scrollBehavior });
-      unlockTimer = window.setTimeout(() => {
-        isLocked = false;
-      }, lockDurationMs);
+      await animateScrollTo(targetTop);
+      isAnimating = false;
     };
 
     const stepSlides = (direction) => {
-      if (isLocked) {
+      if (isAnimating) {
         return;
       }
 
@@ -102,12 +150,27 @@ function MainLayout({ children }) {
         return;
       }
 
-      if (Math.abs(event.deltaY) < 12) {
+      if (Math.abs(event.deltaY) < 4) {
         return;
       }
 
       event.preventDefault();
-      stepSlides(event.deltaY > 0 ? 1 : -1);
+
+      wheelAccumulator += event.deltaY;
+      if (wheelResetTimer) {
+        window.clearTimeout(wheelResetTimer);
+      }
+      wheelResetTimer = window.setTimeout(() => {
+        wheelAccumulator = 0;
+      }, 130);
+
+      if (Math.abs(wheelAccumulator) < wheelThreshold) {
+        return;
+      }
+
+      const direction = wheelAccumulator > 0 ? 1 : -1;
+      wheelAccumulator = 0;
+      stepSlides(direction);
     };
 
     const onKeyDown = (event) => {
@@ -181,7 +244,7 @@ function MainLayout({ children }) {
       touchStartY = null;
       touchStartX = null;
 
-      if (Math.abs(deltaY) < 48 || Math.abs(deltaY) < Math.abs(deltaX)) {
+      if (Math.abs(deltaY) < touchThreshold || Math.abs(deltaY) < Math.abs(deltaX)) {
         return;
       }
 
@@ -201,10 +264,11 @@ function MainLayout({ children }) {
     return () => {
       document.body.classList.remove('home-view');
 
-      if (unlockTimer) {
-        window.clearTimeout(unlockTimer);
+      if (wheelResetTimer) {
+        window.clearTimeout(wheelResetTimer);
       }
 
+      stopAnimation();
       window.removeEventListener('wheel', onWheel);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('touchstart', onTouchStart);
