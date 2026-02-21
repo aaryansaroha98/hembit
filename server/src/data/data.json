@@ -1,0 +1,108 @@
+{
+  "slides": [
+    {
+      "id": "slide_xi01702nmlwogpjx",
+      "title": "dsaasd",
+      "subtitle": "did",
+      "type": "image",
+      "url": "/Users/aaryansaroha/Downloads/00a2d544-7ac4-40ab-aa38-bd450d3bf239.JPG",
+      "ctaLabel": "Discover",
+      "ctaLink": "/shop",
+      "order": 1
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat_men",
+      "name": "Men",
+      "slug": "men",
+      "order": 1,
+      "series": [
+        {
+          "id": "ser_signature",
+          "name": "Signature Series",
+          "slug": "signature-series"
+        },
+        {
+          "id": "ser_raw",
+          "name": "Raw Contrast Series",
+          "slug": "raw-contrast-series"
+        }
+      ]
+    }
+  ],
+  "products": [
+    {
+      "id": "prd_1",
+      "name": "Monochrome Signature Shirt",
+      "slug": "monochrome-signature-shirt",
+      "categoryId": "cat_men",
+      "seriesId": "ser_signature",
+      "price": 3999,
+      "currency": "INR",
+      "description": "Structured cotton shirt with contrast stitch details.",
+      "details": "Premium cotton twill, hidden placket, dry clean recommended.",
+      "images": [
+        "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 20,
+      "featured": true,
+      "createdAt": "2026-02-20T10:00:00.000Z"
+    }
+  ],
+  "content": {
+    "about": {
+      "title": "Our Story",
+      "body": "HEMBIT builds modern clothing with a focused design language rooted in quality and intention."
+    },
+    "founder": {
+      "title": "Founder Story",
+      "body": "HEMBIT was created to merge expressive style with disciplined tailoring for the next generation."
+    },
+    "privacy": {
+      "title": "Privacy Notice",
+      "body": "We collect only data needed to fulfill orders and improve service quality."
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "body": "By using HEMBIT, you agree to platform terms, payment terms, and shipping terms."
+    },
+    "services": {
+      "title": "Services",
+      "body": "Email support, call support, and future careers interest applications."
+    }
+  },
+  "hbProductions": [
+    {
+      "id": "blog_1",
+      "title": "Inside the HEMBIT Shirt Program",
+      "excerpt": "Fabric research, fit trials, and final detailing process.",
+      "image": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=1200&q=80",
+      "body": "Our team develops each shirt through iterative pattern revisions and final garment tests.",
+      "createdAt": "2026-02-20T10:00:00.000Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_jr7guv83mlwnd0rj",
+      "name": "HEMBIT Admin",
+      "email": "admin@hembit.in",
+      "passwordHash": "$2a$10$EIERaBL./SarSDDz.0GE1uMw303EM8EycVVEeqY6QOnFBBTKZImI.",
+      "role": "admin",
+      "isVerified": true,
+      "createdAt": "2026-02-21T18:23:15.547Z",
+      "addresses": []
+    }
+  ],
+  "otpRequests": [],
+  "orders": [],
+  "newsletterSubscribers": [],
+  "mailLogs": []
+}
