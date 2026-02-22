@@ -11,7 +11,11 @@ function formatPrice(value) {
 export function ProductCard({ product }) {
   return (
     <article className="product-card">
-      <Link to={`/product/${product.slug}`} className="product-image-link">
+      <Link
+        to={`/product/${product.slug}`}
+        className="product-image-link"
+        onClick={() => console.log('Product clicked:', product.slug, product.name)}
+      >
         <img src={product.images?.[0]} alt={product.name} loading="lazy" />
       </Link>
       <div className="product-meta product-card-title">
