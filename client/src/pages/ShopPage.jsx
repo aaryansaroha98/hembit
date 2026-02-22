@@ -31,9 +31,13 @@ export function ShopPage() {
     return selectedCategory?.series || [];
   }, [currentCategory, data.categories]);
 
+  // Find the display name for the current category
+  const selectedCategory = data.categories.find((category) => category.slug === currentCategory);
+  const displayCategory = selectedCategory ? selectedCategory.name : "MEN";
+
   return (
     <div className="shop-page">
-      <PageHero title={currentCategory ? currentCategory.toUpperCase() : "MEN"} subtitle="" />
+      <PageHero title={displayCategory} small />
       {loading ? (
         <div className="page-status">Loading products...</div>
       ) : (
