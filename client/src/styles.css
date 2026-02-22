@@ -184,7 +184,7 @@ body.home-view .site-footer--home {
   top: 0;
   z-index: 60;
   background: transparent;
-  border-bottom: 1px solid var(--line);
+  border-bottom: none;
   transition: background-color var(--t-med) var(--ease), border-color var(--t-med) var(--ease);
 }
 
