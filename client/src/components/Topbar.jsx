@@ -80,7 +80,7 @@ export function Topbar() {
 
   return (
     <header
-      className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}`}
+      className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}${openMenu ? ' dropdown-open' : ''}`}
       onMouseLeave={() => setOpenMenu('')}
     >
       <div className="topbar">

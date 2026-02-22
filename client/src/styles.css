@@ -1,3 +1,7 @@
+body.home-view .topbar-wrap.dropdown-open {
+  background: #fff;
+  transition: background-color var(--t-med) var(--ease);
+}
 .site-footer--home .newsletter-form input {
   font-size: 0.66rem;
   padding: 0.32em 0.7em;
