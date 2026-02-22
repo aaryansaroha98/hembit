@@ -40,29 +40,21 @@ export function Footer() {
             <Link to="/terms-of-use">TERMS OF USE</Link>
           </nav>
 
-          {isHome ? (
-            <div className="footer-col footer-col-newsletter">
-              <Link to="/services" className="footer-newsletter-link">
-                NEWSLETTER &gt;
-              </Link>
+          <form className="newsletter-form" onSubmit={subscribe}>
+            <label htmlFor="newsletter">NEWSLETTER</label>
+            <div>
+              <input
+                id="newsletter"
+                type="email"
+                placeholder="Enter your email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <button type="submit">JOIN</button>
             </div>
-          ) : (
-            <form className="newsletter-form" onSubmit={subscribe}>
-              <label htmlFor="newsletter">NEWSLETTER</label>
-              <div>
-                <input
-                  id="newsletter"
-                  type="email"
-                  placeholder="Enter your email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <button type="submit">JOIN</button>
-              </div>
-              {message && <small>{message}</small>}
-            </form>
-          )}
+            {message && <small>{message}</small>}
+          </form>
         </div>
 
         <div className="footer-bottom-row">
