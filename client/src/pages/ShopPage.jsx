@@ -33,7 +33,7 @@ export function ShopPage() {
 
   return (
     <div className="shop-page">
-      <PageHero title="Shop" subtitle="HEMBIT MEN" />
+      <PageHero title={currentCategory ? currentCategory.toUpperCase() : "MEN"} subtitle="" />
       {loading ? (
         <div className="page-status">Loading products...</div>
       ) : (
