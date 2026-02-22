@@ -1,3 +1,12 @@
+.site-footer--home .newsletter-form input,
+.site-footer--home .newsletter-form button {
+  font-size: 0.66rem;
+  padding: 0.32em 0.7em;
+  height: 2rem;
+  border-radius: 2px;
+  min-width: 0;
+  box-sizing: border-box;
+}
 .site-footer--home .newsletter-form label {
   font-size: 0.66rem;
   letter-spacing: 0.1em;
