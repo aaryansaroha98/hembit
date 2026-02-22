@@ -846,7 +846,7 @@ textarea {
 .auth-luxe-title {
   margin: 0;
   text-align: center;
-  font-size: clamp(1.1rem, 2.6vw, 1.65rem);
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -881,7 +881,7 @@ textarea {
 .auth-luxe-row label,
 .auth-luxe-row span,
 .auth-luxe-label {
-  font-size: 0.74rem;
+  font-size: 0.62rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 600;
@@ -899,7 +899,7 @@ textarea {
   background: transparent;
   color: #111;
   padding: 0.15rem 0;
-  font-size: 0.94rem;
+  font-size: 0.78rem;
 }
 
 .auth-luxe-input::placeholder {
@@ -1815,7 +1815,7 @@ textarea {
   }
 
   .auth-luxe-title {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
   .auth-luxe-panel-secondary p {
