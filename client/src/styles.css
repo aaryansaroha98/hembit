@@ -1,3 +1,47 @@
+/* Minimal Shop Page Product Grid (YSL style) */
+.shop-page .section-pad {
+  padding: 0;
+}
+
+.shop-page .product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  background: #faf9f6;
+  border: none;
+}
+
+.shop-page .product-grid .product-card {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2.5rem 0 0 0;
+}
+
+.shop-page .product-grid .product-card img {
+  width: 80%;
+  max-width: 420px;
+  height: auto;
+  margin: 0 auto 1.2rem auto;
+  object-fit: contain;
+  background: transparent;
+  box-shadow: none;
+}
+
+.shop-page .product-grid .product-card-title {
+  font-size: 1.05rem;
+  font-weight: 400;
+  text-align: center;
+  letter-spacing: 0.02em;
+  margin: 0.5rem 0 2.5rem 0;
+  color: #222;
+  background: transparent;
+  border: none;
+}
 .site-footer--home .newsletter-form input {
   font-size: 0.66rem;
   padding: 0.32em 0.7em;
