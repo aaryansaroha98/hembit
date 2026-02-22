@@ -340,15 +340,15 @@ adminRouter.get('/slides', (_req, res) => {
 adminRouter.post('/slides', (req, res) => {
   const { title, subtitle, type, url, ctaLabel, ctaLink } = req.body;
 
-  if (!title || !type || !url) {
-    return res.status(400).json({ message: 'title, type, and url are required' });
+  if (!type || !url) {
+    return res.status(400).json({ message: 'type and url are required' });
   }
 
   let slide;
   writeDb((db) => {
     slide = {
       id: createId('slide'),
-      title,
+      title: title || '',
       subtitle: subtitle || '',
       type,
       url,
