@@ -345,7 +345,7 @@ body.home-view .site-footer--home {
 
 
 body.home-view .mega-menu {
-  background: transparent;
+  background: #fff;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
