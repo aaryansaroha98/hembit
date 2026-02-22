@@ -1,3 +1,12 @@
+.site-footer--home .newsletter-form label {
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  line-height: 1.58;
+  font-weight: 400;
+  color: #111;
+  text-transform: uppercase;
+  margin-bottom: 0.55rem;
+}
 :root {
   --bg: #ffffff;
   --surface: #ffffff;
