@@ -15,9 +15,9 @@ export function ProductCard({ product }) {
         <img src={product.images?.[0]} alt={product.name} loading="lazy" />
       </Link>
       <div className="product-meta product-card-title">
-        <div style={{textAlign: 'center', marginTop: '1.2rem'}}>
-          <div style={{fontWeight: 600, fontSize: '1.02rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.2rem'}}>{product.name}</div>
-          <div style={{fontWeight: 400, fontSize: '0.92rem', letterSpacing: '0.06em', color: '#888', textTransform: 'uppercase'}}>{product.seriesName || ''}</div>
+        <div style={{textAlign: 'center', marginTop: '0.6rem'}}>
+          <div style={{fontWeight: 600, fontSize: '0.89rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.08rem'}}>{product.name}</div>
+          <div style={{fontWeight: 400, fontSize: '0.75rem', letterSpacing: '0.06em', color: '#888', textTransform: 'uppercase'}}>{product.seriesName || ''}</div>
         </div>
       </div>
     </article>
