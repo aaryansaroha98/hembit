@@ -1087,7 +1087,7 @@ textarea {
 .services-client-grid {
   margin-top: 4rem;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 3.35rem 4.6rem;
 }
 
@@ -1098,9 +1098,9 @@ textarea {
 }
 
 .services-client-card-track {
-  grid-column: 1 / -1;
-  width: min(470px, 100%);
-  justify-self: center;
+  grid-column: auto;
+  width: 100%;
+  justify-self: stretch;
 }
 
 .services-client-card h2 {
