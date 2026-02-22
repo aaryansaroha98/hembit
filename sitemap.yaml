@@ -1,0 +1,28 @@
+# Website Sitemap (YAML)
+
+site:
+  home: "/"
+  pages:
+    - shop: "/shop"
+    - product_details: "/product/:slug"
+    - signin: "/signin"
+    - signup: "/signup"
+    - services: "/services"
+    - our_story: "/our-story"
+    - founder_story: "/founder-story"
+    - privacy_policy: "/privacy-policy"
+    - terms_of_use: "/terms-of-use"
+    - hb_productions: "/hb-productions"
+    - cart: "/cart"
+    - checkout:
+        path: "/checkout"
+        protected: true
+    - account:
+        path: "/account"
+        protected: true
+    - order_tracking: "/order-tracking"
+    - admin:
+        path: "/admin"
+        admin_protected: true
+  redirects:
+    - any: "/"
