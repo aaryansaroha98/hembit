@@ -102,6 +102,15 @@ export function LoadingScreen({ onFinished, waitForBackend = false }) {
           onEnded={handleEnded}
           className="loading-screen-video"
         />
+        {waitForBackend && (
+          <div className="loading-screen-brand" aria-hidden="true">
+            {'HEMBIT'.split('').map((char, i) => (
+              <span key={i} className="loading-screen-letter" style={{ animationDelay: `${i * 0.18}s` }}>
+                {char}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
