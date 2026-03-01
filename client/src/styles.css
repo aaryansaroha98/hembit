@@ -558,6 +558,118 @@ body.home-view .mega-menu {
   background: #fff;
 }
 
+/* ─── Hero Product Grid Slide ─── */
+.hero-product-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #e9e7e3;
+  padding: clamp(1.2rem, 4vw, 3rem);
+}
+
+.hero-product-header {
+  text-align: center;
+  margin-bottom: clamp(1rem, 3vw, 2.4rem);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 350ms ease, transform 450ms cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.hero-product-header.hero-overlay--visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 200ms;
+}
+
+.hero-product-header .hero-overline {
+  color: #555;
+}
+
+.hero-product-header h2 {
+  margin: 0.4rem 0 0;
+  font-size: clamp(1.1rem, 3vw, 2.2rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #111;
+}
+
+.hero-product-grid {
+  display: grid;
+  gap: clamp(0.8rem, 2vw, 1.6rem);
+  width: 100%;
+  max-width: 1200px;
+}
+
+.hero-product-grid--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.hero-product-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.hero-product-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: #111;
+  overflow: hidden;
+}
+
+.hero-product-img {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background: #d9d7d3;
+}
+
+.hero-product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hero-product-card:hover .hero-product-img img {
+  transform: scale(1.04);
+}
+
+.hero-product-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.85rem 0.4rem 0;
+  text-align: center;
+}
+
+.hero-product-name {
+  font-size: clamp(0.68rem, 1.2vw, 0.88rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-product-series {
+  font-size: clamp(0.58rem, 0.9vw, 0.72rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #777;
+}
+
+.hero-product-price {
+  font-size: clamp(0.62rem, 1vw, 0.78rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #333;
+  margin-top: 0.15rem;
+}
+
 .section-heading {
   display: flex;
   justify-content: space-between;
@@ -1973,6 +2085,61 @@ textarea {
   accent-color: #111;
 }
 
+/* Admin Product Picker for Slides */
+.admin-product-picker {
+  margin-top: 0.4rem;
+}
+
+.admin-product-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.6rem;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 0.4rem 0;
+}
+
+.admin-product-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+  text-align: center;
+}
+
+.admin-product-picker-item:hover {
+  border-color: #9ca3af;
+}
+
+.admin-product-picker-item.selected {
+  border-color: #111;
+  background: #f3f4f6;
+}
+
+.admin-product-picker-item input[type='checkbox'] {
+  display: none;
+}
+
+.admin-product-picker-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.admin-product-picker-item span {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #374151;
+}
+
 /* Responsive */
 @media (max-width: 1120px) {
   .product-grid {
@@ -2241,6 +2408,10 @@ textarea {
     left: 0.9rem;
     right: 0.9rem;
     max-width: none;
+  }
+
+  .hero-product-grid--3 {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .slider-dots {

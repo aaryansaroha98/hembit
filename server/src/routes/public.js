@@ -27,7 +27,18 @@ function withDerivedProduct(db, product) {
 publicRouter.get('/home', (req, res) => {
   const db = readDb();
 
-  const slides = [...db.slides].sort((a, b) => a.order - b.order);
+  const slides = [...db.slides].sort((a, b) => a.order - b.order).map((slide) => {
+    if (slide.type === 'products' && Array.isArray(slide.productIds)) {
+      return {
+        ...slide,
+        products: slide.productIds
+          .map((pid) => db.products.find((p) => p.id === pid))
+          .filter(Boolean)
+          .map((p) => withDerivedProduct(db, p)),
+      };
+    }
+    return slide;
+  });
   const featuredProducts = db.products
     .filter((item) => item.featured)
     .slice(0, 8)

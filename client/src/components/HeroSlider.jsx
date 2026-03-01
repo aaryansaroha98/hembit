@@ -15,6 +15,10 @@ export function HeroSlider({ slides, children }) {
   const wheelTimerRef = useRef(null);
   const touchStartRef = useRef({ y: 0, x: 0 });
 
+  const hasOverlay = useCallback((slide) => {
+    return !!(slide.title || slide.subtitle || slide.ctaLabel);
+  }, []);
+
   const goTo = useCallback(
     (index) => {
       if (animatingRef.current) return;
@@ -137,22 +141,66 @@ export function HeroSlider({ slides, children }) {
         ))}
       </div>
 
-      {/* Image / video slides */}
+      {/* Image / video / product slides */}
       {orderedSlides.map((slide, i) => (
         <article className={panelClass(i)} key={slide.id} style={{ zIndex: i + 1 }}>
-          <div className="hero-media">
-            {slide.type === 'video' ? (
-              <video src={slide.url} autoPlay muted loop playsInline preload="metadata" />
-            ) : (
-              <img src={slide.url} alt={slide.title} />
-            )}
-          </div>
-          <div className="hero-slide-mask" />
-          <div className={`hero-overlay${i === activeIndex ? ' hero-overlay--visible' : ''}`}>
-            <p className="hero-overline">{slide.subtitle}</p>
-            <h1>{slide.title}</h1>
-            <Link to={slide.ctaLink || '/shop'}>{slide.ctaLabel || 'Discover'}</Link>
-          </div>
+          {slide.type === 'products' ? (
+            /* ─── Product Grid Panel ─── */
+            <div className="hero-product-panel">
+              {hasOverlay(slide) && (
+                <div className={`hero-product-header${i === activeIndex ? ' hero-overlay--visible' : ''}`}>
+                  {slide.subtitle && <p className="hero-overline">{slide.subtitle}</p>}
+                  {slide.title && <h2>{slide.title}</h2>}
+                </div>
+              )}
+              <div className={`hero-product-grid hero-product-grid--${slide.layout || 2}`}>
+                {(slide.products || []).map((product) => {
+                  const linkSlug = product.slug || product.id;
+                  return (
+                    <Link
+                      to={`/product/${linkSlug}`}
+                      className="hero-product-card"
+                      key={product.id}
+                    >
+                      <div className="hero-product-img">
+                        <img src={product.images?.[0]} alt={product.name} />
+                      </div>
+                      <div className="hero-product-info">
+                        <span className="hero-product-name">{product.name}</span>
+                        {product.seriesName && (
+                          <span className="hero-product-series">{product.seriesName}</span>
+                        )}
+                        {product.displayPrice && (
+                          <span className="hero-product-price">{product.displayPrice}</span>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            /* ─── Image / Video Panel ─── */
+            <>
+              <div className="hero-media">
+                {slide.type === 'video' ? (
+                  <video src={slide.url} autoPlay muted loop playsInline preload="metadata" />
+                ) : (
+                  <img src={slide.url} alt={slide.title || 'Slide'} />
+                )}
+              </div>
+              {hasOverlay(slide) && <div className="hero-slide-mask" />}
+              {hasOverlay(slide) && (
+                <div className={`hero-overlay${i === activeIndex ? ' hero-overlay--visible' : ''}`}>
+                  {slide.subtitle && <p className="hero-overline">{slide.subtitle}</p>}
+                  {slide.title && <h1>{slide.title}</h1>}
+                  {slide.ctaLabel && (
+                    <Link to={slide.ctaLink || '/shop'}>{slide.ctaLabel}</Link>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </article>
       ))}
 

@@ -63,8 +63,10 @@ export function AdminPage() {
     subtitle: '',
     type: 'image',
     url: '',
-    ctaLabel: 'Discover',
-    ctaLink: '/shop',
+    ctaLabel: '',
+    ctaLink: '',
+    productIds: [],
+    layout: 2,
   });
   const [slideUploadState, setSlideUploadState] = useState({ loading: false, message: '' });
   const [postForm, setPostForm] = useState({ title: '', excerpt: '', image: '', body: '' });
@@ -510,69 +512,136 @@ export function AdminPage() {
             <h2>Homepage Slides</h2>
             <div className="admin-form-grid">
               <input
-                placeholder="Title"
+                placeholder="Title (optional)"
                 value={slideForm.title}
                 onChange={(e) => setSlideForm((prev) => ({ ...prev, title: e.target.value }))}
               />
               <input
-                placeholder="Subtitle"
+                placeholder="Subtitle (optional)"
                 value={slideForm.subtitle}
                 onChange={(e) => setSlideForm((prev) => ({ ...prev, subtitle: e.target.value }))}
               />
               <select value={slideForm.type} onChange={(e) => setSlideForm((prev) => ({ ...prev, type: e.target.value }))}>
                 <option value="image">Image</option>
                 <option value="video">Video</option>
+                <option value="products">Product Grid</option>
               </select>
-              <input
-                placeholder="Media URL"
-                value={slideForm.url}
-                onChange={(e) => setSlideForm((prev) => ({ ...prev, url: e.target.value }))}
-              />
-              <input
-                placeholder="CTA Label"
-                value={slideForm.ctaLabel}
-                onChange={(e) => setSlideForm((prev) => ({ ...prev, ctaLabel: e.target.value }))}
-              />
-              <input
-                placeholder="CTA Link"
-                value={slideForm.ctaLink}
-                onChange={(e) => setSlideForm((prev) => ({ ...prev, ctaLink: e.target.value }))}
-              />
+
+              {slideForm.type !== 'products' && (
+                <>
+                  <input
+                    placeholder="Media URL"
+                    value={slideForm.url}
+                    onChange={(e) => setSlideForm((prev) => ({ ...prev, url: e.target.value }))}
+                  />
+                  <input
+                    placeholder="CTA Label (optional)"
+                    value={slideForm.ctaLabel}
+                    onChange={(e) => setSlideForm((prev) => ({ ...prev, ctaLabel: e.target.value }))}
+                  />
+                  <input
+                    placeholder="CTA Link (optional)"
+                    value={slideForm.ctaLink}
+                    onChange={(e) => setSlideForm((prev) => ({ ...prev, ctaLink: e.target.value }))}
+                  />
+                </>
+              )}
+
+              {slideForm.type === 'products' && (
+                <>
+                  <select
+                    value={slideForm.layout}
+                    onChange={(e) => setSlideForm((prev) => ({ ...prev, layout: Number(e.target.value) }))}
+                  >
+                    <option value={2}>2 Products</option>
+                    <option value={3}>3 Products</option>
+                  </select>
+                </>
+              )}
             </div>
-            <div className="admin-upload-row">
-              <input
-                type="file"
-                accept="image/*,video/*"
-                onChange={(e) => uploadSlideFile(e.target.files?.[0])}
-              />
-              <span>
-                {slideUploadState.loading ? 'Uploading...' : 'Upload from Computer'}
-              </span>
-            </div>
+
+            {slideForm.type === 'products' && (
+              <div className="admin-product-picker">
+                <p className="admin-image-uploader-label">
+                  Select Products ({slideForm.productIds.length}/{slideForm.layout})
+                </p>
+                <div className="admin-product-picker-grid">
+                  {products.map((product) => {
+                    const isSelected = slideForm.productIds.includes(product.id);
+                    return (
+                      <label
+                        key={product.id}
+                        className={`admin-product-picker-item${isSelected ? ' selected' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {
+                            setSlideForm((prev) => {
+                              const ids = prev.productIds.includes(product.id)
+                                ? prev.productIds.filter((id) => id !== product.id)
+                                : prev.productIds.length < prev.layout
+                                  ? [...prev.productIds, product.id]
+                                  : prev.productIds;
+                              return { ...prev, productIds: ids };
+                            });
+                          }}
+                        />
+                        {product.images?.[0] && (
+                          <img src={product.images[0]} alt={product.name} />
+                        )}
+                        <span>{product.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {slideForm.type !== 'products' && (
+              <div className="admin-upload-row">
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={(e) => uploadSlideFile(e.target.files?.[0])}
+                />
+                <span>
+                  {slideUploadState.loading ? 'Uploading...' : 'Upload from Computer'}
+                </span>
+              </div>
+            )}
             {slideUploadState.message && <p className="form-message">{slideUploadState.message}</p>}
             <button
               type="button"
               onClick={async () => {
-                await api.post('/admin/slides', slideForm, token);
-                setSlideForm({
-                  title: '',
-                  subtitle: '',
-                  type: 'image',
-                  url: '',
-                  ctaLabel: 'Discover',
-                  ctaLink: '/shop',
-                });
-                loadAll();
+                try {
+                  await api.post('/admin/slides', slideForm, token);
+                  setSlideForm({
+                    title: '',
+                    subtitle: '',
+                    type: 'image',
+                    url: '',
+                    ctaLabel: '',
+                    ctaLink: '',
+                    productIds: [],
+                    layout: 2,
+                  });
+                  setMessage('Slide added');
+                  loadAll();
+                } catch (error) {
+                  setMessage(error.message);
+                }
               }}
             >
               Add Slide
             </button>
 
+            <h3>Existing Slides</h3>
             {slides.map((slide) => (
               <article key={slide.id} className="admin-list-item">
                 <div>
-                  <strong>{slide.title}</strong>
-                  <p>{slide.type}</p>
+                  <strong>{slide.title || (slide.type === 'products' ? 'Product Grid' : 'Image/Video Slide')}</strong>
+                  <p>{slide.type}{slide.type === 'products' ? ` · ${slide.layout || 2} products` : ''}</p>
                 </div>
                 <button
                   type="button"

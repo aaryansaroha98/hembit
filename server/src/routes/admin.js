@@ -342,10 +342,16 @@ adminRouter.get('/slides', (_req, res) => {
 });
 
 adminRouter.post('/slides', (req, res) => {
-  const { title, subtitle, type, url, ctaLabel, ctaLink } = req.body;
+  const { title, subtitle, type, url, ctaLabel, ctaLink, productIds, layout } = req.body;
 
-  if (!type || !url) {
-    return res.status(400).json({ message: 'type and url are required' });
+  if (type === 'products') {
+    if (!Array.isArray(productIds) || productIds.length < 1) {
+      return res.status(400).json({ message: 'productIds array is required for product slides' });
+    }
+  } else {
+    if (!type || !url) {
+      return res.status(400).json({ message: 'type and url are required' });
+    }
   }
 
   let slide;
@@ -354,10 +360,12 @@ adminRouter.post('/slides', (req, res) => {
       id: createId('slide'),
       title: title || '',
       subtitle: subtitle || '',
-      type,
-      url,
-      ctaLabel: ctaLabel || 'Discover',
-      ctaLink: ctaLink || '/shop',
+      type: type || 'image',
+      url: url || '',
+      ctaLabel: ctaLabel || '',
+      ctaLink: ctaLink || '',
+      productIds: type === 'products' ? productIds : [],
+      layout: type === 'products' ? (Number(layout) || 2) : 0,
       order: db.slides.length + 1,
     };
 
@@ -385,6 +393,8 @@ adminRouter.put('/slides/:id', (req, res) => {
       url: payload.url ?? slide.url,
       ctaLabel: payload.ctaLabel ?? slide.ctaLabel,
       ctaLink: payload.ctaLink ?? slide.ctaLink,
+      productIds: payload.productIds ?? slide.productIds ?? [],
+      layout: payload.layout !== undefined ? Number(payload.layout) : (slide.layout ?? 0),
       order: payload.order !== undefined ? Number(payload.order) : slide.order,
     });
   });
