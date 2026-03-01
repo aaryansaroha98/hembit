@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 
@@ -24,7 +25,7 @@ const emptyAddress = {
 };
 
 export function AccountPage() {
-  const { user, token, signout, refreshUser } = useAuth();
+  const { user, token, signout, refreshUser, isAdmin } = useAuth();
 
   const [tab, setTab] = useState('overview');
   const [profileView, setProfileView] = useState('menu');
@@ -149,20 +150,23 @@ export function AccountPage() {
           </p>
           <div className="myaccount-overview-grid">
             <div className="myaccount-overview-card" onClick={() => setTab('orders')} role="button" tabIndex={0}>
-              <span className="myaccount-overview-icon">📦</span>
               <h3>Orders</h3>
               <p>{orders.length} order{orders.length !== 1 ? 's' : ''}</p>
             </div>
             <div className="myaccount-overview-card" onClick={() => { setTab('profile'); setProfileView('addresses'); }} role="button" tabIndex={0}>
-              <span className="myaccount-overview-icon">📍</span>
               <h3>Address Book</h3>
               <p>{addresses.length} address{addresses.length !== 1 ? 'es' : ''}</p>
             </div>
             <div className="myaccount-overview-card" onClick={() => { setTab('profile'); setProfileView('info'); }} role="button" tabIndex={0}>
-              <span className="myaccount-overview-icon">👤</span>
               <h3>Account Info</h3>
               <p>Edit your details</p>
             </div>
+            {isAdmin && (
+              <Link to="/admin" className="myaccount-overview-card myaccount-overview-card--admin">
+                <h3>Admin Panel</h3>
+                <p>Manage your store</p>
+              </Link>
+            )}
           </div>
         </div>
       )}

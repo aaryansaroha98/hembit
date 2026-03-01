@@ -14,11 +14,7 @@ export function SignInPage() {
     event.preventDefault();
     try {
       const user = await signin(form.email, form.password);
-      if (user.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/account');
-      }
+      navigate('/');
     } catch (error) {
       setMessage(error.message);
     }
