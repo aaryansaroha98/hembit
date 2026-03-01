@@ -6,23 +6,36 @@ export function LoadingScreen({ onFinished }) {
   const videoRef = useRef(null);
   const readyToFade = useRef(false);
 
-  /* Video plays once. When it ends, start fade. */
-  /* Also set a safety fallback of 4s in case onEnded doesn't fire. */
-  useEffect(() => {
-    const fallback = setTimeout(() => {
-      if (!readyToFade.current) {
-        readyToFade.current = true;
-        setPhase('fading');
-      }
-    }, 4000);
-    return () => clearTimeout(fallback);
-  }, []);
-
-  const handleEnded = () => {
+  const startFade = () => {
     if (readyToFade.current) return;
     readyToFade.current = true;
     setPhase('fading');
   };
+
+  /* Try to force-play the video on mount (mobile needs this) */
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    /* Set attributes explicitly for mobile */
+    vid.setAttribute('muted', '');
+    vid.setAttribute('playsinline', '');
+    vid.muted = true;
+
+    const playPromise = vid.play();
+    if (playPromise && playPromise.catch) {
+      playPromise.catch(() => {
+        /* Autoplay blocked — skip to fade after 1.5s */
+        setTimeout(startFade, 1500);
+      });
+    }
+
+    /* Safety fallback: if nothing fires in 4s, just fade out */
+    const fallback = setTimeout(startFade, 4000);
+    return () => clearTimeout(fallback);
+  }, []);
+
+  const handleEnded = () => startFade();
 
   useEffect(() => {
     if (phase === 'fading') {
