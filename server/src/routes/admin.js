@@ -568,6 +568,28 @@ adminRouter.delete('/hb-productions/:id', (req, res) => {
   return res.json({ message: 'HB production post deleted' });
 });
 
+adminRouter.put('/hb-productions/:id', (req, res) => {
+  const id = req.params.id;
+  const { title, excerpt, image, body } = req.body;
+
+  let post;
+  writeDb((db) => {
+    post = db.hbProductions.find((item) => item.id === id);
+    if (!post) return;
+
+    post.title = title ?? post.title;
+    post.excerpt = excerpt ?? post.excerpt;
+    post.image = image ?? post.image;
+    post.body = body ?? post.body;
+  });
+
+  if (!post) {
+    return res.status(404).json({ message: 'Post not found' });
+  }
+
+  return res.json({ post });
+});
+
 adminRouter.get('/orders', (_req, res) => {
   const db = readDb();
   res.json({ orders: db.orders });

@@ -70,6 +70,10 @@ export function AdminPage() {
   });
   const [slideUploadState, setSlideUploadState] = useState({ loading: false, message: '' });
   const [postForm, setPostForm] = useState({ title: '', excerpt: '', image: '', body: '' });
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editingSlideId, setEditingSlideId] = useState(null);
+  const [editingPostId, setEditingPostId] = useState(null);
   const [newsletterForm, setNewsletterForm] = useState({ subject: '', body: '' });
   const [settingsForm, setSettingsForm] = useState({
     supportEmail: '',
@@ -193,7 +197,7 @@ export function AdminPage() {
 
         {activeTab === 'Products' && (
           <div className="admin-block">
-            <h2>Add Product</h2>
+            <h2>{editingProductId ? 'Edit Product' : 'Add Product'}</h2>
             <div className="admin-form-grid">
               <input
                 placeholder="Name"
@@ -371,19 +375,22 @@ export function AdminPage() {
               type="button"
               onClick={async () => {
                 try {
-                  await api.post(
-                    '/admin/products',
-                    {
-                      ...productForm,
-                      images: uploadedImages,
-                      sizes: productForm.sizesCsv
-                        .split(',')
-                        .map((item) => item.trim())
-                        .filter(Boolean),
-                    },
-                    token
-                  );
-                  setMessage('Product added');
+                  const payload = {
+                    ...productForm,
+                    images: uploadedImages,
+                    sizes: productForm.sizesCsv
+                      .split(',')
+                      .map((item) => item.trim())
+                      .filter(Boolean),
+                  };
+                  if (editingProductId) {
+                    await api.put(`/admin/products/${editingProductId}`, payload, token);
+                    setMessage('Product updated');
+                    setEditingProductId(null);
+                  } else {
+                    await api.post('/admin/products', payload, token);
+                    setMessage('Product added');
+                  }
                   setProductForm({
                     name: '',
                     slug: '',
@@ -403,8 +410,21 @@ export function AdminPage() {
                 }
               }}
             >
-              Add Product
+              {editingProductId ? 'Update Product' : 'Add Product'}
             </button>
+            {editingProductId && (
+              <button
+                type="button"
+                style={{ marginLeft: 8, background: '#666' }}
+                onClick={() => {
+                  setEditingProductId(null);
+                  setProductForm({ name: '', slug: '', categoryId: '', seriesId: '', price: '', description: '', details: '', sizesCsv: 'S,M,L,XL', stock: 0, featured: false });
+                  setUploadedImages([]);
+                }}
+              >
+                Cancel
+              </button>
+            )}
 
             <h3>Existing Products</h3>
             {products.map((product) => (
@@ -413,15 +433,39 @@ export function AdminPage() {
                   <strong>{product.name}</strong>
                   <p>{product.slug}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await api.del(`/admin/products/${product.id}`, token);
-                    loadAll();
-                  }}
-                >
-                  Delete
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingProductId(product.id);
+                      setProductForm({
+                        name: product.name || '',
+                        slug: product.slug || '',
+                        categoryId: product.categoryId || '',
+                        seriesId: product.seriesId || '',
+                        price: product.price || '',
+                        description: product.description || '',
+                        details: product.details || '',
+                        sizesCsv: (product.sizes || []).join(','),
+                        stock: product.stock || 0,
+                        featured: product.featured || false,
+                      });
+                      setUploadedImages(product.images || []);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await api.del(`/admin/products/${product.id}`, token);
+                      loadAll();
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </article>
             ))}
           </div>
@@ -444,13 +488,36 @@ export function AdminPage() {
               <button
                 type="button"
                 onClick={async () => {
-                  await api.post('/admin/categories', categoryForm, token);
-                  setCategoryForm({ name: '', slug: '' });
-                  loadAll();
+                  try {
+                    if (editingCategoryId) {
+                      await api.put(`/admin/categories/${editingCategoryId}`, categoryForm, token);
+                      setMessage('Category updated');
+                      setEditingCategoryId(null);
+                    } else {
+                      await api.post('/admin/categories', categoryForm, token);
+                      setMessage('Category added');
+                    }
+                    setCategoryForm({ name: '', slug: '' });
+                    loadAll();
+                  } catch (err) {
+                    setMessage(err.message);
+                  }
                 }}
               >
-                Add Category
+                {editingCategoryId ? 'Update Category' : 'Add Category'}
               </button>
+              {editingCategoryId && (
+                <button
+                  type="button"
+                  style={{ background: '#666' }}
+                  onClick={() => {
+                    setEditingCategoryId(null);
+                    setCategoryForm({ name: '', slug: '' });
+                  }}
+                >
+                  Cancel
+                </button>
+              )}
             </div>
 
             <h3>Add Series</h3>
@@ -494,18 +561,42 @@ export function AdminPage() {
                 <small>{category.slug}</small>
                 <div className="series-list">
                   {category.series.map((series) => (
-                    <span key={series.id}>{series.name}</span>
+                    <span key={series.id}>
+                      {series.name}
+                      <button
+                        type="button"
+                        style={{ marginLeft: 4, fontSize: '0.7rem', padding: '1px 6px', background: '#c00' }}
+                        onClick={async () => {
+                          await api.del(`/admin/categories/${category.id}/series/${series.id}`, token);
+                          loadAll();
+                        }}
+                      >
+                        ×
+                      </button>
+                    </span>
                   ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await api.del(`/admin/categories/${category.id}`, token);
-                    loadAll();
-                  }}
-                >
-                  Delete Category
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingCategoryId(category.id);
+                      setCategoryForm({ name: category.name, slug: category.slug });
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await api.del(`/admin/categories/${category.id}`, token);
+                      loadAll();
+                    }}
+                  >
+                    Delete Category
+                  </button>
+                </div>
               </article>
             ))}
           </div>
@@ -513,7 +604,7 @@ export function AdminPage() {
 
         {activeTab === 'Slides' && (
           <div className="admin-block">
-            <h2>Homepage Slides</h2>
+            <h2>{editingSlideId ? 'Edit Slide' : 'Homepage Slides'}</h2>
             <div className="admin-form-grid">
               <input
                 placeholder="Title (optional)"
@@ -619,7 +710,14 @@ export function AdminPage() {
               type="button"
               onClick={async () => {
                 try {
-                  await api.post('/admin/slides', slideForm, token);
+                  if (editingSlideId) {
+                    await api.put(`/admin/slides/${editingSlideId}`, slideForm, token);
+                    setMessage('Slide updated');
+                    setEditingSlideId(null);
+                  } else {
+                    await api.post('/admin/slides', slideForm, token);
+                    setMessage('Slide added');
+                  }
                   setSlideForm({
                     title: '',
                     subtitle: '',
@@ -630,15 +728,26 @@ export function AdminPage() {
                     productIds: [],
                     layout: 2,
                   });
-                  setMessage('Slide added');
                   loadAll();
                 } catch (error) {
                   setMessage(error.message);
                 }
               }}
             >
-              Add Slide
+              {editingSlideId ? 'Update Slide' : 'Add Slide'}
             </button>
+            {editingSlideId && (
+              <button
+                type="button"
+                style={{ marginLeft: 8, background: '#666' }}
+                onClick={() => {
+                  setEditingSlideId(null);
+                  setSlideForm({ title: '', subtitle: '', type: 'image', url: '', ctaLabel: '', ctaLink: '', productIds: [], layout: 2 });
+                }}
+              >
+                Cancel
+              </button>
+            )}
 
             <h3>Existing Slides</h3>
             {slides.map((slide, idx) => (
@@ -680,6 +789,25 @@ export function AdminPage() {
                 </div>
                 <button
                   type="button"
+                  onClick={() => {
+                    setEditingSlideId(slide.id);
+                    setSlideForm({
+                      title: slide.title || '',
+                      subtitle: slide.subtitle || '',
+                      type: slide.type || 'image',
+                      url: slide.url || '',
+                      ctaLabel: slide.ctaLabel || '',
+                      ctaLink: slide.ctaLink || '',
+                      productIds: slide.productIds || [],
+                      layout: slide.layout || 2,
+                    });
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
                   onClick={async () => {
                     await api.del(`/admin/slides/${slide.id}`, token);
                     loadAll();
@@ -694,7 +822,7 @@ export function AdminPage() {
 
         {activeTab === 'HB Productions' && (
           <div className="admin-block">
-            <h2>HB Productions Blogs</h2>
+            <h2>{editingPostId ? 'Edit Blog Post' : 'HB Productions Blogs'}</h2>
             <input
               placeholder="Title"
               value={postForm.title}
@@ -718,28 +846,68 @@ export function AdminPage() {
             <button
               type="button"
               onClick={async () => {
-                await api.post('/admin/hb-productions', postForm, token);
-                setPostForm({ title: '', excerpt: '', image: '', body: '' });
-                loadAll();
+                try {
+                  if (editingPostId) {
+                    await api.put(`/admin/hb-productions/${editingPostId}`, postForm, token);
+                    setMessage('Blog post updated');
+                    setEditingPostId(null);
+                  } else {
+                    await api.post('/admin/hb-productions', postForm, token);
+                    setMessage('Blog post added');
+                  }
+                  setPostForm({ title: '', excerpt: '', image: '', body: '' });
+                  loadAll();
+                } catch (err) {
+                  setMessage(err.message);
+                }
               }}
             >
-              Add Blog
+              {editingPostId ? 'Update Blog' : 'Add Blog'}
             </button>
+            {editingPostId && (
+              <button
+                type="button"
+                style={{ marginLeft: 8, background: '#666' }}
+                onClick={() => {
+                  setEditingPostId(null);
+                  setPostForm({ title: '', excerpt: '', image: '', body: '' });
+                }}
+              >
+                Cancel
+              </button>
+            )}
 
             {posts.map((post) => (
               <article key={post.id} className="admin-list-item">
                 <div>
                   <strong>{post.title}</strong>
                 </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await api.del(`/admin/hb-productions/${post.id}`, token);
-                    loadAll();
-                  }}
-                >
-                  Delete
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingPostId(post.id);
+                      setPostForm({
+                        title: post.title || '',
+                        excerpt: post.excerpt || '',
+                        image: post.image || '',
+                        body: post.body || '',
+                      });
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await api.del(`/admin/hb-productions/${post.id}`, token);
+                      loadAll();
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </article>
             ))}
           </div>
