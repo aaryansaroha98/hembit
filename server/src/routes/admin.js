@@ -531,6 +531,31 @@ adminRouter.put('/settings', (req, res) => {
   return res.json({ message: 'Settings updated', settings });
 });
 
+adminRouter.put('/settings/logo-video', (req, res) => {
+  const { url } = req.body;
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ message: 'url is required' });
+  }
+
+  let settings;
+  writeDb((db) => {
+    db.settings = db.settings || {};
+    db.settings.logoVideo = url;
+    settings = db.settings;
+  });
+
+  return res.json({ message: 'Logo video updated', settings });
+});
+
+adminRouter.delete('/settings/logo-video', (_req, res) => {
+  writeDb((db) => {
+    db.settings = db.settings || {};
+    db.settings.logoVideo = '';
+  });
+
+  return res.json({ message: 'Logo video removed' });
+});
+
 adminRouter.get('/hb-productions', (_req, res) => {
   const db = readDb();
   res.json({ posts: db.hbProductions });

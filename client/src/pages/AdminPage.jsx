@@ -9,6 +9,7 @@ const TABS = [
   'Slides',
   'HB Productions',
   'Content',
+  'Logo Management',
   'Settings',
   'Users',
   'Orders',
@@ -85,6 +86,9 @@ export function AdminPage() {
     subject: '',
     body: '',
   });
+  const [logoVideo, setLogoVideo] = useState('');
+  const [logoUploading, setLogoUploading] = useState(false);
+  const logoFileRef = useRef(null);
 
   const loadAll = async () => {
     const [dash, prod, cat, sl, hb, cnt, sett, usersData, ord, news, recipients] = await Promise.all([
@@ -113,6 +117,7 @@ export function AdminPage() {
       contactNumber: sett.settings?.serviceContact?.contactNumber || '',
       contactHours: sett.settings?.serviceContact?.contactHours || '',
     });
+    setLogoVideo(sett.settings?.logoVideo || '');
     setUserList(usersData.users || []);
     setOrders(ord.orders);
     setNewsletter(news);
@@ -935,6 +940,112 @@ export function AdminPage() {
                 />
               </article>
             ))}
+          </div>
+        )}
+
+        {activeTab === 'Logo Management' && (
+          <div className="admin-block">
+            <h2>Logo Management</h2>
+            <p style={{ color: '#999', marginBottom: '1rem' }}>
+              Upload your brand logo video. This will be shown as a loading animation when the website loads.
+            </p>
+
+            {logoVideo && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3>Current Logo Video</h3>
+                <video
+                  src={logoVideo}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  style={{ maxWidth: '400px', width: '100%', borderRadius: '8px', border: '1px solid #333' }}
+                />
+                <div style={{ marginTop: '0.75rem' }}>
+                  <button
+                    type="button"
+                    className="admin-btn-danger"
+                    onClick={async () => {
+                      try {
+                        await api.del('/admin/settings/logo-video', token);
+                        setLogoVideo('');
+                        setMessage('Logo video removed');
+                      } catch (err) {
+                        setMessage(err.message);
+                      }
+                    }}
+                  >
+                    Remove Logo Video
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <h3>{logoVideo ? 'Replace Logo Video' : 'Upload Logo Video'}</h3>
+            <div
+              className="admin-image-dropzone"
+              onClick={() => logoFileRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('dragover'); }}
+              onDragLeave={(e) => e.currentTarget.classList.remove('dragover')}
+              onDrop={async (e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove('dragover');
+                const file = e.dataTransfer.files?.[0];
+                if (!file || !file.type.startsWith('video/')) {
+                  setMessage('Please drop a video file');
+                  return;
+                }
+                setLogoUploading(true);
+                try {
+                  const dataUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('Failed to read file'));
+                    reader.readAsDataURL(file);
+                  });
+                  const uploaded = await api.post('/admin/media/upload', { filename: file.name, dataUrl }, token);
+                  await api.put('/admin/settings/logo-video', { url: uploaded.url }, token);
+                  setLogoVideo(uploaded.url);
+                  setMessage('Logo video uploaded and saved');
+                } catch (err) {
+                  setMessage(err.message);
+                }
+                setLogoUploading(false);
+              }}
+            >
+              <input
+                ref={logoFileRef}
+                type="file"
+                accept="video/*"
+                style={{ display: 'none' }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setLogoUploading(true);
+                  try {
+                    const dataUrl = await new Promise((resolve, reject) => {
+                      const reader = new FileReader();
+                      reader.onload = () => resolve(reader.result);
+                      reader.onerror = () => reject(new Error('Failed to read file'));
+                      reader.readAsDataURL(file);
+                    });
+                    const uploaded = await api.post('/admin/media/upload', { filename: file.name, dataUrl }, token);
+                    await api.put('/admin/settings/logo-video', { url: uploaded.url }, token);
+                    setLogoVideo(uploaded.url);
+                    setMessage('Logo video uploaded and saved');
+                  } catch (err) {
+                    setMessage(err.message);
+                  }
+                  setLogoUploading(false);
+                  e.target.value = '';
+                }}
+              />
+              {logoUploading ? (
+                <span className="admin-image-dropzone-text">Uploading to Cloudinary...</span>
+              ) : (
+                <span className="admin-image-dropzone-text">+ Click or drag video here</span>
+              )}
+            </div>
           </div>
         )}
 
