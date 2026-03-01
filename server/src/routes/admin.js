@@ -156,16 +156,20 @@ adminRouter.get('/products', (_req, res) => {
 adminRouter.post('/products', (req, res) => {
   const payload = req.body;
 
-  if (!payload.name || !payload.slug || !payload.categoryId || !payload.seriesId || !payload.price) {
-    return res.status(400).json({ message: 'name, slug, categoryId, seriesId, and price are required' });
+  if (!payload.name || !payload.categoryId || !payload.seriesId || !payload.price) {
+    return res.status(400).json({ message: 'name, categoryId, seriesId, and price are required' });
   }
+
+  const autoSlug = payload.slug
+    ? payload.slug
+    : payload.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now().toString(36);
 
   let created;
   writeDb((db) => {
     created = {
       id: createId('prd'),
       name: payload.name,
-      slug: payload.slug,
+      slug: autoSlug,
       categoryId: payload.categoryId,
       seriesId: payload.seriesId,
       price: Number(payload.price),
