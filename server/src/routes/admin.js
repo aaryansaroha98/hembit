@@ -514,18 +514,29 @@ adminRouter.get('/settings', (_req, res) => {
 });
 
 adminRouter.put('/settings', (req, res) => {
-  const incoming = req.body?.serviceContact || {};
+  const incomingContact = req.body?.serviceContact;
+  const incomingRazorpay = req.body?.razorpay;
 
   let settings;
   writeDb((db) => {
     db.settings = db.settings || {};
-    const current = db.settings.serviceContact || {};
 
-    db.settings.serviceContact = {
-      supportEmail: incoming.supportEmail ?? current.supportEmail ?? '',
-      contactNumber: incoming.contactNumber ?? current.contactNumber ?? '',
-      contactHours: incoming.contactHours ?? current.contactHours ?? '',
-    };
+    if (incomingContact) {
+      const current = db.settings.serviceContact || {};
+      db.settings.serviceContact = {
+        supportEmail: incomingContact.supportEmail ?? current.supportEmail ?? '',
+        contactNumber: incomingContact.contactNumber ?? current.contactNumber ?? '',
+        contactHours: incomingContact.contactHours ?? current.contactHours ?? '',
+      };
+    }
+
+    if (incomingRazorpay) {
+      const current = db.settings.razorpay || {};
+      db.settings.razorpay = {
+        keyId: incomingRazorpay.keyId ?? current.keyId ?? '',
+        secret: incomingRazorpay.secret ?? current.secret ?? '',
+      };
+    }
 
     settings = db.settings;
   });

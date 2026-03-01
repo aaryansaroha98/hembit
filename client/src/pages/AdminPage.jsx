@@ -80,6 +80,8 @@ export function AdminPage() {
     supportEmail: '',
     contactNumber: '',
     contactHours: '',
+    razorpayKeyId: '',
+    razorpaySecret: '',
   });
   const [mailForm, setMailForm] = useState({
     audience: 'both',
@@ -116,6 +118,8 @@ export function AdminPage() {
       supportEmail: sett.settings?.serviceContact?.supportEmail || '',
       contactNumber: sett.settings?.serviceContact?.contactNumber || '',
       contactHours: sett.settings?.serviceContact?.contactHours || '',
+      razorpayKeyId: sett.settings?.razorpay?.keyId || '',
+      razorpaySecret: sett.settings?.razorpay?.secret || '',
     });
     setLogoVideo(sett.settings?.logoVideo || '');
     setUserList(usersData.users || []);
@@ -1096,6 +1100,47 @@ export function AdminPage() {
             </button>
             <p>
               Current: {settings?.serviceContact?.supportEmail} | {settings?.serviceContact?.contactNumber}
+            </p>
+
+            <h3 style={{ marginTop: '2rem' }}>Razorpay Payment Gateway</h3>
+            <div className="admin-form-grid">
+              <input
+                placeholder="Razorpay Key ID"
+                value={settingsForm.razorpayKeyId}
+                onChange={(e) => setSettingsForm((prev) => ({ ...prev, razorpayKeyId: e.target.value }))}
+              />
+              <input
+                type="password"
+                placeholder="Razorpay Key Secret"
+                value={settingsForm.razorpaySecret}
+                onChange={(e) => setSettingsForm((prev) => ({ ...prev, razorpaySecret: e.target.value }))}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await api.put(
+                    '/admin/settings',
+                    {
+                      razorpay: {
+                        keyId: settingsForm.razorpayKeyId,
+                        secret: settingsForm.razorpaySecret,
+                      },
+                    },
+                    token
+                  );
+                  setMessage('Razorpay keys updated');
+                  loadAll();
+                } catch (error) {
+                  setMessage(error.message);
+                }
+              }}
+            >
+              Save Razorpay Keys
+            </button>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-soft)', marginTop: '0.5rem' }}>
+              {settings?.razorpay?.keyId ? `Key ID: ${settings.razorpay.keyId.slice(0, 8)}••••` : 'No Razorpay keys configured — orders will be confirmed directly without payment.'}
             </p>
           </div>
         )}

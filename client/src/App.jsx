@@ -17,6 +17,7 @@ import { OrderTrackingPage } from './pages/OrderTrackingPage';
 import { CartPage } from './pages/CartPage';
 import { HBProductionsPage } from './pages/HBProductionsPage';
 import { AdminPage } from './pages/AdminPage';
+import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 
 function RouteLoadingWrapper({ children }) {
   const location = useLocation();
@@ -188,6 +189,16 @@ export default function App() {
             <ProtectedRoute>
               <MainLayout>
                 <AccountPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order-confirmed/:orderId"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <OrderConfirmationPage />
               </MainLayout>
             </ProtectedRoute>
           }
