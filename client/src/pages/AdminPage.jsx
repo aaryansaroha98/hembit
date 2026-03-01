@@ -172,13 +172,16 @@ export function AdminPage() {
         {message && <p className="form-message">{message}</p>}
 
         {activeTab === 'Dashboard' && dashboard && (
-          <div className="admin-grid">
-            {Object.entries(dashboard).map(([key, value]) => (
-              <article key={key} className="metric-card">
-                <p>{key}</p>
-                <strong>{value}</strong>
-              </article>
-            ))}
+          <div className="admin-block" style={{ background: 'transparent', boxShadow: 'none', padding: 0 }}>
+            <h2 style={{ border: 0, paddingBottom: 0.4 + 'rem' }}>Dashboard</h2>
+            <div className="admin-grid">
+              {Object.entries(dashboard).map(([key, value]) => (
+                <article key={key} className="metric-card">
+                  <p>{key}</p>
+                  <strong>{value}</strong>
+                </article>
+              ))}
+            </div>
           </div>
         )}
 
@@ -231,11 +234,6 @@ export function AdminPage() {
                 placeholder="Stock"
                 value={productForm.stock}
                 onChange={(e) => setProductForm((prev) => ({ ...prev, stock: e.target.value }))}
-              />
-              <input
-                placeholder="Image URLs (comma separated)"
-                value={productForm.imagesCsv}
-                onChange={(e) => setProductForm((prev) => ({ ...prev, imagesCsv: e.target.value }))}
               />
               <input
                 placeholder="Sizes (comma separated)"
