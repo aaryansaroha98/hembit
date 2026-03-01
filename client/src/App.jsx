@@ -30,9 +30,9 @@ function MainLayout({ children }) {
     let touchStartX = null;
     const prefersReducedMotion =
       typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const slideDurationMs = prefersReducedMotion ? 0 : 860;
-    const wheelThreshold = 60;
-    const touchThreshold = 52;
+    const slideDurationMs = prefersReducedMotion ? 0 : 380;
+    const wheelThreshold = 25;
+    const touchThreshold = 35;
 
     const getSections = () => Array.from(document.querySelectorAll('.hero-page, .site-footer--home'));
 
@@ -82,12 +82,11 @@ function MainLayout({ children }) {
         }
 
         const startTime = performance.now();
-        const easeInOutCubic = (value) =>
-          value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
+        const easeOutQuart = (value) => 1 - Math.pow(1 - value, 4);
 
         const tick = (now) => {
           const progress = Math.min((now - startTime) / slideDurationMs, 1);
-          const easedProgress = easeInOutCubic(progress);
+          const easedProgress = easeOutQuart(progress);
           window.scrollTo(0, startTop + distance * easedProgress);
 
           if (progress < 1) {
@@ -162,7 +161,7 @@ function MainLayout({ children }) {
       }
       wheelResetTimer = window.setTimeout(() => {
         wheelAccumulator = 0;
-      }, 130);
+      }, 200);
 
       if (Math.abs(wheelAccumulator) < wheelThreshold) {
         return;
