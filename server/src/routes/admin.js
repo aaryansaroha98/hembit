@@ -629,7 +629,40 @@ adminRouter.post('/orders/:id/send-status-email', async (req, res) => {
     </tr>`
   ).join('');
 
-  const statusColor = order.status === 'Delivered' ? '#0a7c42' : order.status === 'Shipped' ? '#1a6dd4' : '#111';
+  const statusColor = order.status === 'Delivered' ? '#0a7c42' : order.status === 'Shipped' ? '#1a6dd4' : order.status === 'Out for Delivery' ? '#b45309' : order.status === 'Confirmed' ? '#111' : '#555';
+
+  const statusMessages = {
+    'Pending Confirmation': {
+      heading: 'We\'ve Received Your Order',
+      body: 'Thank you for placing your order with HEMBIT. We are currently reviewing your order and will confirm it shortly. You will receive an update once your order is confirmed.',
+    },
+    'Payment Successful': {
+      heading: 'Payment Confirmed',
+      body: 'Your payment has been successfully processed. We are now preparing your order with the utmost care and attention to detail.',
+    },
+    'Confirmed': {
+      heading: 'Your Order is Confirmed',
+      body: 'Great news — your order has been confirmed and is being prepared for dispatch. Our team is ensuring everything is perfect before it leaves our hands.',
+    },
+    'Shipped': {
+      heading: 'Your Order is On Its Way',
+      body: 'Your order has been shipped and is on its way to you. Keep an eye on your inbox for tracking updates as your order makes its journey.',
+    },
+    'Out for Delivery': {
+      heading: 'Almost There',
+      body: 'Your order is out for delivery and will arrive shortly. Please ensure someone is available to receive your package.',
+    },
+    'Delivered': {
+      heading: 'Thank You for Shopping with Us',
+      body: 'Your order has been delivered. We hope you love your purchase as much as we enjoyed curating it for you. Your style, elevated — that\'s the HEMBIT promise.',
+    },
+    'Cancelled': {
+      heading: 'Order Cancelled',
+      body: 'Your order has been cancelled. If a payment was made, the refund will be processed within 5–7 business days. We hope to serve you again soon.',
+    },
+  };
+
+  const msg = statusMessages[order.status] || { heading: 'Order Update', body: `Your order status has been updated to ${order.status}.` };
 
   const html = `
 <!DOCTYPE html>
@@ -699,17 +732,17 @@ adminRouter.post('/orders/:id/send-status-email', async (req, res) => {
             </table>
           </td>
         </tr>
-        <!-- Timeline -->
+        <!-- Message -->
         <tr>
           <td style="padding:0 32px 32px;">
-            <p style="margin:0 0 12px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#888;font-weight:600;">Order Timeline</p>
-            ${(order.timeline || []).map((t) =>
-              `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;">
-                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#111;flex-shrink:0;"></span>
-                <span style="color:#333;font-weight:500;">${t.status}</span>
-                <span style="color:#999;font-size:12px;margin-left:auto;">${new Date(t.at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
-              </div>`
-            ).join('')}
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;border:1px solid #eee;border-radius:6px;">
+              <tr>
+                <td style="padding:24px 28px;">
+                  <h3 style="margin:0 0 10px;font-size:16px;font-weight:600;color:#111;letter-spacing:0.02em;">${msg.heading}</h3>
+                  <p style="margin:0;font-size:14px;line-height:1.7;color:#555;">${msg.body}</p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
         <!-- Footer -->

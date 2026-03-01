@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { readDb, writeDb } from '../services/store.js';
 import { createId } from '../utils/id.js';
+import { sendEmail } from '../services/email.js';
 
 export const publicRouter = Router();
 
@@ -154,9 +155,11 @@ publicRouter.post('/newsletter/subscribe', (req, res) => {
     return res.status(400).json({ message: 'Email is required' });
   }
 
+  let isNew = false;
   writeDb((db) => {
     const exists = db.newsletterSubscribers.some((item) => item.email === email);
     if (!exists) {
+      isNew = true;
       db.newsletterSubscribers.push({
         id: createId('nws'),
         email,
@@ -164,6 +167,57 @@ publicRouter.post('/newsletter/subscribe', (req, res) => {
       });
     }
   });
+
+  if (isNew) {
+    const welcomeHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;max-width:600px;width:100%;">
+        <tr>
+          <td style="background:#111;padding:28px 32px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;letter-spacing:0.18em;font-weight:600;">HEMBIT</h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:48px 40px 20px;text-align:center;">
+            <h2 style="margin:0 0 8px;font-size:24px;font-weight:600;color:#111;letter-spacing:0.03em;">Welcome to HEMBIT</h2>
+            <p style="margin:0;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:#999;">You're now on the list</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 40px 40px;text-align:center;">
+            <p style="margin:0 0 20px;font-size:15px;line-height:1.8;color:#555;">Thank you for subscribing. You'll be the first to know about new collections, exclusive drops, and everything HEMBIT.</p>
+            <p style="margin:0;font-size:15px;line-height:1.8;color:#555;">Style isn't just what you wear — it's how you carry yourself. We're here to make sure you do it right.</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 40px 40px;text-align:center;">
+            <a href="https://hembit.in" style="display:inline-block;background:#111;color:#fff;padding:14px 40px;font-size:13px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;border-radius:0;">Explore Now</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#111;padding:24px 32px;text-align:center;">
+            <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.12em;color:rgba(255,255,255,0.6);text-transform:uppercase;">Elevate your style with</p>
+            <p style="margin:0;font-size:16px;letter-spacing:0.18em;color:#fff;font-weight:600;">HEMBIT</p>
+            <p style="margin:12px 0 0;font-size:11px;color:rgba(255,255,255,0.4);">hembit.in</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+    sendEmail({
+      to: email,
+      subject: 'Welcome to HEMBIT — You\'re In',
+      html: welcomeHtml,
+    }).catch(() => {});
+  }
 
   return res.json({ message: 'Subscribed successfully' });
 });
