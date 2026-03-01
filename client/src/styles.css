@@ -441,7 +441,7 @@ body.home-view .mega-menu {
   inset: 0;
   overflow: hidden;
   will-change: transform;
-  transition: transform 900ms cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 600ms cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 .hero-panel--visible {
@@ -484,13 +484,13 @@ body.home-view .mega-menu {
   z-index: 4;
   opacity: 0;
   transform: translateY(40px);
-  transition: opacity 500ms ease, transform 700ms cubic-bezier(0.76, 0, 0.24, 1);
+  transition: opacity 350ms ease, transform 450ms cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 .hero-overlay--visible {
   opacity: 1;
   transform: translateY(0);
-  transition-delay: 350ms;
+  transition-delay: 250ms;
 }
 
 .hero-overline {

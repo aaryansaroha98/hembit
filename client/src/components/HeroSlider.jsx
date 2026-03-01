@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const TRANSITION_DURATION = 900;
-const COOLDOWN = TRANSITION_DURATION + 80;
+const TRANSITION_DURATION = 600;
+const COOLDOWN = TRANSITION_DURATION + 60;
 const WHEEL_THRESHOLD = 30;
 const TOUCH_THRESHOLD = 40;
 
