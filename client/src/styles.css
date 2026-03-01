@@ -28,7 +28,7 @@
   width: 320px;
   height: auto;
   object-fit: contain;
-  background: transparent;
+  background: #fff;
 }
 
 @keyframes loadingPulse {
