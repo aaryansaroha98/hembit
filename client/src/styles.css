@@ -2318,7 +2318,7 @@ textarea {
 
 /* Compact Footer (all non-home pages) — Same style, not full-page */
 .site-footer--compact {
-  background: #e7e7e7;
+  background: #fff;
   color: #111;
   min-height: auto;
   border-top: 0;
