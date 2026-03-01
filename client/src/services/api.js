@@ -45,4 +45,17 @@ export const api = {
       method: 'DELETE',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     }),
+  uploadFile: async (file, token) => {
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    return request('/admin/media/upload', {
+      method: 'POST',
+      body: JSON.stringify({ filename: file.name, dataUrl }),
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
 };

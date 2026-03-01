@@ -1650,6 +1650,109 @@ textarea {
   gap: 0.62rem;
 }
 
+/* Admin Image Uploader */
+.admin-image-uploader {
+  margin-top: 0.8rem;
+}
+
+.admin-image-uploader-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-image-dropzone {
+  border: 2px dashed var(--line);
+  border-radius: 6px;
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+.admin-image-dropzone:hover,
+.admin-image-dropzone.dragover {
+  border-color: var(--black);
+  background: var(--surface-soft);
+}
+
+.admin-image-dropzone-text {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  letter-spacing: 0.04em;
+}
+
+.admin-image-preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.admin-image-preview {
+  position: relative;
+  width: 110px;
+  height: 140px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.admin-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.admin-image-preview-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 3px 0;
+}
+
+.admin-image-preview-actions button {
+  width: 24px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 2px;
+}
+
+.admin-image-preview-actions button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-image-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: var(--black);
+  color: #fff;
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
 .admin-list-item {
   display: flex;
   justify-content: space-between;

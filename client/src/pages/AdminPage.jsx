@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -49,11 +49,13 @@ export function AdminPage() {
     price: '',
     description: '',
     details: '',
-    imagesCsv: '',
     sizesCsv: 'S,M,L,XL',
     stock: 0,
     featured: false,
   });
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const [categoryForm, setCategoryForm] = useState({ name: '', slug: '' });
   const [seriesForm, setSeriesForm] = useState({ categoryId: '', name: '', slug: '' });
   const [slideForm, setSlideForm] = useState({
@@ -241,6 +243,108 @@ export function AdminPage() {
                 onChange={(e) => setProductForm((prev) => ({ ...prev, sizesCsv: e.target.value }))}
               />
             </div>
+
+            {/* Image uploader */}
+            <div className="admin-image-uploader">
+              <p className="admin-image-uploader-label">Product Images</p>
+              <div
+                className="admin-image-dropzone"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('dragover'); }}
+                onDragLeave={(e) => e.currentTarget.classList.remove('dragover')}
+                onDrop={async (e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove('dragover');
+                  const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'));
+                  if (!files.length) return;
+                  setUploading(true);
+                  try {
+                    const results = await Promise.all(files.map((f) => api.uploadFile(f, token)));
+                    setUploadedImages((prev) => [...prev, ...results.map((r) => r.url)]);
+                  } catch (err) {
+                    setMessage(err.message);
+                  }
+                  setUploading(false);
+                }}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  style={{ display: 'none' }}
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files);
+                    if (!files.length) return;
+                    setUploading(true);
+                    try {
+                      const results = await Promise.all(files.map((f) => api.uploadFile(f, token)));
+                      setUploadedImages((prev) => [...prev, ...results.map((r) => r.url)]);
+                    } catch (err) {
+                      setMessage(err.message);
+                    }
+                    setUploading(false);
+                    e.target.value = '';
+                  }}
+                />
+                {uploading ? (
+                  <span className="admin-image-dropzone-text">Uploading...</span>
+                ) : (
+                  <span className="admin-image-dropzone-text">+ Click or drag images here</span>
+                )}
+              </div>
+              {uploadedImages.length > 0 && (
+                <div className="admin-image-preview-grid">
+                  {uploadedImages.map((url, idx) => (
+                    <div className="admin-image-preview" key={url}>
+                      <img src={url} alt={`Product ${idx + 1}`} />
+                      <div className="admin-image-preview-actions">
+                        {idx > 0 && (
+                          <button
+                            type="button"
+                            title="Move left"
+                            onClick={() =>
+                              setUploadedImages((prev) => {
+                                const copy = [...prev];
+                                [copy[idx - 1], copy[idx]] = [copy[idx], copy[idx - 1]];
+                                return copy;
+                              })
+                            }
+                          >
+                            ←
+                          </button>
+                        )}
+                        {idx < uploadedImages.length - 1 && (
+                          <button
+                            type="button"
+                            title="Move right"
+                            onClick={() =>
+                              setUploadedImages((prev) => {
+                                const copy = [...prev];
+                                [copy[idx], copy[idx + 1]] = [copy[idx + 1], copy[idx]];
+                                return copy;
+                              })
+                            }
+                          >
+                            →
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          title="Remove"
+                          onClick={() =>
+                            setUploadedImages((prev) => prev.filter((_, i) => i !== idx))
+                          }
+                        >
+                          ×
+                        </button>
+                      </div>
+                      {idx === 0 && <span className="admin-image-badge">Main</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <textarea
               placeholder="Description"
               value={productForm.description}
@@ -267,10 +371,7 @@ export function AdminPage() {
                     '/admin/products',
                     {
                       ...productForm,
-                      images: productForm.imagesCsv
-                        .split(',')
-                        .map((item) => item.trim())
-                        .filter(Boolean),
+                      images: uploadedImages,
                       sizes: productForm.sizesCsv
                         .split(',')
                         .map((item) => item.trim())
@@ -287,11 +388,11 @@ export function AdminPage() {
                     price: '',
                     description: '',
                     details: '',
-                    imagesCsv: '',
                     sizesCsv: 'S,M,L,XL',
                     stock: 0,
                     featured: false,
                   });
+                  setUploadedImages([]);
                   loadAll();
                 } catch (error) {
                   setMessage(error.message);
