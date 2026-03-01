@@ -933,14 +933,13 @@ textarea {
 }
 
 .product-gallery {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
 .product-gallery img {
   width: 100%;
-  aspect-ratio: 3 / 4;
   object-fit: cover;
   border: 1px solid var(--line);
 }
