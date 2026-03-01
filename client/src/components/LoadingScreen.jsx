@@ -1,23 +1,52 @@
 import { useEffect, useRef, useState } from 'react';
 import logoVideo from '../assets/logo-animation.mp4';
 
-export function LoadingScreen({ onFinished }) {
+export function LoadingScreen({ onFinished, waitForBackend = false }) {
   const [phase, setPhase] = useState('playing'); // playing → fading → done
   const videoRef = useRef(null);
-  const readyToFade = useRef(false);
+  const videoEnded = useRef(false);
+  const backendReady = useRef(!waitForBackend); // skip check if not needed
+  const fadeStarted = useRef(false);
 
-  const startFade = () => {
-    if (readyToFade.current) return;
-    readyToFade.current = true;
+  const tryFade = () => {
+    if (fadeStarted.current) return;
+    if (!videoEnded.current || !backendReady.current) return;
+    fadeStarted.current = true;
     setPhase('fading');
   };
+
+  /* Ping backend health until it responds */
+  useEffect(() => {
+    if (!waitForBackend) return;
+
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    let cancelled = false;
+
+    const ping = async () => {
+      while (!cancelled) {
+        try {
+          const res = await fetch(`${API_URL}/health`, { method: 'GET' });
+          if (res.ok) {
+            backendReady.current = true;
+            tryFade();
+            return;
+          }
+        } catch {
+          /* server still waking up */
+        }
+        await new Promise((r) => setTimeout(r, 2000));
+      }
+    };
+
+    ping();
+    return () => { cancelled = true; };
+  }, [waitForBackend]);
 
   /* Try to force-play the video on mount (mobile needs this) */
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
-    /* Set attributes explicitly for mobile */
     vid.setAttribute('muted', '');
     vid.setAttribute('playsinline', '');
     vid.muted = true;
@@ -25,17 +54,28 @@ export function LoadingScreen({ onFinished }) {
     const playPromise = vid.play();
     if (playPromise && playPromise.catch) {
       playPromise.catch(() => {
-        /* Autoplay blocked — skip to fade after 1.5s */
-        setTimeout(startFade, 1500);
+        videoEnded.current = true;
+        tryFade();
       });
     }
 
-    /* Safety fallback: if nothing fires in 4s, just fade out */
-    const fallback = setTimeout(startFade, 4000);
+    /* Safety fallback */
+    const fallback = setTimeout(() => {
+      videoEnded.current = true;
+      tryFade();
+    }, 4000);
     return () => clearTimeout(fallback);
   }, []);
 
-  const handleEnded = () => startFade();
+  const handleEnded = () => {
+    videoEnded.current = true;
+    /* If backend still loading, loop the video */
+    if (!backendReady.current && videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    } else {
+      tryFade();
+    }
+  };
 
   useEffect(() => {
     if (phase === 'fading') {

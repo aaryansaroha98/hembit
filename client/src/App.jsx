@@ -22,6 +22,7 @@ function RouteLoadingWrapper({ children }) {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const isFirstLoad = useRef(true);
+  const backendWarmed = useRef(false);
 
   /* Show loading on every route change */
   useEffect(() => {
@@ -32,11 +33,19 @@ function RouteLoadingWrapper({ children }) {
     setLoading(true);
   }, [location.pathname]);
 
-  const handleFinished = useCallback(() => setLoading(false), []);
+  const handleFinished = useCallback(() => {
+    backendWarmed.current = true;
+    setLoading(false);
+  }, []);
 
   return (
     <>
-      {loading && <LoadingScreen onFinished={handleFinished} />}
+      {loading && (
+        <LoadingScreen
+          onFinished={handleFinished}
+          waitForBackend={!backendWarmed.current}
+        />
+      )}
       {children}
     </>
   );

@@ -899,11 +899,14 @@ textarea {
 
 .product-gallery {
   display: grid;
-  gap: 0.82rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
 }
 
 .product-gallery img {
   width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
   border: 1px solid var(--line);
 }
 
