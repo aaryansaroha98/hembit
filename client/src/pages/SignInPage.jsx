@@ -122,7 +122,7 @@ export function SignInPage() {
 
         <article className="auth-luxe-panel auth-luxe-panel-secondary">
           <h2>Create an account</h2>
-          <p>Enjoy a faster checkout experience and manage all your personal information in your dedicated account.</p>
+          <p>Join the Hembit community for an elevated shopping experience.</p>
           <Link to="/signup" className="auth-luxe-btn auth-luxe-btn-link">
             Create an account
           </Link>
