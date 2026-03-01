@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { PageHero } from '../components/PageHero';
 import { api } from '../services/api';
 
-function ContentPage({ endpoint, heroTitle, subtitle }) {
+function ContentPage({ endpoint, heroTitle }) {
   const [content, setContent] = useState(null);
 
   useEffect(() => {
@@ -10,28 +9,31 @@ function ContentPage({ endpoint, heroTitle, subtitle }) {
   }, [endpoint]);
 
   return (
-    <section>
-      <PageHero title={heroTitle} subtitle={subtitle} />
-      <div className="text-page">
-        <h2>{content?.title || heroTitle}</h2>
-        <p>{content?.body || ''}</p>
+    <section className="content-page">
+      <div className="content-page-inner">
+        <h1>{(content?.title || heroTitle).toUpperCase()}</h1>
+        <div className="content-page-body">
+          {(content?.body || '').split('\n').map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
 export function OurStoryPage() {
-  return <ContentPage endpoint="about" heroTitle="Our Story" subtitle="HEMBIT" />;
+  return <ContentPage endpoint="about" heroTitle="Our Story" />;
 }
 
 export function FounderStoryPage() {
-  return <ContentPage endpoint="founder" heroTitle="Founder Story" subtitle="HEMBIT" />;
+  return <ContentPage endpoint="founder" heroTitle="Founder Story" />;
 }
 
 export function PrivacyPolicyPage() {
-  return <ContentPage endpoint="privacy" heroTitle="Privacy Policy" subtitle="HEMBIT" />;
+  return <ContentPage endpoint="privacy" heroTitle="Privacy Policy" />;
 }
 
 export function TermsPage() {
-  return <ContentPage endpoint="terms" heroTitle="Terms of Use" subtitle="HEMBIT" />;
+  return <ContentPage endpoint="terms" heroTitle="Terms of Use" />;
 }

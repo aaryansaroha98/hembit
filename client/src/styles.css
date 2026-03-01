@@ -1324,6 +1324,42 @@ textarea {
   line-height: 1.82;
 }
 
+/* Content pages (About, Founder, Privacy, Terms) */
+.content-page {
+  background: #e7e7e7;
+  min-height: calc(100vh - 80px);
+  padding: 2.7rem 0 5rem;
+}
+
+.content-page-inner {
+  width: min(960px, 100% - 2.6rem);
+  margin: 0 auto;
+}
+
+.content-page-inner h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.content-page-body {
+  margin-top: 3rem;
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.content-page-body p {
+  margin: 0 0 1.2rem;
+  font-size: 0.82rem;
+  line-height: 1.85;
+  letter-spacing: 0.02em;
+  color: #333;
+}
+
 /* Services page */
 .services-client-page {
   background: #e7e7e7;
