@@ -1151,22 +1151,30 @@ textarea {
 
 .auth-luxe-panel-secondary {
   border-top: 1px solid #c9c9c9;
-  padding-top: 2rem;
+  padding-top: 1.2rem;
 }
 
 .auth-luxe-panel-secondary h2 {
   margin: 0;
   text-align: center;
-  font-size: clamp(0.98rem, 2.1vw, 1.25rem);
-  letter-spacing: 0.08em;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .auth-luxe-panel-secondary p {
-  margin: 1.6rem 0 1.8rem;
-  font-size: 0.93rem;
-  line-height: 1.42;
+  margin: 0.7rem 0 1rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
   text-transform: uppercase;
+  color: #555;
+  letter-spacing: 0.03em;
+}
+
+.auth-luxe-panel-secondary .auth-luxe-btn {
+  height: 36px;
+  font-size: 0.7rem;
 }
 
 .auth-luxe-switch {
@@ -2933,7 +2941,7 @@ textarea {
   }
 
   .auth-luxe-panel-secondary p {
-    font-size: 0.82rem;
+    font-size: 0.68rem;
   }
 
   .admin-shell {
