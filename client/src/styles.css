@@ -894,6 +894,7 @@ textarea {
   display: grid;
   grid-template-columns: 1.08fr 1fr;
   gap: 1.6rem;
+  align-items: start;
 }
 
 .product-gallery {
@@ -910,6 +911,16 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 0.72rem;
+  position: sticky;
+  top: calc(var(--topbar-height) + 1.6rem);
+  max-height: calc(100vh - var(--topbar-height) - 3.2rem);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.product-info::-webkit-scrollbar {
+  display: none;
 }
 
 .product-info p {
@@ -2906,6 +2917,12 @@ textarea {
   .admin-form-grid,
   .inline-form {
     grid-template-columns: 1fr;
+  }
+
+  .product-info {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
   }
 
   .myaccount-overview-grid {
