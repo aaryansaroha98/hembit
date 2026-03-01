@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import logoVideo from '../assets/logo-animation.mp4';
 
 const MIN_DISPLAY_MS = 2000;
 
-export function LoadingScreen({ videoUrl, onFinished }) {
+export function LoadingScreen({ onFinished }) {
   const [phase, setPhase] = useState('visible'); // visible → fading → done
   const startRef = useRef(Date.now());
-  const videoRef = useRef(null);
 
   useEffect(() => {
     startRef.current = Date.now();
@@ -39,19 +39,14 @@ export function LoadingScreen({ videoUrl, onFinished }) {
   return (
     <div className={`loading-screen${phase === 'fading' ? ' loading-screen--fade-out' : ''}`}>
       <div className="loading-screen-content">
-        {videoUrl ? (
-          <video
-            ref={videoRef}
-            src={videoUrl}
-            autoPlay
-            muted
-            playsInline
-            loop
-            className="loading-screen-video"
-          />
-        ) : (
-          <div className="loading-screen-logo">HEMBIT</div>
-        )}
+        <video
+          src={logoVideo}
+          autoPlay
+          muted
+          playsInline
+          loop
+          className="loading-screen-video"
+        />
       </div>
     </div>
   );

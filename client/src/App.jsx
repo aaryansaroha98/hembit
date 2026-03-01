@@ -17,26 +17,11 @@ import { OrderTrackingPage } from './pages/OrderTrackingPage';
 import { CartPage } from './pages/CartPage';
 import { HBProductionsPage } from './pages/HBProductionsPage';
 import { AdminPage } from './pages/AdminPage';
-import { api } from './services/api';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 function RouteLoadingWrapper({ children }) {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
-  const [logoVideo, setLogoVideo] = useState(null);
-  const videoFetched = useRef(false);
   const isFirstLoad = useRef(true);
-
-  /* Fetch logo video URL once on app boot */
-  useEffect(() => {
-    if (videoFetched.current) return;
-    videoFetched.current = true;
-    fetch(`${API_URL}/public/settings`)
-      .then((r) => r.json())
-      .then((data) => setLogoVideo(data?.settings?.logoVideo || ''))
-      .catch(() => setLogoVideo(''));
-  }, []);
 
   /* Show loading on every route change */
   useEffect(() => {
@@ -49,14 +34,9 @@ function RouteLoadingWrapper({ children }) {
 
   const handleFinished = useCallback(() => setLoading(false), []);
 
-  /* Wait until we know whether a video URL exists */
-  if (logoVideo === null) {
-    return <LoadingScreen videoUrl="" onFinished={() => {}} />;
-  }
-
   return (
     <>
-      {loading && <LoadingScreen videoUrl={logoVideo} onFinished={handleFinished} />}
+      {loading && <LoadingScreen onFinished={handleFinished} />}
       {children}
     </>
   );
