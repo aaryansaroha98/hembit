@@ -2543,7 +2543,7 @@ textarea {
 }
 
 .site-footer--home .footer-bottom-row {
-  margin-top: clamp(90px, 17vh, 160px);
+  margin-top: clamp(32px, 5vh, 56px);
   padding-bottom: clamp(108px, 16vh, 172px);
   justify-content: center;
   gap: 1rem;
