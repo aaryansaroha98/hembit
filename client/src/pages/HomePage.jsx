@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { HeroSlider } from '../components/HeroSlider';
+import { Footer } from '../components/Footer';
 import { api } from '../services/api';
 
 export function HomePage() {
@@ -19,7 +20,9 @@ export function HomePage() {
 
   return (
     <div className="home-page">
-      <HeroSlider slides={data.slides} />
+      <HeroSlider slides={data.slides}>
+        <Footer />
+      </HeroSlider>
     </div>
   );
 }
