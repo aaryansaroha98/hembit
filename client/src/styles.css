@@ -2316,12 +2316,12 @@ textarea {
   color: #a6462d;
 }
 
-/* Compact Footer (all non-home pages) — Professional */
+/* Compact Footer (all non-home pages) — Classic */
 .site-footer--compact {
-  background: #111;
-  color: #fff;
+  background: #f6f6f4;
+  color: #111;
   min-height: auto;
-  border-top: none;
+  border-top: 1px solid #d8d8d4;
 }
 
 .cf-inner {
@@ -2329,96 +2329,12 @@ textarea {
   margin: 0 auto;
 }
 
-/* Newsletter band */
-.cf-newsletter-band {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  padding: 3rem 0 2.8rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.cf-newsletter-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.cf-newsletter-heading {
-  font-size: 1.15rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.cf-newsletter-sub {
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.5);
-  letter-spacing: 0.02em;
-}
-
-.cf-newsletter-form {
-  display: flex;
-  gap: 0;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.cf-newsletter-form input {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-right: none;
-  color: #fff;
-  padding: 0.75rem 1rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  width: 260px;
-  outline: none;
-  transition: border-color 200ms ease;
-}
-
-.cf-newsletter-form input::placeholder {
-  color: rgba(255, 255, 255, 0.35);
-}
-
-.cf-newsletter-form input:focus {
-  border-color: rgba(255, 255, 255, 0.6);
-}
-
-.cf-newsletter-form button {
-  background: #fff;
-  color: #111;
-  border: 1px solid #fff;
-  padding: 0.75rem 1.6rem;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 200ms ease, color 200ms ease;
-}
-
-.cf-newsletter-form button:hover {
-  background: transparent;
-  color: #fff;
-}
-
-.cf-newsletter-msg {
-  position: absolute;
-  bottom: -1.4rem;
-  left: 0;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
 /* Main grid */
 .cf-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
-  padding: 2.8rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding: clamp(3.5rem, 7vh, 5.5rem) 0 clamp(2rem, 4vh, 3rem);
 }
 
 .cf-col {
@@ -2427,47 +2343,151 @@ textarea {
   gap: 0;
 }
 
-.cf-heading {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+.cf-col--end {
+  align-items: flex-start;
+}
+
+.cf-version {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #fff;
-  margin: 0 0 1rem;
+  color: #111;
+  line-height: 1.7;
 }
 
 .cf-links {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.35rem;
 }
 
 .cf-links a {
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.76rem;
-  letter-spacing: 0.03em;
+  color: #111;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   text-decoration: none;
+  line-height: 1.7;
   transition: color 200ms ease;
 }
 
 .cf-links a:hover {
-  color: #fff;
+  color: #555;
 }
 
-/* Bottom bar */
-.cf-bottom {
+.cf-arrow-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 0 0.35rem;
+  cursor: pointer;
+  color: #111;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  line-height: 1.7;
+  text-align: left;
+  transition: color 200ms ease;
+  font-family: inherit;
+}
+
+.cf-arrow-link:hover {
+  color: #555;
+}
+
+/* Newsletter toggle */
+.cf-newsletter {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 350ms ease, padding 350ms ease;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cf-newsletter--open {
+  max-height: 120px;
+  padding: 0 0 1.5rem;
+}
+
+.cf-newsletter-form {
+  display: flex;
+  gap: 0;
+}
+
+.cf-newsletter-form input {
+  background: transparent;
+  border: 1px solid #aaa;
+  border-right: none;
+  color: #111;
+  padding: 0.65rem 1rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  width: 260px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 200ms ease;
+}
+
+.cf-newsletter-form input::placeholder {
+  color: #888;
+}
+
+.cf-newsletter-form input:focus {
+  border-color: #555;
+}
+
+.cf-newsletter-form button {
+  background: #111;
+  color: #fff;
+  border: 1px solid #111;
+  padding: 0.65rem 1.6rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.cf-newsletter-form button:hover {
+  background: transparent;
+  color: #111;
+}
+
+.cf-newsletter-msg {
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  color: #555;
+}
+
+/* Social icons */
+.cf-socials {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1.4rem 0;
+  justify-content: center;
+  gap: 1.6rem;
+  padding: clamp(2.5rem, 6vh, 4.5rem) 0 clamp(3rem, 6vh, 5rem);
+  border-top: 1px solid #d8d8d4;
 }
 
-.cf-copyright,
-.cf-region {
-  margin: 0;
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.04em;
+.cf-socials a {
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 200ms ease;
+}
+
+.cf-socials a:hover {
+  color: #555;
 }
 
 /* Home Footer Slide Page */
@@ -3602,32 +3622,14 @@ textarea {
   }
 
   /* Compact footer mobile */
-  .cf-newsletter-band {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.2rem;
-    padding: 2rem 0 2rem;
-  }
-
-  .cf-newsletter-form {
-    width: 100%;
+  .cf-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem 1.5rem;
+    padding: 2.5rem 0 2rem;
   }
 
   .cf-newsletter-form input {
     width: 100%;
     min-width: 0;
-  }
-
-  .cf-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem 1.5rem;
-    padding: 2rem 0;
-  }
-
-  .cf-bottom {
-    flex-direction: column;
-    gap: 0.4rem;
-    text-align: center;
-    padding: 1.2rem 0;
   }
 }
