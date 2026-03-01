@@ -3,6 +3,7 @@ import logoVideo from '../assets/logo-animation.mp4';
 
 export function LoadingScreen({ onFinished, waitForBackend = false }) {
   const [phase, setPhase] = useState('playing'); // playing → fading → done
+  const [isColdStart, setIsColdStart] = useState(false);
   const videoRef = useRef(null);
   const videoEnded = useRef(false);
   const backendReady = useRef(!waitForBackend); // skip check if not needed
@@ -22,6 +23,7 @@ export function LoadingScreen({ onFinished, waitForBackend = false }) {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     let cancelled = false;
 
+    let firstAttempt = true;
     const ping = async () => {
       while (!cancelled) {
         try {
@@ -33,6 +35,10 @@ export function LoadingScreen({ onFinished, waitForBackend = false }) {
           }
         } catch {
           /* server still waking up */
+        }
+        if (firstAttempt) {
+          firstAttempt = false;
+          if (!cancelled) setIsColdStart(true);
         }
         await new Promise((r) => setTimeout(r, 2000));
       }
@@ -102,7 +108,7 @@ export function LoadingScreen({ onFinished, waitForBackend = false }) {
           onEnded={handleEnded}
           className="loading-screen-video"
         />
-        {waitForBackend && (
+        {isColdStart && (
           <div className="loading-screen-brand" aria-hidden="true">
             {'HEMBIT'.split('').map((char, i) => (
               <span key={i} className="loading-screen-letter" style={{ animationDelay: `${i * 0.18}s` }}>
