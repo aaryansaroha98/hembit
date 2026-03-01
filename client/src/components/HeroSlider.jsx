@@ -32,8 +32,8 @@ export function HeroSlider({ slides }) {
         }
       },
       {
-        threshold: [0.45, 0.6, 0.75],
-        rootMargin: '0px 0px -8% 0px',
+        threshold: [0.2, 0.35, 0.5],
+        rootMargin: '0px 0px -5% 0px',
       }
     );
 
