@@ -295,10 +295,95 @@ authRouter.post('/address', requireAuth, (req, res) => {
       state,
       postalCode,
       country,
+      isDefault: !user.addresses || user.addresses.length === 0,
     };
     user.addresses = user.addresses || [];
     user.addresses.push(newAddress);
   });
 
   return res.json({ message: 'Address added', address: newAddress });
+});
+
+authRouter.put('/address/:id', requireAuth, (req, res) => {
+  const addrId = req.params.id;
+  const { line1, line2, city, state, postalCode, country, isDefault } = req.body;
+
+  let updated;
+  writeDb((db) => {
+    const user = db.users.find((item) => item.id === req.user.id);
+    if (!user || !user.addresses) return;
+    const addr = user.addresses.find((a) => a.id === addrId);
+    if (!addr) return;
+    if (line1 !== undefined) addr.line1 = line1;
+    if (line2 !== undefined) addr.line2 = line2;
+    if (city !== undefined) addr.city = city;
+    if (state !== undefined) addr.state = state;
+    if (postalCode !== undefined) addr.postalCode = postalCode;
+    if (country !== undefined) addr.country = country;
+    if (isDefault) {
+      user.addresses.forEach((a) => { a.isDefault = false; });
+      addr.isDefault = true;
+    }
+    updated = addr;
+  });
+
+  if (!updated) return res.status(404).json({ message: 'Address not found' });
+  return res.json({ message: 'Address updated', address: updated });
+});
+
+authRouter.delete('/address/:id', requireAuth, (req, res) => {
+  const addrId = req.params.id;
+  writeDb((db) => {
+    const user = db.users.find((item) => item.id === req.user.id);
+    if (!user) return;
+    user.addresses = (user.addresses || []).filter((a) => a.id !== addrId);
+  });
+  return res.json({ message: 'Address deleted' });
+});
+
+authRouter.put('/profile', requireAuth, (req, res) => {
+  const { name, mobile, country, pincode, gender, age } = req.body;
+  let updated;
+  writeDb((db) => {
+    const user = db.users.find((item) => item.id === req.user.id);
+    if (!user) return;
+    if (name !== undefined) user.name = name;
+    if (mobile !== undefined) user.mobile = mobile;
+    if (country !== undefined) user.country = country;
+    if (pincode !== undefined) user.pincode = pincode;
+    if (gender !== undefined) user.gender = gender;
+    if (age !== undefined) user.age = Number(age);
+    updated = {
+      id: user.id, name: user.name, email: user.email, mobile: user.mobile || '',
+      country: user.country || '', pincode: user.pincode || '', gender: user.gender || '',
+      age: Number.isFinite(user.age) ? user.age : null, role: user.role, addresses: user.addresses || [],
+    };
+  });
+  if (!updated) return res.status(404).json({ message: 'User not found' });
+  return res.json({ message: 'Profile updated', user: updated });
+});
+
+authRouter.put('/password', requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'Current and new password are required' });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: 'New password must be at least 6 characters' });
+  }
+
+  const db = readDb();
+  const user = db.users.find((item) => item.id === req.user.id);
+  if (!user) return res.status(404).json({ message: 'User not found' });
+
+  const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!ok) return res.status(401).json({ message: 'Current password is incorrect' });
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  writeDb((state) => {
+    const u = state.users.find((item) => item.id === req.user.id);
+    if (u) u.passwordHash = passwordHash;
+  });
+
+  return res.json({ message: 'Password updated successfully' });
 });

@@ -1320,17 +1320,15 @@ textarea {
   line-height: 1.7;
 }
 
-/* Cart / Checkout / Account */
+/* Cart / Checkout */
 .cart-layout,
-.checkout-layout,
-.account-layout {
+.checkout-layout {
   display: grid;
   grid-template-columns: 1.45fr 1fr;
   gap: 1rem;
 }
 
 .cart-item,
-.order-card,
 .order-track-card {
   display: grid;
   grid-template-columns: 130px 1fr;
@@ -1359,17 +1357,13 @@ textarea {
 }
 
 .cart-summary,
-.account-panel,
-.order-panel,
 .order-track-card {
   border: 1px solid var(--line);
   background: #fff;
   padding: 1rem;
 }
 
-.cart-summary h2,
-.account-panel h2,
-.order-panel h2 {
+.cart-summary h2 {
   margin: 0 0 0.9rem;
   font-size: 0.96rem;
   letter-spacing: 0.09em;
@@ -1382,23 +1376,418 @@ textarea {
   margin-top: 0.75rem;
 }
 
-.address-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.62rem;
-  margin-bottom: 0.74rem;
+/* ═══════════════════════════════════════
+   MY ACCOUNT — YSL-style
+   ═══════════════════════════════════════ */
+.myaccount {
+  width: min(680px, 100% - 3rem);
+  margin: 0 auto;
+  padding: 3rem 0 5rem;
 }
 
-.order-card header {
+.myaccount-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: none;
+}
+.myaccount-tab {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #888;
+  cursor: pointer;
+  padding: 0 0 6px;
+  border-bottom: 2px solid transparent;
+  transition: color 200ms, border-color 200ms;
+}
+.myaccount-tab:hover {
+  color: #111;
+}
+.myaccount-tab--active {
+  color: #111;
+  font-weight: 600;
+  border-bottom-color: #111;
+}
+
+.myaccount-flash {
+  text-align: center;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: #0a7c42;
+  margin: 0 0 1.5rem;
+}
+
+/* ─── Overview ─── */
+.myaccount-greeting {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.5rem;
+}
+.myaccount-greeting-sub {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #777;
+  line-height: 1.7;
+  margin: 0 0 2.5rem;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.myaccount-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+}
+.myaccount-overview-card {
+  border: 1px solid #e5e5e5;
+  padding: 1.8rem 1.2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+.myaccount-overview-card:hover {
+  border-color: #111;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.myaccount-overview-icon {
+  font-size: 1.4rem;
+  display: block;
+  margin-bottom: 0.6rem;
+}
+.myaccount-overview-card h3 {
+  margin: 0 0 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.myaccount-overview-card p {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #888;
+}
+
+/* ─── Orders ─── */
+.myaccount-empty {
+  text-align: center;
+  font-size: 0.82rem;
+  color: #999;
+  padding: 3rem 0;
+}
+.myaccount-order {
+  border: 1px solid #e5e5e5;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
+}
+.myaccount-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+.myaccount-order-id {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #111;
+  text-transform: uppercase;
+}
+.myaccount-order-date {
+  display: block;
+  font-size: 0.7rem;
+  color: #999;
+  margin-top: 2px;
+}
+.myaccount-status {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  background: #f0f0f0;
+  color: #555;
+}
+.myaccount-status--delivered { background: #ecfdf5; color: #0a7c42; }
+.myaccount-status--shipped { background: #eff6ff; color: #1a6dd4; }
+.myaccount-status--confirmed { background: #f0f0f0; color: #111; }
+.myaccount-status--cancelled { background: #fef2f2; color: #b91c1c; }
+.myaccount-status--out-for-delivery { background: #fffbeb; color: #b45309; }
+
+.myaccount-order-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.myaccount-order-items li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+.myaccount-order-items li:last-child {
+  border-bottom: none;
+}
+.myaccount-item-name {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #111;
+}
+.myaccount-item-meta {
+  font-size: 0.72rem;
+  color: #999;
+}
+.myaccount-order-footer {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid #e5e5e5;
+  text-align: right;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Profile Menu ─── */
+.myaccount-menu-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 1.4rem 0;
+  cursor: pointer;
+  transition: color 200ms;
+}
+.myaccount-menu-row span:first-child {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #111;
+}
+.myaccount-chevron {
+  font-size: 1.2rem;
+  color: #999;
+  transition: transform 150ms;
+}
+.myaccount-menu-row:hover .myaccount-chevron {
+  transform: translateX(3px);
+}
+.myaccount-logout {
+  display: block;
+  margin: 2.5rem auto 0;
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #111;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.myaccount-logout:hover {
+  color: #555;
 }
 
-.order-card ul {
-  margin: 0.4rem 0 0;
-  padding-left: 1.1rem;
+/* ─── Sub-pages (Info / Password / Addresses) ─── */
+.myaccount-subpage {
+  /* no extra wrapper needed */
+}
+.myaccount-back {
+  background: none;
+  border: none;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #888;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 2rem;
+  display: inline-block;
+  transition: color 150ms;
+}
+.myaccount-back:hover {
+  color: #111;
+}
+.myaccount-subpage-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0 0 2rem;
+}
+
+/* ─── Forms ─── */
+.myaccount-form {
+  max-width: 520px;
+  margin: 0 auto;
+}
+.myaccount-field {
+  margin-bottom: 1.6rem;
+}
+.myaccount-field label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #111;
+  margin-bottom: 0.45rem;
+}
+.myaccount-field input,
+.myaccount-field select {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  padding: 0.55rem 0;
+  font-size: 0.82rem;
+  font-family: inherit;
+  color: #333;
+  background: transparent;
+  border-radius: 0;
+  outline: none;
+  transition: border-color 200ms;
+}
+.myaccount-field input:focus,
+.myaccount-field select:focus {
+  border-bottom-color: #111;
+}
+.myaccount-static {
+  font-size: 0.82rem;
+  color: #555;
+  margin: 0;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid #eee;
+}
+.myaccount-radio-row {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.3rem 0;
+}
+.myaccount-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: #333;
+  cursor: pointer;
+}
+.myaccount-radio input[type="radio"] {
+  width: auto;
+  accent-color: #111;
+}
+.myaccount-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #333;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+}
+.myaccount-checkbox input[type="checkbox"] {
+  accent-color: #111;
+}
+
+.myaccount-form-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.myaccount-btn {
+  padding: 0.85rem 1.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid #111;
+  transition: background 200ms, color 200ms;
+  font-family: inherit;
+}
+.myaccount-btn--outline {
+  background: #fff;
+  color: #111;
+}
+.myaccount-btn--outline:hover {
+  background: #f5f5f5;
+}
+.myaccount-btn--filled {
+  background: #111;
+  color: #fff;
+}
+.myaccount-btn--filled:hover {
+  background: #333;
+}
+.myaccount-btn--full {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+/* ─── Address Cards ─── */
+.myaccount-address-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem 0;
+  border-top: 1px solid #e5e5e5;
+}
+.myaccount-address-card:last-of-type {
+  border-bottom: 1px solid #e5e5e5;
+}
+.myaccount-default-tag {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #111;
+  margin-bottom: 0.3rem;
+}
+.myaccount-address-info p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #555;
+  line-height: 1.6;
+}
+.myaccount-address-actions {
+  display: flex;
+  gap: 1rem;
+}
+.myaccount-address-actions button {
+  background: none;
+  border: none;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #111;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.myaccount-address-actions button:hover {
+  color: #555;
 }
 
 /* Tracking */
@@ -2358,123 +2747,6 @@ textarea {
   letter-spacing: 0.08em;
 }
 
-.order-status-badge {
-  display: inline-block;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 4px;
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.order-status--confirmed,
-.order-status--packed {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.order-status--shipped,
-.order-status--out-for-delivery {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.order-status--delivered {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.order-card-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.74rem;
-  color: var(--text-soft);
-  margin-bottom: 0.6rem;
-}
-
-.order-card-items {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 0.8rem;
-}
-
-.order-card-items li {
-  font-size: 0.72rem;
-  color: var(--text-soft);
-  padding: 0.2rem 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.order-card-items li:last-child {
-  border-bottom: 0;
-}
-
-.order-timeline {
-  padding-top: 0.7rem;
-  border-top: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.order-timeline-step {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  position: relative;
-  padding-bottom: 0.6rem;
-  padding-left: 0.15rem;
-}
-
-.order-timeline-step:not(:last-child)::before {
-  content: '';
-  position: absolute;
-  left: 4.5px;
-  top: 12px;
-  bottom: 0;
-  width: 1px;
-  background: #d1d5db;
-}
-
-.order-timeline-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #d1d5db;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.order-timeline-step--active .order-timeline-dot {
-  background: #111;
-}
-
-.order-timeline-info {
-  display: flex;
-  justify-content: space-between;
-  flex: 1;
-}
-
-.order-timeline-label {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: #374151;
-}
-
-.order-timeline-step--active .order-timeline-label {
-  font-weight: 700;
-  color: #111;
-}
-
-.order-timeline-date {
-  font-size: 0.66rem;
-  color: #9ca3af;
-}
-
 /* Responsive */
 @media (max-width: 1120px) {
   .product-grid {
@@ -2569,14 +2841,19 @@ textarea {
   .product-page,
   .cart-layout,
   .checkout-layout,
-  .account-layout,
   .tracking-form,
   .admin-form-grid,
   .inline-form {
     grid-template-columns: 1fr;
   }
 
-  .address-grid {
+  .myaccount-overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .myaccount-tabs {
+    gap: 1.2rem;
+  }
+  .myaccount-form-actions {
     grid-template-columns: 1fr;
   }
 
