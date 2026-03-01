@@ -1,39 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import logoVideo from '../assets/logo-animation.mp4';
 
-const MIN_DISPLAY_MS = 1000;
-
 export function LoadingScreen({ onFinished }) {
-  const [phase, setPhase] = useState('visible'); // visible → fading → done
-  const [videoReady, setVideoReady] = useState(false);
+  const [phase, setPhase] = useState('playing'); // playing → fading → done
   const videoRef = useRef(null);
-  const minElapsed = useRef(false);
-  const videoEnded = useRef(false);
+  const readyToFade = useRef(false);
 
-  const tryFade = () => {
-    if (minElapsed.current && videoEnded.current) {
-      setPhase('fading');
-    }
-  };
-
-  /* Minimum display timer — starts when video is ready */
+  /* Video plays once. When it ends, start fade. */
+  /* Also set a safety fallback of 4s in case onEnded doesn't fire. */
   useEffect(() => {
-    if (!videoReady) return;
-    const timer = setTimeout(() => {
-      minElapsed.current = true;
-      tryFade();
-    }, MIN_DISPLAY_MS);
-    return () => clearTimeout(timer);
-  }, [videoReady]);
+    const fallback = setTimeout(() => {
+      if (!readyToFade.current) {
+        readyToFade.current = true;
+        setPhase('fading');
+      }
+    }, 4000);
+    return () => clearTimeout(fallback);
+  }, []);
 
-  const handleCanPlay = () => {
-    setVideoReady(true);
-    videoRef.current?.play().catch(() => {});
-  };
-
-  const handleVideoEnded = () => {
-    videoEnded.current = true;
-    tryFade();
+  const handleEnded = () => {
+    if (readyToFade.current) return;
+    readyToFade.current = true;
+    setPhase('fading');
   };
 
   useEffect(() => {
@@ -54,13 +42,12 @@ export function LoadingScreen({ onFinished }) {
         <video
           ref={videoRef}
           src={logoVideo}
+          autoPlay
           muted
           playsInline
           preload="auto"
-          onCanPlayThrough={handleCanPlay}
-          onEnded={handleVideoEnded}
+          onEnded={handleEnded}
           className="loading-screen-video"
-          style={{ opacity: videoReady ? 1 : 0, transition: 'opacity 0.15s ease' }}
         />
       </div>
     </div>

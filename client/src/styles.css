@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: center;
   opacity: 1;
-  transition: opacity 600ms ease;
+  transition: opacity 500ms ease;
 }
 
 .loading-screen--fade-out {
@@ -20,20 +20,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
 }
 
 .loading-screen-video {
-  width: 320px;
+  width: 280px;
   height: auto;
   object-fit: contain;
-  background: #fff;
+  background: none;
 }
 
-@keyframes loadingPulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+@media (max-width: 600px) {
+  .loading-screen-video {
+    width: 160px;
+  }
+}
+
+@media (max-width: 380px) {
+  .loading-screen-video {
+    width: 120px;
+  }
 }
 
 /* ── End Loading Screen ── */
