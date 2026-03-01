@@ -6,6 +6,7 @@ import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { readDb, writeDb } from '../services/store.js';
 import { createId } from '../utils/id.js';
 import { sendEmail } from '../services/email.js';
+import { uploadToCloudinary } from '../services/cloudinary.js';
 
 export const adminRouter = Router();
 
@@ -65,8 +66,8 @@ function getAudienceEmails(db, audience) {
 
 adminRouter.use(requireAuth, requireAdmin);
 
-adminRouter.post('/media/upload', (req, res) => {
-  const { filename = '', dataUrl = '' } = req.body;
+adminRouter.post('/media/upload', async (req, res) => {
+  const { dataUrl = '' } = req.body;
   if (!dataUrl || typeof dataUrl !== 'string') {
     return res.status(400).json({ message: 'dataUrl is required' });
   }
@@ -92,22 +93,17 @@ adminRouter.post('/media/upload', (req, res) => {
   }
 
   const buffer = Buffer.from(base64, 'base64');
-  if (buffer.length > 8 * 1024 * 1024) {
-    return res.status(400).json({ message: 'File too large (max 8MB)' });
+  if (buffer.length > 10 * 1024 * 1024) {
+    return res.status(400).json({ message: 'File too large (max 10MB)' });
   }
 
-  ensureUploadsDir();
-  const sourceExt = path.extname(filename).toLowerCase();
-  const ext = sourceExt || getExtFromMime(mime) || '.bin';
-  const safeFileName = `${createId('media')}${ext}`;
-  const targetPath = path.join(uploadsDir, safeFileName);
-  fs.writeFileSync(targetPath, buffer);
-
-  const hostBase = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
-  return res.status(201).json({
-    url: `${hostBase}/uploads/${safeFileName}`,
-    mime,
-  });
+  try {
+    const result = await uploadToCloudinary(dataUrl);
+    return res.status(201).json({ url: result.url, mime: result.mime });
+  } catch (err) {
+    console.error('Cloudinary upload error:', err);
+    return res.status(500).json({ message: 'Upload failed' });
+  }
 });
 
 adminRouter.get('/dashboard', (_req, res) => {

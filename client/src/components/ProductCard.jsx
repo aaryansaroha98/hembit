@@ -8,15 +8,25 @@ function formatPrice(value) {
   }).format(value);
 }
 
+const PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" fill="#f5f5f5"><rect width="400" height="500" fill="#f5f5f5"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#bbb" font-family="sans-serif" font-size="16">No Image</text></svg>'
+);
+
 export function ProductCard({ product }) {
   const linkSlug = product.slug || product.id;
+  const imgSrc = product.images?.[0] || PLACEHOLDER;
   return (
     <article className="product-card">
       <Link
         to={`/product/${linkSlug}`}
         className="product-image-link"
       >
-        <img src={product.images?.[0]} alt={product.name} loading="lazy" />
+        <img
+          src={imgSrc}
+          alt={product.name}
+          loading="lazy"
+          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = PLACEHOLDER; }}
+        />
       </Link>
       <div className="product-meta product-card-title">
         <div style={{textAlign: 'center', marginTop: '0.6rem'}}>
