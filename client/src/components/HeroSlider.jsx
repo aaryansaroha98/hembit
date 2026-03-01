@@ -172,9 +172,6 @@ export function HeroSlider({ slides, children }) {
                         {product.seriesName && (
                           <span className="hero-product-series">{product.seriesName}</span>
                         )}
-                        {product.displayPrice && (
-                          <span className="hero-product-price">{product.displayPrice}</span>
-                        )}
                       </div>
                     </Link>
                   );
