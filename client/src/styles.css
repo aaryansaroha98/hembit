@@ -1,3 +1,52 @@
+/* ── Loading Screen ── */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 600ms ease;
+}
+
+.loading-screen--fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-screen-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-screen-video {
+  max-width: 260px;
+  max-height: 260px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.loading-screen-logo {
+  font-family: var(--ff-heading, 'Cormorant Garamond', serif);
+  font-size: 3rem;
+  font-weight: 300;
+  letter-spacing: 0.35em;
+  color: #fff;
+  text-transform: uppercase;
+  animation: loadingPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* ── End Loading Screen ── */
+
 body.home-view .topbar-wrap.dropdown-open {
   background: #fff;
   transition: background-color var(--t-med) var(--ease);

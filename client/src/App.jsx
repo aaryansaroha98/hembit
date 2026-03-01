@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Topbar } from './components/Topbar';
 import { Footer } from './components/Footer';
+import { LoadingScreen } from './components/LoadingScreen';
 import { AdminRoute, ProtectedRoute } from './components/Guards';
 import { HomePage } from './pages/HomePage';
 import { ShopPage } from './pages/ShopPage';
@@ -16,6 +17,50 @@ import { OrderTrackingPage } from './pages/OrderTrackingPage';
 import { CartPage } from './pages/CartPage';
 import { HBProductionsPage } from './pages/HBProductionsPage';
 import { AdminPage } from './pages/AdminPage';
+import { api } from './services/api';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+function RouteLoadingWrapper({ children }) {
+  const location = useLocation();
+  const [loading, setLoading] = useState(true);
+  const [logoVideo, setLogoVideo] = useState(null);
+  const videoFetched = useRef(false);
+  const isFirstLoad = useRef(true);
+
+  /* Fetch logo video URL once on app boot */
+  useEffect(() => {
+    if (videoFetched.current) return;
+    videoFetched.current = true;
+    fetch(`${API_URL}/public/settings`)
+      .then((r) => r.json())
+      .then((data) => setLogoVideo(data?.settings?.logoVideo || ''))
+      .catch(() => setLogoVideo(''));
+  }, []);
+
+  /* Show loading on every route change */
+  useEffect(() => {
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      return;
+    }
+    setLoading(true);
+  }, [location.pathname]);
+
+  const handleFinished = useCallback(() => setLoading(false), []);
+
+  /* Wait until we know whether a video URL exists */
+  if (logoVideo === null) {
+    return <LoadingScreen videoUrl="" onFinished={() => {}} />;
+  }
+
+  return (
+    <>
+      {loading && <LoadingScreen videoUrl={logoVideo} onFinished={handleFinished} />}
+      {children}
+    </>
+  );
+}
 
 function MainLayout({ children }) {
   const location = useLocation();
@@ -40,7 +85,8 @@ function MainLayout({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <RouteLoadingWrapper>
+        <Routes>
         <Route
           path="/"
           element={
@@ -175,6 +221,7 @@ export default function App() {
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </RouteLoadingWrapper>
     </BrowserRouter>
   );
 }
