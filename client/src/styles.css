@@ -956,21 +956,49 @@ textarea {
   max-width: 160px;
 }
 
-.more-details {
-  margin-top: 1rem;
-  padding-top: 0.9rem;
+.pdp-accordion {
   border-top: 1px solid var(--line);
+  padding: 0;
 }
 
-.more-details h3 {
-  margin: 0 0 0.55rem;
+.pdp-accordion summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0.9rem 0;
   font-size: 0.72rem;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  list-style: none;
 }
 
-.more-details p {
-  color: var(--text);
+.pdp-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.pdp-accordion summary::after {
+  content: '+';
+  font-size: 1rem;
+  font-weight: 300;
+  transition: transform var(--t-fast) var(--ease);
+}
+
+.pdp-accordion[open] summary::after {
+  content: '−';
+}
+
+.pdp-accordion-body {
+  padding-bottom: 1rem;
+}
+
+.pdp-accordion-body p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--text-soft);
+  white-space: pre-line;
 }
 
 /* Auth */

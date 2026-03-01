@@ -44,12 +44,12 @@ export function AdminPage() {
 
   const [productForm, setProductForm] = useState({
     name: '',
-    slug: '',
     categoryId: '',
     seriesId: '',
     price: '',
     description: '',
     details: '',
+    careInstructions: '',
     sizesCsv: 'S,M,L,XL',
     stock: 0,
     featured: false,
@@ -209,11 +209,6 @@ export function AdminPage() {
                 value={productForm.name}
                 onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))}
               />
-              <input
-                placeholder="Slug"
-                value={productForm.slug}
-                onChange={(e) => setProductForm((prev) => ({ ...prev, slug: e.target.value }))}
-              />
               <select
                 value={productForm.categoryId}
                 onChange={(e) =>
@@ -368,6 +363,11 @@ export function AdminPage() {
               value={productForm.details}
               onChange={(e) => setProductForm((prev) => ({ ...prev, details: e.target.value }))}
             />
+            <textarea
+              placeholder="Care Instructions"
+              value={productForm.careInstructions}
+              onChange={(e) => setProductForm((prev) => ({ ...prev, careInstructions: e.target.value }))}
+            />
             <label>
               <input
                 type="checkbox"
@@ -398,12 +398,12 @@ export function AdminPage() {
                   }
                   setProductForm({
                     name: '',
-                    slug: '',
                     categoryId: '',
                     seriesId: '',
                     price: '',
                     description: '',
                     details: '',
+                    careInstructions: '',
                     sizesCsv: 'S,M,L,XL',
                     stock: 0,
                     featured: false,
@@ -423,7 +423,7 @@ export function AdminPage() {
                 style={{ marginLeft: 8, background: '#666' }}
                 onClick={() => {
                   setEditingProductId(null);
-                  setProductForm({ name: '', slug: '', categoryId: '', seriesId: '', price: '', description: '', details: '', sizesCsv: 'S,M,L,XL', stock: 0, featured: false });
+                  setProductForm({ name: '', categoryId: '', seriesId: '', price: '', description: '', details: '', careInstructions: '', sizesCsv: 'S,M,L,XL', stock: 0, featured: false });
                   setUploadedImages([]);
                 }}
               >
@@ -445,12 +445,12 @@ export function AdminPage() {
                       setEditingProductId(product.id);
                       setProductForm({
                         name: product.name || '',
-                        slug: product.slug || '',
                         categoryId: product.categoryId || '',
                         seriesId: product.seriesId || '',
                         price: product.price || '',
                         description: product.description || '',
                         details: product.details || '',
+                        careInstructions: product.careInstructions || '',
                         sizesCsv: (product.sizes || []).join(','),
                         stock: product.stock || 0,
                         featured: product.featured || false,

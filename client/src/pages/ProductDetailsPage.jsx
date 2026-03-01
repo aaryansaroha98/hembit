@@ -64,10 +64,21 @@ export function ProductDetailsPage() {
         </button>
         {message && <small>{message}</small>}
 
-        <div className="more-details">
-          <h3>MORE DETAILS</h3>
-          <p>{product.details}</p>
-        </div>
+        <details className="pdp-accordion">
+          <summary>More Details</summary>
+          <div className="pdp-accordion-body">
+            <p>{product.details}</p>
+          </div>
+        </details>
+
+        {product.careInstructions && (
+          <details className="pdp-accordion">
+            <summary>Care Instructions</summary>
+            <div className="pdp-accordion-body">
+              <p>{product.careInstructions}</p>
+            </div>
+          </details>
+        )}
       </div>
     </section>
   );
