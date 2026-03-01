@@ -140,12 +140,67 @@ adminRouter.get('/users', (_req, res) => {
       gender: item.gender || '',
       age: Number.isFinite(item.age) ? item.age : null,
       role: item.role || 'customer',
+      tag: item.tag || '',
+      banned: Boolean(item.banned),
       isVerified: Boolean(item.isVerified),
       createdAt: item.createdAt || null,
     }))
     .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 
   res.json({ users, count: users.length });
+});
+
+/* ── User Management: make admin, ban, tag ── */
+adminRouter.put('/users/:id/role', (req, res) => {
+  const { role } = req.body;
+  if (!['customer', 'admin'].includes(role)) {
+    return res.status(400).json({ message: 'role must be customer or admin' });
+  }
+
+  let updated;
+  writeDb((db) => {
+    const user = db.users.find((u) => u.id === req.params.id);
+    if (user) {
+      user.role = role;
+      updated = user;
+    }
+  });
+
+  if (!updated) return res.status(404).json({ message: 'User not found' });
+  return res.json({ message: `User role set to ${role}`, user: updated });
+});
+
+adminRouter.put('/users/:id/ban', (req, res) => {
+  const { banned } = req.body;
+
+  let updated;
+  writeDb((db) => {
+    const user = db.users.find((u) => u.id === req.params.id);
+    if (user) {
+      user.banned = Boolean(banned);
+      user.bannedAt = banned ? new Date().toISOString() : null;
+      updated = user;
+    }
+  });
+
+  if (!updated) return res.status(404).json({ message: 'User not found' });
+  return res.json({ message: banned ? 'User banned' : 'User unbanned', user: updated });
+});
+
+adminRouter.put('/users/:id/tag', (req, res) => {
+  const { tag } = req.body;
+
+  let updated;
+  writeDb((db) => {
+    const user = db.users.find((u) => u.id === req.params.id);
+    if (user) {
+      user.tag = String(tag || '').trim();
+      updated = user;
+    }
+  });
+
+  if (!updated) return res.status(404).json({ message: 'User not found' });
+  return res.json({ message: 'Tag updated', user: updated });
 });
 
 adminRouter.get('/products', (_req, res) => {
@@ -375,6 +430,20 @@ adminRouter.post('/slides', (req, res) => {
   return res.status(201).json({ slide });
 });
 
+adminRouter.put('/slides/reorder', (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids)) {
+    return res.status(400).json({ message: 'ids array is required' });
+  }
+  writeDb((db) => {
+    ids.forEach((id, index) => {
+      const slide = db.slides.find((s) => s.id === id);
+      if (slide) slide.order = index + 1;
+    });
+  });
+  return res.json({ message: 'Slides reordered' });
+});
+
 adminRouter.put('/slides/:id', (req, res) => {
   const id = req.params.id;
   const payload = req.body;
@@ -534,6 +603,139 @@ adminRouter.put('/orders/:id/status', (req, res) => {
   }
 
   return res.json({ order: updated });
+});
+
+/* ── Send order status email ── */
+adminRouter.post('/orders/:id/send-status-email', async (req, res) => {
+  const id = req.params.id;
+  const db = readDb();
+  const order = db.orders.find((item) => item.id === id);
+
+  if (!order) {
+    return res.status(404).json({ message: 'Order not found' });
+  }
+
+  const email = order.customer?.email;
+  if (!email) {
+    return res.status(400).json({ message: 'No customer email on order' });
+  }
+
+  const itemRows = (order.items || []).map((item) =>
+    `<tr>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e5e5;font-size:14px;color:#333;">${item.name}</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e5e5;font-size:14px;color:#333;text-align:center;">${item.size || '-'}</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e5e5;font-size:14px;color:#333;text-align:center;">${item.quantity}</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e5e5;font-size:14px;color:#333;text-align:right;">₹${Number(item.lineTotal || item.price * item.quantity).toLocaleString('en-IN')}</td>
+    </tr>`
+  ).join('');
+
+  const statusColor = order.status === 'Delivered' ? '#0a7c42' : order.status === 'Shipped' ? '#1a6dd4' : '#111';
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;max-width:600px;width:100%;">
+        <!-- Header -->
+        <tr>
+          <td style="background:#111;padding:28px 32px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;letter-spacing:0.18em;font-weight:600;">HEMBIT</h1>
+          </td>
+        </tr>
+        <!-- Status Banner -->
+        <tr>
+          <td style="padding:32px 32px 24px;text-align:center;">
+            <p style="margin:0 0 6px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#888;">Order Status Update</p>
+            <h2 style="margin:0;font-size:26px;font-weight:600;color:${statusColor};letter-spacing:0.04em;text-transform:uppercase;">${order.status}</h2>
+          </td>
+        </tr>
+        <!-- Order Details -->
+        <tr>
+          <td style="padding:0 32px 24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;border:1px solid #eee;border-radius:6px;">
+              <tr>
+                <td style="padding:16px 20px;border-bottom:1px solid #eee;">
+                  <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#888;">Order Number</span><br>
+                  <strong style="font-size:14px;color:#111;">${order.id}</strong>
+                </td>
+                <td style="padding:16px 20px;border-bottom:1px solid #eee;text-align:right;">
+                  <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#888;">Date</span><br>
+                  <strong style="font-size:14px;color:#111;">${new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" style="padding:16px 20px;">
+                  <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#888;">Delivered To</span><br>
+                  <strong style="font-size:14px;color:#111;">${order.customer?.name || 'Customer'}</strong>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Items Table -->
+        <tr>
+          <td style="padding:0 32px 24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eee;border-radius:6px;overflow:hidden;">
+              <thead>
+                <tr style="background:#111;">
+                  <th style="padding:12px 16px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#fff;text-align:left;font-weight:500;">Item</th>
+                  <th style="padding:12px 16px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#fff;text-align:center;font-weight:500;">Size</th>
+                  <th style="padding:12px 16px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#fff;text-align:center;font-weight:500;">Qty</th>
+                  <th style="padding:12px 16px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#fff;text-align:right;font-weight:500;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemRows}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" style="padding:14px 16px;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#111;">Total</td>
+                  <td style="padding:14px 16px;font-size:15px;font-weight:700;color:#111;text-align:right;">₹${Number(order.total).toLocaleString('en-IN')}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </td>
+        </tr>
+        <!-- Timeline -->
+        <tr>
+          <td style="padding:0 32px 32px;">
+            <p style="margin:0 0 12px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#888;font-weight:600;">Order Timeline</p>
+            ${(order.timeline || []).map((t) =>
+              `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;">
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#111;flex-shrink:0;"></span>
+                <span style="color:#333;font-weight:500;">${t.status}</span>
+                <span style="color:#999;font-size:12px;margin-left:auto;">${new Date(t.at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+              </div>`
+            ).join('')}
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background:#111;padding:24px 32px;text-align:center;">
+            <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.12em;color:rgba(255,255,255,0.6);text-transform:uppercase;">Thank you for shopping with</p>
+            <p style="margin:0;font-size:16px;letter-spacing:0.18em;color:#fff;font-weight:600;">HEMBIT</p>
+            <p style="margin:12px 0 0;font-size:11px;color:rgba(255,255,255,0.4);">hembit.in</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  try {
+    await sendEmail({
+      to: email,
+      subject: `HEMBIT — Order ${order.id} is now ${order.status}`,
+      html,
+    });
+    return res.json({ message: `Status email sent to ${email}` });
+  } catch (error) {
+    return res.status(500).json({ message: `Failed to send email: ${error.message}` });
+  }
 });
 
 adminRouter.get('/mail/recipients', (_req, res) => {

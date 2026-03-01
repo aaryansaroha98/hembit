@@ -170,6 +170,10 @@ authRouter.post('/signin', async (req, res) => {
     return res.status(401).json({ message: 'Invalid credentials' });
   }
 
+  if (user.banned) {
+    return res.status(403).json({ message: 'Your account has been suspended. Contact support for assistance.' });
+  }
+
   const ok = await bcrypt.compare(password, user.passwordHash);
 
   if (!ok) {

@@ -126,10 +126,12 @@ export function HeroSlider({ slides, children }) {
     return 'hero-panel hero-panel--below';
   };
 
+  const isProductSlide = orderedSlides[activeIndex]?.type === 'products';
+
   return (
     <section className="hero-slider">
       {/* Navigation dots */}
-      <div className="slider-dots">
+      <div className={`slider-dots${isProductSlide ? ' slider-dots--dark' : ''}`}>
         {Array.from({ length: totalPanels }).map((_, i) => (
           <button
             key={i}

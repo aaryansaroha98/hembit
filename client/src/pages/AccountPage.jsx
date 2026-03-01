@@ -103,15 +103,39 @@ export function AccountPage() {
           <article key={order.id} className="order-card">
             <header>
               <strong>{order.id}</strong>
-              <span>{order.status}</span>
+              <span className={`order-status-badge order-status--${order.status?.toLowerCase().replace(/\s+/g, '-')}`}>
+                {order.status}
+              </span>
             </header>
-            <p>{new Date(order.createdAt).toLocaleString()}</p>
-            <p>{formatPrice(order.total)}</p>
-            <ul>
+            <div className="order-card-meta">
+              <span>{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+              <span>{formatPrice(order.total)}</span>
+            </div>
+            <ul className="order-card-items">
               {order.items.map((item) => (
-                <li key={`${order.id}-${item.productId}-${item.size}`}>{`${item.name} x${item.quantity}`}</li>
+                <li key={`${order.id}-${item.productId}-${item.size}`}>
+                  {item.name} · {item.size || '-'} · x{item.quantity}
+                </li>
               ))}
             </ul>
+            {order.timeline && order.timeline.length > 0 && (
+              <div className="order-timeline">
+                {order.timeline.map((entry, idx) => (
+                  <div
+                    className={`order-timeline-step${idx === order.timeline.length - 1 ? ' order-timeline-step--active' : ''}`}
+                    key={idx}
+                  >
+                    <div className="order-timeline-dot" />
+                    <div className="order-timeline-info">
+                      <span className="order-timeline-label">{entry.status}</span>
+                      <span className="order-timeline-date">
+                        {new Date(entry.at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </article>
         ))}
       </div>

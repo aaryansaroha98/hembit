@@ -17,7 +17,7 @@ const TABS = [
 ];
 
 export function AdminPage() {
-  const { token } = useAuth();
+  const { token, signout } = useAuth();
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [message, setMessage] = useState('');
   const [dashboard, setDashboard] = useState(null);
@@ -168,6 +168,10 @@ export function AdminPage() {
             {tab}
           </button>
         ))}
+        <div className="admin-sidebar-spacer" />
+        <button type="button" className="admin-logout-btn" onClick={signout}>
+          Logout
+        </button>
       </aside>
 
       <main className="admin-main">
@@ -637,9 +641,40 @@ export function AdminPage() {
             </button>
 
             <h3>Existing Slides</h3>
-            {slides.map((slide) => (
-              <article key={slide.id} className="admin-list-item">
-                <div>
+            {slides.map((slide, idx) => (
+              <article key={slide.id} className="admin-list-item admin-list-item--reorder">
+                <div className="admin-reorder-arrows">
+                  <button
+                    type="button"
+                    className="admin-reorder-btn"
+                    disabled={idx === 0}
+                    title="Move up"
+                    onClick={async () => {
+                      const ids = slides.map((s) => s.id);
+                      [ids[idx - 1], ids[idx]] = [ids[idx], ids[idx - 1]];
+                      await api.put('/admin/slides/reorder', { ids }, token);
+                      loadAll();
+                    }}
+                  >
+                    ▲
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-reorder-btn"
+                    disabled={idx === slides.length - 1}
+                    title="Move down"
+                    onClick={async () => {
+                      const ids = slides.map((s) => s.id);
+                      [ids[idx], ids[idx + 1]] = [ids[idx + 1], ids[idx]];
+                      await api.put('/admin/slides/reorder', { ids }, token);
+                      loadAll();
+                    }}
+                  >
+                    ▼
+                  </button>
+                </div>
+                <span className="admin-reorder-pos">{idx + 1}</span>
+                <div className="admin-list-item-info">
                   <strong>{slide.title || (slide.type === 'products' ? 'Product Grid' : 'Image/Video Slide')}</strong>
                   <p>{slide.type}{slide.type === 'products' ? ` · ${slide.layout || 2} products` : ''}</p>
                 </div>
@@ -789,25 +824,55 @@ export function AdminPage() {
         {activeTab === 'Orders' && (
           <div className="admin-block">
             <h2>Order Management</h2>
+            {!orders.length && <p>No orders yet.</p>}
             {orders.map((order) => (
-              <article key={order.id} className="admin-list-item stacked">
-                <strong>{order.id}</strong>
-                <p>{order.customer?.email}</p>
-                <p>{order.status}</p>
-                <select
-                  value={order.status}
-                  onChange={async (e) => {
-                    await api.put(`/admin/orders/${order.id}/status`, { status: e.target.value }, token);
-                    loadAll();
-                  }}
-                >
-                  <option>Pending Confirmation</option>
-                  <option>Confirmed</option>
-                  <option>Packed</option>
-                  <option>Shipped</option>
-                  <option>Out for Delivery</option>
-                  <option>Delivered</option>
-                </select>
+              <article key={order.id} className="admin-order-card">
+                <div className="admin-order-top">
+                  <div>
+                    <strong>{order.id}</strong>
+                    <p>{order.customer?.name} · {order.customer?.email}</p>
+                    <p>{new Date(order.createdAt).toLocaleDateString()} · ₹{Number(order.total).toLocaleString('en-IN')}</p>
+                  </div>
+                  <div className="admin-order-items">
+                    {(order.items || []).map((item, idx) => (
+                      <span key={idx}>{item.name} x{item.quantity}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="admin-order-bottom">
+                  <select
+                    value={order.status}
+                    onChange={async (e) => {
+                      try {
+                        await api.put(`/admin/orders/${order.id}/status`, { status: e.target.value }, token);
+                        setMessage(`Order ${order.id} → ${e.target.value}`);
+                        loadAll();
+                      } catch (err) {
+                        setMessage(err.message);
+                      }
+                    }}
+                  >
+                    <option>Pending Confirmation</option>
+                    <option>Confirmed</option>
+                    <option>Packed</option>
+                    <option>Shipped</option>
+                    <option>Out for Delivery</option>
+                    <option>Delivered</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const result = await api.post(`/admin/orders/${order.id}/send-status-email`, {}, token);
+                        setMessage(result.message);
+                      } catch (err) {
+                        setMessage(err.message);
+                      }
+                    }}
+                  >
+                    Send Status Email
+                  </button>
+                </div>
               </article>
             ))}
           </div>
@@ -815,23 +880,67 @@ export function AdminPage() {
 
         {activeTab === 'Users' && (
           <div className="admin-block">
-            <h2>Users</h2>
+            <h2>User Management</h2>
             <p>Total users: {userList.length}</p>
             {!userList.length && <p>No users found.</p>}
             {userList.map((user) => (
-              <article key={user.id} className="admin-list-item stacked">
-                <strong>
-                  {user.name || 'Unnamed User'} {user.role === 'admin' ? '(Admin)' : ''}
-                </strong>
-                <p>{user.email || '-'}</p>
-                <p>Mobile: {user.mobile || '-'}</p>
-                <p>
-                  Country: {user.country || '-'} | Pincode: {user.pincode || '-'}
-                </p>
-                <p>
-                  Gender: {user.gender || '-'} | Age: {user.age ?? '-'}
-                </p>
-                <p>Joined: {user.createdAt ? new Date(user.createdAt).toLocaleString() : '-'}</p>
+              <article key={user.id} className={`admin-list-item stacked${user.banned ? ' admin-user-banned' : ''}`}>
+                <div className="admin-user-header">
+                  <strong>
+                    {user.name || 'Unnamed User'}
+                    {user.role === 'admin' && <span className="admin-badge">Admin</span>}
+                    {user.banned && <span className="admin-badge admin-badge--red">Banned</span>}
+                    {user.tag && <span className="admin-badge admin-badge--blue">{user.tag}</span>}
+                  </strong>
+                  <p>{user.email || '-'}</p>
+                  <p>Mobile: {user.mobile || '-'} | {user.country || '-'} | Pincode: {user.pincode || '-'}</p>
+                  <p>Gender: {user.gender || '-'} | Age: {user.age ?? '-'} | Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</p>
+                </div>
+                <div className="admin-user-actions">
+                  <input
+                    placeholder="Tag name"
+                    defaultValue={user.tag || ''}
+                    onBlur={async (e) => {
+                      try {
+                        await api.put(`/admin/users/${user.id}/tag`, { tag: e.target.value }, token);
+                        loadAll();
+                      } catch (err) {
+                        setMessage(err.message);
+                      }
+                    }}
+                    style={{ maxWidth: '140px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const newRole = user.role === 'admin' ? 'customer' : 'admin';
+                        await api.put(`/admin/users/${user.id}/role`, { role: newRole }, token);
+                        setMessage(`${user.name} is now ${newRole}`);
+                        loadAll();
+                      } catch (err) {
+                        setMessage(err.message);
+                      }
+                    }}
+                  >
+                    {user.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
+                  </button>
+                  <button
+                    type="button"
+                    className={user.banned ? 'admin-btn-green' : 'admin-btn-danger'}
+                    onClick={async () => {
+                      try {
+                        await api.put(`/admin/users/${user.id}/ban`, { banned: !user.banned }, token);
+                        setMessage(user.banned ? `${user.name} unbanned` : `${user.name} banned`);
+                        loadAll();
+                      } catch (err) {
+                        setMessage(err.message);
+                      }
+                    }}
+                  >
+                    {user.banned ? 'Unban' : 'Ban User'}
+                  </button>
+                </div>
               </article>
             ))}
           </div>
