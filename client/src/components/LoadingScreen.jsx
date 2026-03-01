@@ -1,28 +1,39 @@
 import { useEffect, useRef, useState } from 'react';
 import logoVideo from '../assets/logo-animation.mp4';
 
-const MIN_DISPLAY_MS = 2000;
+const MIN_DISPLAY_MS = 1800;
 
 export function LoadingScreen({ onFinished }) {
   const [phase, setPhase] = useState('visible'); // visible → fading → done
   const startRef = useRef(Date.now());
+  const videoRef = useRef(null);
+  const minElapsed = useRef(false);
+  const videoEnded = useRef(false);
 
   useEffect(() => {
     startRef.current = Date.now();
   }, []);
 
-  useEffect(() => {
-    if (phase !== 'visible') return;
-
-    const elapsed = Date.now() - startRef.current;
-    const remaining = Math.max(0, MIN_DISPLAY_MS - elapsed);
-
-    const timer = setTimeout(() => {
+  const tryFade = () => {
+    if (minElapsed.current && videoEnded.current) {
       setPhase('fading');
-    }, remaining);
+    }
+  };
 
+  /* Minimum display timer */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      minElapsed.current = true;
+      tryFade();
+    }, MIN_DISPLAY_MS);
     return () => clearTimeout(timer);
-  }, [phase]);
+  }, []);
+
+  /* When video finishes one loop */
+  const handleVideoEnded = () => {
+    videoEnded.current = true;
+    tryFade();
+  };
 
   useEffect(() => {
     if (phase === 'fading') {
@@ -40,11 +51,12 @@ export function LoadingScreen({ onFinished }) {
     <div className={`loading-screen${phase === 'fading' ? ' loading-screen--fade-out' : ''}`}>
       <div className="loading-screen-content">
         <video
+          ref={videoRef}
           src={logoVideo}
           autoPlay
           muted
           playsInline
-          loop
+          onEnded={handleVideoEnded}
           className="loading-screen-video"
         />
       </div>
