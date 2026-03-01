@@ -117,9 +117,8 @@ export function HeroSlider({ slides, children }) {
 
   if (!orderedSlides.length) return null;
 
-  const panelState = (index) => {
-    if (index === activeIndex) return 'hero-panel hero-panel--active';
-    if (index < activeIndex) return 'hero-panel hero-panel--above';
+  const panelClass = (index) => {
+    if (index <= activeIndex) return 'hero-panel hero-panel--visible';
     return 'hero-panel hero-panel--below';
   };
 
@@ -140,7 +139,7 @@ export function HeroSlider({ slides, children }) {
 
       {/* Image / video slides */}
       {orderedSlides.map((slide, i) => (
-        <article className={panelState(i)} key={slide.id}>
+        <article className={panelClass(i)} key={slide.id} style={{ zIndex: i + 1 }}>
           <div className="hero-media">
             {slide.type === 'video' ? (
               <video src={slide.url} autoPlay muted loop playsInline preload="metadata" />
@@ -158,7 +157,11 @@ export function HeroSlider({ slides, children }) {
       ))}
 
       {/* Footer panel (last slide) */}
-      {children && <div className={panelState(orderedSlides.length)}>{children}</div>}
+      {children && (
+        <div className={panelClass(orderedSlides.length)} style={{ zIndex: orderedSlides.length + 1 }}>
+          {children}
+        </div>
+      )}
     </section>
   );
 }
