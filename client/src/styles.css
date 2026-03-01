@@ -3,7 +3,7 @@
   position: fixed;
   inset: 0;
   z-index: 99999;
-  background: #000;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,7 +35,7 @@
   font-size: 3rem;
   font-weight: 300;
   letter-spacing: 0.35em;
-  color: #fff;
+  color: #000;
   text-transform: uppercase;
   animation: loadingPulse 1.4s ease-in-out infinite;
 }
