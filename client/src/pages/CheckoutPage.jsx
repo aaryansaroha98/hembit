@@ -44,7 +44,7 @@ export function CheckoutPage() {
           amount: created.order.total * 100,
           currency: 'INR',
           name: 'HEMBIT',
-          description: `Order ${created.order.id}`,
+          description: `Order ${created.order.orderNumber || created.order.id}`,
           handler: async (response) => {
             const confirmation = await api.post(
               '/checkout/confirm-payment',

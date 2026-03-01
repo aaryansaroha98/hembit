@@ -231,7 +231,7 @@ publicRouter.get('/track-order', (req, res) => {
   }
 
   const order = db.orders.find(
-    (item) => item.id === orderId && item.customer?.email?.toLowerCase() === String(email).toLowerCase()
+    (item) => (item.orderNumber === orderId || item.id === orderId) && item.customer?.email?.toLowerCase() === String(email).toLowerCase()
   );
 
   if (!order) {
@@ -241,6 +241,7 @@ publicRouter.get('/track-order', (req, res) => {
   return res.json({
     order: {
       id: order.id,
+      orderNumber: order.orderNumber || order.id,
       status: order.status,
       items: order.items,
       total: order.total,

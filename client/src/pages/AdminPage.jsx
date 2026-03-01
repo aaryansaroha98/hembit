@@ -1108,7 +1108,7 @@ export function AdminPage() {
               <article key={order.id} className="admin-order-card">
                 <div className="admin-order-top">
                   <div>
-                    <strong>{order.id}</strong>
+                    <strong>{order.orderNumber || order.id}</strong>
                     <p>{order.customer?.name} · {order.customer?.email}</p>
                     <p>{new Date(order.createdAt).toLocaleDateString()} · ₹{Number(order.total).toLocaleString('en-IN')}</p>
                   </div>
@@ -1124,7 +1124,7 @@ export function AdminPage() {
                     onChange={async (e) => {
                       try {
                         await api.put(`/admin/orders/${order.id}/status`, { status: e.target.value }, token);
-                        setMessage(`Order ${order.id} → ${e.target.value}`);
+                        setMessage(`Order ${order.orderNumber || order.id} → ${e.target.value}`);
                         loadAll();
                       } catch (err) {
                         setMessage(err.message);

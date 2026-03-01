@@ -48,7 +48,7 @@ export function OrderTrackingPage() {
 
         {order && (
           <article className="order-track-card">
-            <h2>{order.id}</h2>
+            <h2>{order.orderNumber || order.id}</h2>
             <p>Status: {order.status}</p>
             <p>Total: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(order.total)}</p>
             <h3>Timeline</h3>

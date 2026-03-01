@@ -179,7 +179,7 @@ export function AccountPage() {
             <article key={order.id} className="myaccount-order">
               <div className="myaccount-order-header">
                 <div>
-                  <span className="myaccount-order-id">{order.id}</span>
+                  <span className="myaccount-order-id">{order.orderNumber || order.id}</span>
                   <span className="myaccount-order-date">
                     {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </span>

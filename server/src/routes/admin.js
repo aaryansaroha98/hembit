@@ -737,7 +737,7 @@ adminRouter.post('/orders/:id/send-status-email', async (req, res) => {
               <tr>
                 <td style="padding:16px 20px;border-bottom:1px solid #eee;">
                   <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#888;">Order Number</span><br>
-                  <strong style="font-size:14px;color:#111;">${order.id}</strong>
+                  <strong style="font-size:14px;color:#111;">${order.orderNumber || order.id}</strong>
                 </td>
                 <td style="padding:16px 20px;border-bottom:1px solid #eee;text-align:right;">
                   <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#888;">Date</span><br>
@@ -807,7 +807,7 @@ adminRouter.post('/orders/:id/send-status-email', async (req, res) => {
   try {
     await sendEmail({
       to: email,
-      subject: `HEMBIT — Order ${order.id} is now ${order.status}`,
+      subject: `HEMBIT — Order ${order.orderNumber || order.id} is now ${order.status}`,
       html,
     });
     return res.json({ message: `Status email sent to ${email}` });

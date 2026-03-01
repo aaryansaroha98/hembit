@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { readDb, writeDb } from '../services/store.js';
-import { createId } from '../utils/id.js';
+import { createId, createOrderNumber } from '../utils/id.js';
 
 export const checkoutRouter = Router();
 
@@ -51,6 +51,7 @@ checkoutRouter.post('/create-order', requireAuth, (req, res) => {
 
   const total = enrichedItems.reduce((sum, item) => sum + item.lineTotal, 0);
   const orderId = createId('ord');
+  const orderNumber = createOrderNumber();
   const now = new Date().toISOString();
 
   let order;
@@ -59,6 +60,7 @@ checkoutRouter.post('/create-order', requireAuth, (req, res) => {
 
     order = {
       id: orderId,
+      orderNumber,
       userId: req.user.id,
       customer: {
         name: customer?.name || '',
