@@ -1127,7 +1127,7 @@ textarea {
 }
 
 .pdp-accordion {
-  border-top: 1px solid var(--line);
+  border-top: none;
   padding: 0;
   margin-top: 0.3rem;
 }
