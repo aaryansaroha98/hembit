@@ -788,7 +788,16 @@ body.home-view .mega-menu {
 }
 
 .shop-mob-title {
-  display: none;
+  display: flex;
+  align-items: center;
+  padding: 1.4rem 1.6rem 1rem;
+}
+
+.shop-mob-title span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .shop-grid-wrap {
@@ -3867,17 +3876,13 @@ textarea {
   }
 
   .shop-mob-title {
-    display: flex;
-    align-items: center;
     justify-content: center;
     padding: 1.1rem 0 0.8rem;
   }
 
   .shop-mob-title span {
     font-size: 0.74rem;
-    font-weight: 600;
     letter-spacing: 0.12em;
-    text-transform: uppercase;
   }
 
   .product-grid {
