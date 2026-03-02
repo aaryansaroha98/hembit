@@ -52,6 +52,14 @@ function RouteLoadingWrapper({ children }) {
   );
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function MainLayout({ children }) {
   const location = useLocation();
   const isHome = location.pathname === '/';
@@ -75,6 +83,7 @@ function MainLayout({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <RouteLoadingWrapper>
         <Routes>
         <Route

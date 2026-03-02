@@ -2687,21 +2687,23 @@ textarea {
 }
 
 .site-footer--compact .newsletter-form input {
-  font-size: 0.66rem;
-  padding: 0.32em 0.7em;
-  height: 2rem;
-  border-radius: 2px;
+  font-size: 0.72rem;
+  padding: 0 0.72rem;
+  height: 42px;
+  border-radius: 0;
   min-width: 0;
+  width: 100%;
+  max-width: 280px;
   box-sizing: border-box;
 }
 
 .site-footer--compact .newsletter-form button {
-  font-size: 0.58rem;
-  padding: 0.18em 0.7em;
-  height: 1.5rem;
-  min-width: 2.5rem;
+  font-size: 0.66rem;
+  padding: 0 1.2rem;
+  height: 38px;
+  min-width: 3.2rem;
   width: auto;
-  border-radius: 2px;
+  border-radius: 0;
   box-sizing: border-box;
 }
 
