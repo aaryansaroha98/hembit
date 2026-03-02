@@ -128,17 +128,91 @@ export function HeroSlider({ slides, children }) {
 
   const isProductSlide = orderedSlides[activeIndex]?.type === 'products';
   const isLastPanel = activeIndex === orderedSlides.length && children;
+  const sliderRef = useRef(null);
+  const brightnessCache = useRef({});   // url → 'light' | 'dark'
+  const [heroTheme, setHeroTheme] = useState('dark');
 
-  // Set body attribute so the topbar can adapt its color to the slide background
+  // Analyse the average brightness of the top strip of an image / video frame
+  const analyseBrightness = useCallback((mediaEl, url) => {
+    if (brightnessCache.current[url]) {
+      setHeroTheme(brightnessCache.current[url]);
+      return;
+    }
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      // Sample a small strip across the top (navbar region)
+      const sampleW = 120;
+      const sampleH = 20;
+      canvas.width = sampleW;
+      canvas.height = sampleH;
+      ctx.drawImage(mediaEl, 0, 0, mediaEl.videoWidth || mediaEl.naturalWidth, (mediaEl.videoHeight || mediaEl.naturalHeight) * 0.12, 0, 0, sampleW, sampleH);
+      const { data } = ctx.getImageData(0, 0, sampleW, sampleH);
+      let total = 0;
+      const pixels = data.length / 4;
+      for (let i = 0; i < data.length; i += 4) {
+        // perceived luminance
+        total += data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+      }
+      const avg = total / pixels;       // 0-255
+      const theme = avg > 140 ? 'light' : 'dark';
+      brightnessCache.current[url] = theme;
+      setHeroTheme(theme);
+    } catch {
+      // cross-origin or other error → fall back to dark
+      setHeroTheme('dark');
+    }
+  }, []);
+
+  // Detect brightness whenever active slide changes
   useEffect(() => {
-    // Product slides & footer panel have light backgrounds; image/video slides are dark
-    const theme = isProductSlide || isLastPanel ? 'light' : 'dark';
-    document.body.setAttribute('data-hero-theme', theme);
+    if (isProductSlide || isLastPanel) {
+      setHeroTheme('light');
+      return;
+    }
+
+    const slide = orderedSlides[activeIndex];
+    if (!slide?.url) { setHeroTheme('dark'); return; }
+
+    // If already cached, apply immediately
+    if (brightnessCache.current[slide.url]) {
+      setHeroTheme(brightnessCache.current[slide.url]);
+      return;
+    }
+
+    // Find the actual media element inside the active panel
+    const panel = sliderRef.current?.querySelectorAll('.hero-panel')?.[activeIndex];
+    if (!panel) return;
+
+    const img = panel.querySelector('.hero-media img');
+    const video = panel.querySelector('.hero-media video');
+
+    if (img) {
+      if (img.complete && img.naturalWidth) {
+        analyseBrightness(img, slide.url);
+      } else {
+        img.addEventListener('load', () => analyseBrightness(img, slide.url), { once: true });
+      }
+    } else if (video) {
+      const tryFrame = () => {
+        if (video.readyState >= 2) {
+          analyseBrightness(video, slide.url);
+        } else {
+          video.addEventListener('loadeddata', () => analyseBrightness(video, slide.url), { once: true });
+        }
+      };
+      tryFrame();
+    }
+  }, [activeIndex, isProductSlide, isLastPanel, orderedSlides, analyseBrightness]);
+
+  // Sync theme attribute to body
+  useEffect(() => {
+    document.body.setAttribute('data-hero-theme', heroTheme);
     return () => document.body.removeAttribute('data-hero-theme');
-  }, [isProductSlide, isLastPanel]);
+  }, [heroTheme]);
 
   return (
-    <section className="hero-slider">
+    <section className="hero-slider" ref={sliderRef}>
       {/* Navigation dots */}
       <div className={`slider-dots${isProductSlide ? ' slider-dots--dark' : ''}`}>
         {Array.from({ length: totalPanels }).map((_, i) => (
