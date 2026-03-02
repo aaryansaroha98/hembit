@@ -428,6 +428,84 @@ body.home-view .site-footer--home {
   display: none;
 }
 
+/* Search overlay */
+.search-overlay {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  z-index: 70;
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 280ms var(--ease), opacity 200ms ease;
+}
+
+.search-overlay--open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.search-overlay-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0.85rem 1.4rem;
+}
+
+.search-overlay-inner svg {
+  flex-shrink: 0;
+  color: var(--text-soft);
+}
+
+.search-overlay-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.search-overlay-input::placeholder {
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.74rem;
+}
+
+.search-overlay-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-soft);
+  padding: 0.2rem;
+  flex-shrink: 0;
+}
+
+.search-overlay-close:hover {
+  color: var(--text);
+}
+
+.search-overlay-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.18);
+  border: none;
+  z-index: 60;
+  cursor: default;
+}
+
 
 body.home-view .mega-menu {
   background: #fff;
@@ -796,6 +874,7 @@ body.home-view .mega-menu {
 .shop-mob-title {
   display: flex;
   align-items: center;
+  gap: 0.8rem;
   padding: 1.4rem 1.6rem 1rem;
 }
 
@@ -804,6 +883,22 @@ body.home-view .mega-menu {
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.shop-clear-search {
+  background: none;
+  border: 1px solid var(--line-strong);
+  padding: 0.25rem 0.7rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.shop-clear-search:hover {
+  background: var(--black);
+  color: #fff;
 }
 
 .shop-grid-wrap {

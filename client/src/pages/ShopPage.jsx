@@ -36,12 +36,27 @@ export function ShopPage() {
 
   return (
     <div className="shop-page">
-      {/* Mobile centered title */}
+      {/* Title */}
       <div className="shop-mob-title">
-        <span>{displayCategory.toUpperCase()}</span>
+        <span>
+          {currentSearch
+            ? `RESULTS FOR "${currentSearch.toUpperCase()}"`
+            : displayCategory.toUpperCase()}
+        </span>
+        {currentSearch && (
+          <button
+            type="button"
+            className="shop-clear-search"
+            onClick={() => setSearchParams({})}
+          >
+            CLEAR
+          </button>
+        )}
       </div>
       {loading ? (
         <div className="page-status">Loading products...</div>
+      ) : data.products.length === 0 ? (
+        <div className="page-status">No products found.</div>
       ) : (
         <section className="shop-grid-wrap">
           <div className="product-grid">

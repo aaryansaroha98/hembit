@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -37,6 +37,10 @@ export function Topbar() {
   const [mobSection, setMobSection] = useState(null); // 'HIGHLIGHTS' | 'MEN' | null
   /* Which category accordion is expanded inside a section */
   const [mobExpanded, setMobExpanded] = useState(null);
+  /* Search overlay */
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef(null);
   const { isAuthenticated } = useAuth();
   const { items } = useCart();
   const location = useLocation();
@@ -49,12 +53,35 @@ export function Topbar() {
   useEffect(() => {
     setOpenMenu('');
     closeMobile();
+    closeSearch();
   }, [location.pathname]);
 
   const closeMobile = () => {
     setMobileOpen(false);
     setMobSection(null);
     setMobExpanded(null);
+  };
+
+  const openSearchOverlay = () => {
+    setSearchOpen(true);
+    setSearchQuery('');
+    closeMobile();
+    setOpenMenu('');
+    setTimeout(() => searchInputRef.current?.focus(), 80);
+  };
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setSearchQuery('');
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) {
+      navigate(`/shop?search=${encodeURIComponent(q)}`);
+      closeSearch();
+    }
   };
 
   const actionLabel = isAuthenticated ? 'ACCOUNT' : 'LOGIN';
@@ -140,7 +167,7 @@ export function Topbar() {
           HEMBIT
         </Link>
 
-        <button type="button" className="mobile-search" onClick={() => navigate('/shop')} aria-label="Open search">
+        <button type="button" className="mobile-search" onClick={openSearchOverlay} aria-label="Open search">
           <SearchIcon />
         </button>
 
@@ -148,7 +175,7 @@ export function Topbar() {
           <Link to="/cart">CART ({items.length})</Link>
           <Link to="/services">SERVICES</Link>
           <Link to={isAuthenticated ? '/account' : '/signin'}>{actionLabel}</Link>
-          <button type="button" className="search-btn" onClick={() => navigate('/shop')}>
+          <button type="button" className="search-btn" onClick={openSearchOverlay}>
             <SearchIcon />
           </button>
         </nav>
@@ -174,7 +201,7 @@ export function Topbar() {
             className="mob-search-btn"
             onClick={() => {
               closeMobile();
-              navigate('/shop');
+              openSearchOverlay();
             }}
             aria-label="Search"
           >
@@ -259,6 +286,28 @@ export function Topbar() {
           </div>
         </div>
       </div>
+
+      {/* ─── Search overlay ─── */}
+      <div className={`search-overlay${searchOpen ? ' search-overlay--open' : ''}`}>
+        <form className="search-overlay-inner" onSubmit={handleSearchSubmit}>
+          <SearchIcon />
+          <input
+            ref={searchInputRef}
+            type="text"
+            className="search-overlay-input"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button type="button" className="search-overlay-close" onClick={closeSearch} aria-label="Close search">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <line x1="3" y1="3" x2="17" y2="17" />
+              <line x1="17" y1="3" x2="3" y2="17" />
+            </svg>
+          </button>
+        </form>
+      </div>
+      {searchOpen && <button type="button" className="search-overlay-backdrop" onClick={closeSearch} aria-label="Close search" />}
     </header>
   );
 }
