@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PageHero } from '../components/PageHero';
 import { ProductCard } from '../components/ProductCard';
 import { api } from '../services/api';
 
@@ -37,10 +36,6 @@ export function ShopPage() {
 
   return (
     <div className="shop-page">
-      {/* Desktop hero */}
-      <div className="shop-hero-desktop">
-        <PageHero title={displayCategory} small />
-      </div>
       {/* Mobile centered title */}
       <div className="shop-mob-title">
         <span>{displayCategory.toUpperCase()}</span>
@@ -48,7 +43,7 @@ export function ShopPage() {
       {loading ? (
         <div className="page-status">Loading products...</div>
       ) : (
-        <section className="section-pad">
+        <section className="shop-grid-wrap">
           <div className="product-grid">
             {data.products.map((product) => (
               <ProductCard key={product.id} product={product} />
