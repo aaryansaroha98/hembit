@@ -65,12 +65,13 @@ export function LoadingScreen({ onFinished, waitForBackend = false }) {
       });
     }
 
-    /* Safety fallback */
-    const fallback = setTimeout(() => {
+    /* End after 1 second regardless of video length */
+    const cutoff = setTimeout(() => {
       videoEnded.current = true;
+      if (vid) { vid.pause(); }
       tryFade();
-    }, 4000);
-    return () => clearTimeout(fallback);
+    }, 1000);
+    return () => clearTimeout(cutoff);
   }, []);
 
   const handleEnded = () => {
