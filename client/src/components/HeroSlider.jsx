@@ -127,6 +127,15 @@ export function HeroSlider({ slides, children }) {
   };
 
   const isProductSlide = orderedSlides[activeIndex]?.type === 'products';
+  const isLastPanel = activeIndex === orderedSlides.length && children;
+
+  // Set body attribute so the topbar can adapt its color to the slide background
+  useEffect(() => {
+    // Product slides & footer panel have light backgrounds; image/video slides are dark
+    const theme = isProductSlide || isLastPanel ? 'light' : 'dark';
+    document.body.setAttribute('data-hero-theme', theme);
+    return () => document.body.removeAttribute('data-hero-theme');
+  }, [isProductSlide, isLastPanel]);
 
   return (
     <section className="hero-slider">
