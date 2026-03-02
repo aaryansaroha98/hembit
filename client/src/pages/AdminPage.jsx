@@ -559,23 +559,45 @@ export function AdminPage() {
               <button
                 type="button"
                 onClick={async () => {
+                  const name = seriesForm.name.trim();
+                  const slug = seriesForm.slug.trim();
+
+                  if (!name || !slug) {
+                    setMessage('Series name and slug are required');
+                    return;
+                  }
+
                   try {
                     if (editingSeries) {
+                      if (!editingSeries.categoryId || !editingSeries.seriesId) {
+                        setMessage('Please select a valid series to edit');
+                        return;
+                      }
+
                       await api.put(
                         `/admin/categories/${editingSeries.categoryId}/series/${editingSeries.seriesId}`,
-                        { name: seriesForm.name, slug: seriesForm.slug },
+                        { name, slug },
                         token
                       );
                       setMessage('Series updated');
                     } else {
-                      await api.post(`/admin/categories/${seriesForm.categoryId}/series`, seriesForm, token);
+                      if (!seriesForm.categoryId) {
+                        setMessage('Please select a category');
+                        return;
+                      }
+
+                      await api.post(`/admin/categories/${seriesForm.categoryId}/series`, { name, slug }, token);
                       setMessage('Series added');
                     }
                     setEditingSeries(null);
                     setSeriesForm({ categoryId: '', name: '', slug: '' });
                     loadAll();
                   } catch (err) {
-                    setMessage(err.message);
+                    if (editingSeries && err.message === 'Request failed with 404') {
+                      setMessage('Series edit API not found (404). Restart/redeploy backend with latest code.');
+                    } else {
+                      setMessage(err.message);
+                    }
                   }
                 }}
               >
