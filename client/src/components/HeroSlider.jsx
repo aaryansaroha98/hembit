@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const TRANSITION_DURATION = 600;
+const TRANSITION_DURATION = 400;
 const COOLDOWN = TRANSITION_DURATION + 60;
 const WHEEL_THRESHOLD = 30;
 const TOUCH_THRESHOLD = 40;
@@ -127,6 +127,13 @@ export function HeroSlider({ slides, children }) {
   };
 
   const isProductSlide = orderedSlides[activeIndex]?.type === 'products';
+
+  // Communicate slide theme to Topbar via body attribute
+  useEffect(() => {
+    const theme = isProductSlide ? 'light' : 'dark';
+    document.body.setAttribute('data-hero-theme', theme);
+    return () => document.body.removeAttribute('data-hero-theme');
+  }, [isProductSlide]);
 
   return (
     <section className="hero-slider">
