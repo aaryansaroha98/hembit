@@ -435,16 +435,13 @@ body.home-view .site-footer--home {
   left: 0;
   right: 0;
   background: #fff;
-  border-bottom: 1px solid var(--line);
   z-index: 70;
-  transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 280ms var(--ease), opacity 200ms ease;
+  transition: opacity 300ms ease;
 }
 
 .search-overlay--open {
-  transform: translateY(0);
   opacity: 1;
   pointer-events: auto;
 }
@@ -452,46 +449,50 @@ body.home-view .site-footer--home {
 .search-overlay-inner {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  max-width: 640px;
+  gap: 1rem;
+  max-width: 520px;
   margin: 0 auto;
-  padding: 0.85rem 1.4rem;
+  padding: 2rem 1.6rem 1.8rem;
 }
 
-.search-overlay-inner svg {
-  flex-shrink: 0;
-  color: var(--text-soft);
+.search-overlay-inner > svg {
+  display: none;
 }
 
 .search-overlay-input {
   flex: 1;
   border: none;
+  border-bottom: 1px solid #111;
   outline: none;
   background: transparent;
-  font-size: 0.82rem;
-  letter-spacing: 0.06em;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
   color: var(--text);
   font-family: inherit;
+  padding: 0.5rem 0;
+  text-transform: uppercase;
 }
 
 .search-overlay-input::placeholder {
-  color: var(--text-soft);
+  color: #bbb;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  font-size: 0.76rem;
+  font-weight: 400;
 }
 
 .search-overlay-close {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-soft);
-  padding: 0.2rem;
+  color: #999;
+  padding: 0.3rem;
   flex-shrink: 0;
+  transition: color 200ms ease;
 }
 
 .search-overlay-close:hover {
-  color: var(--text);
+  color: #111;
 }
 
 .search-overlay-backdrop {
@@ -500,7 +501,7 @@ body.home-view .site-footer--home {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.18);
+  background: rgba(0, 0, 0, 0.25);
   border: none;
   z-index: 60;
   cursor: default;
