@@ -54,6 +54,8 @@ export function AdminPage() {
     sizesCsv: 'S,M,L,XL',
     stock: 0,
     featured: false,
+    isAvailable: true,
+    unavailableButtonText: 'Currently Unavailable',
   });
   const [uploadedImages, setUploadedImages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -245,6 +247,7 @@ export function AdminPage() {
                 placeholder="Price"
                 value={productForm.price}
                 onChange={(e) => setProductForm((prev) => ({ ...prev, price: e.target.value }))}
+                disabled={!productForm.isAvailable}
               />
               <input
                 type="number"
@@ -252,6 +255,24 @@ export function AdminPage() {
                 value={productForm.stock}
                 onChange={(e) => setProductForm((prev) => ({ ...prev, stock: e.target.value }))}
               />
+              <select
+                value={productForm.isAvailable ? 'yes' : 'no'}
+                onChange={(e) =>
+                  setProductForm((prev) => ({ ...prev, isAvailable: e.target.value === 'yes' }))
+                }
+              >
+                <option value="yes">Available</option>
+                <option value="no">Not Available</option>
+              </select>
+              {!productForm.isAvailable && (
+                <input
+                  placeholder="Unavailable button text"
+                  value={productForm.unavailableButtonText}
+                  onChange={(e) =>
+                    setProductForm((prev) => ({ ...prev, unavailableButtonText: e.target.value }))
+                  }
+                />
+              )}
               <input
                 placeholder="Sizes (comma separated)"
                 value={productForm.sizesCsv}
@@ -387,8 +408,15 @@ export function AdminPage() {
               type="button"
               onClick={async () => {
                 try {
+                  const unavailableButtonText = productForm.unavailableButtonText.trim();
+                  if (!productForm.isAvailable && !unavailableButtonText) {
+                    setMessage('Unavailable button text is required when product is not available');
+                    return;
+                  }
+
                   const payload = {
                     ...productForm,
+                    unavailableButtonText,
                     images: uploadedImages,
                     sizes: productForm.sizesCsv
                       .split(',')
@@ -414,6 +442,8 @@ export function AdminPage() {
                     sizesCsv: 'S,M,L,XL',
                     stock: 0,
                     featured: false,
+                    isAvailable: true,
+                    unavailableButtonText: 'Currently Unavailable',
                   });
                   setUploadedImages([]);
                   loadAll();
@@ -430,7 +460,20 @@ export function AdminPage() {
                 style={{ marginLeft: 8, background: '#666' }}
                 onClick={() => {
                   setEditingProductId(null);
-                  setProductForm({ name: '', categoryId: '', seriesId: '', price: '', description: '', details: '', careInstructions: '', sizesCsv: 'S,M,L,XL', stock: 0, featured: false });
+                  setProductForm({
+                    name: '',
+                    categoryId: '',
+                    seriesId: '',
+                    price: '',
+                    description: '',
+                    details: '',
+                    careInstructions: '',
+                    sizesCsv: 'S,M,L,XL',
+                    stock: 0,
+                    featured: false,
+                    isAvailable: true,
+                    unavailableButtonText: 'Currently Unavailable',
+                  });
                   setUploadedImages([]);
                 }}
               >
@@ -454,13 +497,15 @@ export function AdminPage() {
                         name: product.name || '',
                         categoryId: product.categoryId || '',
                         seriesId: product.seriesId || '',
-                        price: product.price || '',
+                        price: product.price ?? '',
                         description: product.description || '',
                         details: product.details || '',
                         careInstructions: product.careInstructions || '',
                         sizesCsv: (product.sizes || []).join(','),
-                        stock: product.stock || 0,
+                        stock: product.stock ?? 0,
                         featured: product.featured || false,
+                        isAvailable: product.isAvailable !== false,
+                        unavailableButtonText: product.unavailableButtonText || 'Currently Unavailable',
                       });
                       setUploadedImages(product.images || []);
                       window.scrollTo({ top: 0, behavior: 'smooth' });

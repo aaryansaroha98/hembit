@@ -14,6 +14,10 @@ export function CartProvider({ children }) {
   };
 
   const addItem = (product, size = 'M', quantity = 1) => {
+    if (product?.isAvailable === false) {
+      return;
+    }
+
     const existing = items.find((item) => item.productId === product.id && item.size === size);
 
     if (existing) {

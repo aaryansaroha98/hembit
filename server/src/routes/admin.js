@@ -218,9 +218,23 @@ adminRouter.get('/products', (_req, res) => {
 
 adminRouter.post('/products', (req, res) => {
   const payload = req.body;
+  const isAvailable = payload.isAvailable !== undefined ? Boolean(payload.isAvailable) : true;
+  const unavailableButtonText =
+    typeof payload.unavailableButtonText === 'string' ? payload.unavailableButtonText.trim() : '';
+  const priceValue = Number(payload.price);
 
-  if (!payload.name || !payload.categoryId || !payload.seriesId || !payload.price) {
-    return res.status(400).json({ message: 'name, categoryId, seriesId, and price are required' });
+  if (!payload.name || !payload.categoryId || !payload.seriesId) {
+    return res.status(400).json({ message: 'name, categoryId, and seriesId are required' });
+  }
+
+  if (isAvailable) {
+    if (payload.price === undefined || payload.price === null || payload.price === '' || !Number.isFinite(priceValue)) {
+      return res.status(400).json({ message: 'price is required when product is available' });
+    }
+  } else if (!unavailableButtonText) {
+    return res
+      .status(400)
+      .json({ message: 'unavailableButtonText is required when product is not available' });
   }
 
   const autoSlug = payload.slug
@@ -235,7 +249,7 @@ adminRouter.post('/products', (req, res) => {
       slug: autoSlug,
       categoryId: payload.categoryId,
       seriesId: payload.seriesId,
-      price: Number(payload.price),
+      price: Number.isFinite(priceValue) ? priceValue : 0,
       currency: payload.currency || 'INR',
       description: payload.description || '',
       details: payload.details || '',
@@ -244,6 +258,8 @@ adminRouter.post('/products', (req, res) => {
       sizes: Array.isArray(payload.sizes) ? payload.sizes : ['S', 'M', 'L', 'XL'],
       stock: Number(payload.stock || 0),
       featured: Boolean(payload.featured),
+      isAvailable,
+      unavailableButtonText: isAvailable ? '' : unavailableButtonText,
       createdAt: new Date().toISOString(),
     };
 
@@ -256,6 +272,11 @@ adminRouter.post('/products', (req, res) => {
 adminRouter.put('/products/:id', (req, res) => {
   const productId = req.params.id;
   const payload = req.body;
+  const payloadHasPrice = payload.price !== undefined;
+  const parsedPrice = payloadHasPrice ? Number(payload.price) : null;
+  const payloadIsAvailable = payload.isAvailable !== undefined ? Boolean(payload.isAvailable) : undefined;
+  const payloadUnavailableButtonText =
+    typeof payload.unavailableButtonText === 'string' ? payload.unavailableButtonText.trim() : undefined;
 
   let updated;
   writeDb((db) => {
@@ -264,12 +285,29 @@ adminRouter.put('/products/:id', (req, res) => {
       return;
     }
 
+    const nextIsAvailable = payloadIsAvailable !== undefined ? payloadIsAvailable : product.isAvailable !== false;
+    const existingButtonText =
+      typeof product.unavailableButtonText === 'string' && product.unavailableButtonText.trim()
+        ? product.unavailableButtonText.trim()
+        : 'Currently Unavailable';
+    const nextUnavailableButtonText =
+      payloadUnavailableButtonText !== undefined ? payloadUnavailableButtonText : existingButtonText;
+    const nextPrice = payloadHasPrice ? parsedPrice : product.price;
+
+    if (nextIsAvailable && !Number.isFinite(nextPrice)) {
+      return;
+    }
+
+    if (!nextIsAvailable && !nextUnavailableButtonText) {
+      return;
+    }
+
     Object.assign(product, {
       name: payload.name ?? product.name,
       slug: payload.slug ?? product.slug,
       categoryId: payload.categoryId ?? product.categoryId,
       seriesId: payload.seriesId ?? product.seriesId,
-      price: payload.price !== undefined ? Number(payload.price) : product.price,
+      price: nextPrice,
       currency: payload.currency ?? product.currency,
       description: payload.description ?? product.description,
       details: payload.details ?? product.details,
@@ -278,12 +316,22 @@ adminRouter.put('/products/:id', (req, res) => {
       sizes: Array.isArray(payload.sizes) ? payload.sizes : product.sizes,
       stock: payload.stock !== undefined ? Number(payload.stock) : product.stock,
       featured: payload.featured !== undefined ? Boolean(payload.featured) : product.featured,
+      isAvailable: nextIsAvailable,
+      unavailableButtonText: nextIsAvailable ? '' : nextUnavailableButtonText,
     });
 
     updated = product;
   });
 
   if (!updated) {
+    if (payloadHasPrice && !Number.isFinite(parsedPrice)) {
+      return res.status(400).json({ message: 'price must be a valid number' });
+    }
+    if (payloadIsAvailable === false && payloadUnavailableButtonText === '') {
+      return res
+        .status(400)
+        .json({ message: 'unavailableButtonText is required when product is not available' });
+    }
     return res.status(404).json({ message: 'Product not found' });
   }
 

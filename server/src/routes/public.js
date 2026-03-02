@@ -16,10 +16,17 @@ function formatCurrency(amount, currency = 'INR') {
 function withDerivedProduct(db, product) {
   const category = db.categories.find((cat) => cat.id === product.categoryId);
   const series = category?.series.find((ser) => ser.id === product.seriesId);
+  const isAvailable = product.isAvailable !== false;
+  const unavailableButtonText =
+    typeof product.unavailableButtonText === 'string' && product.unavailableButtonText.trim()
+      ? product.unavailableButtonText.trim()
+      : 'Currently Unavailable';
 
   return {
     ...product,
-    displayPrice: formatCurrency(product.price, product.currency),
+    displayPrice: isAvailable ? formatCurrency(product.price, product.currency) : null,
+    isAvailable,
+    unavailableButtonText,
     categoryName: category?.name || 'Uncategorized',
     seriesName: series?.name || 'General',
   };

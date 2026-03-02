@@ -56,6 +56,8 @@ export function ProductDetailsPage() {
     return <div className="page-status">Loading product...</div>;
   }
 
+  const isAvailable = product.isAvailable !== false;
+  const unavailableButtonText = (product.unavailableButtonText || '').trim() || 'CURRENTLY UNAVAILABLE';
   const totalImages = product.images?.length || 0;
 
   return (
@@ -98,18 +100,24 @@ export function ProductDetailsPage() {
 
         <p className="pdp-desc">{product.description}</p>
 
-        <strong className="pdp-price">{product.displayPrice || formatPrice(product.price)}</strong>
+        {isAvailable && (
+          <strong className="pdp-price">{product.displayPrice || formatPrice(product.price)}</strong>
+        )}
 
         <button
           type="button"
-          className="pdp-add-btn"
+          className={`pdp-add-btn${!isAvailable ? ' pdp-add-btn--disabled' : ''}`}
+          disabled={!isAvailable}
           onClick={() => {
+            if (!isAvailable) {
+              return;
+            }
             addItem(product, selectedSize, 1);
             setMessage('Added to cart');
             setTimeout(() => setMessage(''), 2500);
           }}
         >
-          ADD TO CART
+          {isAvailable ? 'ADD TO CART' : unavailableButtonText}
         </button>
         {message && <small className="pdp-msg">{message}</small>}
 
