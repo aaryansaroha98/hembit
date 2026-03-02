@@ -47,6 +47,18 @@ function dedupeEmails(values) {
   return result;
 }
 
+function normalizeHexColor(value) {
+  const raw = String(value || '').trim();
+  if (!raw) {
+    return { value: '', valid: true };
+  }
+
+  const normalized = raw.startsWith('#') ? raw : `#${raw}`;
+  const isValid = /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(normalized);
+
+  return { value: normalized.toUpperCase(), valid: isValid };
+}
+
 function getAudienceEmails(db, audience) {
   const userEmails = dedupeEmails(db.users.map((item) => item.email));
   const subscriberEmails = dedupeEmails(db.newsletterSubscribers.map((item) => item.email));
@@ -395,7 +407,12 @@ adminRouter.get('/slides', (_req, res) => {
 });
 
 adminRouter.post('/slides', (req, res) => {
-  const { title, subtitle, type, url, ctaLabel, ctaLink, productIds, layout } = req.body;
+  const { title, subtitle, type, url, ctaLabel, ctaLink, topbarLinkColor, productIds, layout } = req.body;
+  const parsedTopbarColor = normalizeHexColor(topbarLinkColor);
+
+  if (!parsedTopbarColor.valid) {
+    return res.status(400).json({ message: 'topbarLinkColor must be a valid hex color' });
+  }
 
   if (type === 'products') {
     if (!Array.isArray(productIds) || productIds.length < 1) {
@@ -417,6 +434,7 @@ adminRouter.post('/slides', (req, res) => {
       url: url || '',
       ctaLabel: ctaLabel || '',
       ctaLink: ctaLink || '',
+      topbarLinkColor: parsedTopbarColor.value,
       productIds: type === 'products' ? productIds : [],
       layout: type === 'products' ? (Number(layout) || 2) : 0,
       order: db.slides.length + 1,
@@ -444,7 +462,13 @@ adminRouter.put('/slides/reorder', (req, res) => {
 
 adminRouter.put('/slides/:id', (req, res) => {
   const id = req.params.id;
-  const payload = req.body;
+  const payload = req.body || {};
+  const hasTopbarColor = Object.prototype.hasOwnProperty.call(payload, 'topbarLinkColor');
+  const parsedTopbarColor = hasTopbarColor ? normalizeHexColor(payload.topbarLinkColor) : null;
+
+  if (parsedTopbarColor && !parsedTopbarColor.valid) {
+    return res.status(400).json({ message: 'topbarLinkColor must be a valid hex color' });
+  }
 
   let slide;
   writeDb((db) => {
@@ -460,6 +484,7 @@ adminRouter.put('/slides/:id', (req, res) => {
       url: payload.url ?? slide.url,
       ctaLabel: payload.ctaLabel ?? slide.ctaLabel,
       ctaLink: payload.ctaLink ?? slide.ctaLink,
+      topbarLinkColor: parsedTopbarColor ? parsedTopbarColor.value : (slide.topbarLinkColor || ''),
       productIds: payload.productIds ?? slide.productIds ?? [],
       layout: payload.layout !== undefined ? Number(payload.layout) : (slide.layout ?? 0),
       order: payload.order !== undefined ? Number(payload.order) : slide.order,

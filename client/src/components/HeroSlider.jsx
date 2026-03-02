@@ -5,6 +5,24 @@ const TRANSITION_DURATION = 400;
 const COOLDOWN = TRANSITION_DURATION + 60;
 const WHEEL_THRESHOLD = 30;
 const TOUCH_THRESHOLD = 40;
+const HEX_COLOR_REGEX = /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+
+function toHoverRgba(hexColor) {
+  if (!HEX_COLOR_REGEX.test(hexColor)) {
+    return '';
+  }
+
+  const compact = hexColor.slice(1);
+  const expanded = compact.length === 3
+    ? compact.split('').map((char) => `${char}${char}`).join('')
+    : compact;
+  const int = Number.parseInt(expanded, 16);
+  const r = (int >> 16) & 255;
+  const g = (int >> 8) & 255;
+  const b = int & 255;
+
+  return `rgba(${r}, ${g}, ${b}, 0.72)`;
+}
 
 export function HeroSlider({ slides, children }) {
   const orderedSlides = useMemo(() => [...slides].sort((a, b) => a.order - b.order), [slides]);
@@ -210,6 +228,26 @@ export function HeroSlider({ slides, children }) {
     document.body.setAttribute('data-hero-theme', heroTheme);
     return () => document.body.removeAttribute('data-hero-theme');
   }, [heroTheme]);
+
+  // Optional per-slide topbar link color from admin
+  useEffect(() => {
+    const activeSlide = orderedSlides[activeIndex];
+    const rawColor = String(activeSlide?.topbarLinkColor || '').trim();
+    const normalized = rawColor.startsWith('#') ? rawColor : `#${rawColor}`;
+
+    if (HEX_COLOR_REGEX.test(normalized)) {
+      document.body.style.setProperty('--hero-topbar-link-color', normalized);
+      document.body.style.setProperty('--hero-topbar-link-hover-color', toHoverRgba(normalized));
+    } else {
+      document.body.style.removeProperty('--hero-topbar-link-color');
+      document.body.style.removeProperty('--hero-topbar-link-hover-color');
+    }
+
+    return () => {
+      document.body.style.removeProperty('--hero-topbar-link-color');
+      document.body.style.removeProperty('--hero-topbar-link-hover-color');
+    };
+  }, [activeIndex, orderedSlides]);
 
   return (
     <section className="hero-slider" ref={sliderRef}>

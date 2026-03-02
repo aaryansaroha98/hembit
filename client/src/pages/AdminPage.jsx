@@ -16,6 +16,7 @@ const TABS = [
   'Newsletter',
   'Users & Subscribers Mail',
 ];
+const HEX_COLOR_PATTERN = /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 
 export function AdminPage() {
   const { token, signout } = useAuth();
@@ -66,6 +67,7 @@ export function AdminPage() {
     url: '',
     ctaLabel: '',
     ctaLink: '',
+    topbarLinkColor: '',
     productIds: [],
     layout: 2,
   });
@@ -630,6 +632,28 @@ export function AdminPage() {
                 <option value="video">Video</option>
                 <option value="products">Product Grid</option>
               </select>
+              <input
+                type="text"
+                placeholder="Topbar Link Color (hex, optional)"
+                value={slideForm.topbarLinkColor}
+                onChange={(e) => setSlideForm((prev) => ({ ...prev, topbarLinkColor: e.target.value }))}
+              />
+              <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+                <input
+                  type="color"
+                  value={HEX_COLOR_PATTERN.test(slideForm.topbarLinkColor) ? slideForm.topbarLinkColor : '#111111'}
+                  onChange={(e) => setSlideForm((prev) => ({ ...prev, topbarLinkColor: e.target.value }))}
+                  aria-label="Pick topbar link color"
+                  style={{ width: 42, height: 38, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
+                />
+                <button
+                  type="button"
+                  style={{ background: '#666', padding: '0.45rem 0.75rem' }}
+                  onClick={() => setSlideForm((prev) => ({ ...prev, topbarLinkColor: '' }))}
+                >
+                  Reset Color
+                </button>
+              </div>
 
               {slideForm.type !== 'products' && (
                 <>
@@ -734,6 +758,7 @@ export function AdminPage() {
                     url: '',
                     ctaLabel: '',
                     ctaLink: '',
+                    topbarLinkColor: '',
                     productIds: [],
                     layout: 2,
                   });
@@ -751,7 +776,17 @@ export function AdminPage() {
                 style={{ marginLeft: 8, background: '#666' }}
                 onClick={() => {
                   setEditingSlideId(null);
-                  setSlideForm({ title: '', subtitle: '', type: 'image', url: '', ctaLabel: '', ctaLink: '', productIds: [], layout: 2 });
+                  setSlideForm({
+                    title: '',
+                    subtitle: '',
+                    type: 'image',
+                    url: '',
+                    ctaLabel: '',
+                    ctaLink: '',
+                    topbarLinkColor: '',
+                    productIds: [],
+                    layout: 2,
+                  });
                 }}
               >
                 Cancel
@@ -807,6 +842,7 @@ export function AdminPage() {
                       url: slide.url || '',
                       ctaLabel: slide.ctaLabel || '',
                       ctaLink: slide.ctaLink || '',
+                      topbarLinkColor: slide.topbarLinkColor || '',
                       productIds: slide.productIds || [],
                       layout: slide.layout || 2,
                     });

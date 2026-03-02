@@ -292,7 +292,7 @@ body.home-view .site-footer--home {
 .topbar-wrap-overlay .menu-toggle,
 .topbar-wrap-overlay .mobile-search,
 .topbar-wrap-overlay .brand-mark {
-  color: #111;
+  color: var(--hero-topbar-link-color, #111);
   transition: color 0.45s ease;
 }
 
@@ -301,7 +301,7 @@ body.home-view .site-footer--home {
 .topbar-wrap-overlay .topbar-right button:hover,
 .topbar-wrap-overlay .menu-toggle:hover,
 .topbar-wrap-overlay .mobile-search:hover {
-  color: #555;
+  color: var(--hero-topbar-link-hover-color, #555);
 }
 
 /* Dark slide (image / video) → white topbar */
@@ -311,7 +311,7 @@ body[data-hero-theme="dark"] .topbar-wrap-overlay .topbar-right button,
 body[data-hero-theme="dark"] .topbar-wrap-overlay .menu-toggle,
 body[data-hero-theme="dark"] .topbar-wrap-overlay .mobile-search,
 body[data-hero-theme="dark"] .topbar-wrap-overlay .brand-mark {
-  color: #fff;
+  color: var(--hero-topbar-link-color, #fff);
 }
 
 body[data-hero-theme="dark"] .topbar-wrap-overlay .topbar-left button:hover,
@@ -319,7 +319,7 @@ body[data-hero-theme="dark"] .topbar-wrap-overlay .topbar-right a:hover,
 body[data-hero-theme="dark"] .topbar-wrap-overlay .topbar-right button:hover,
 body[data-hero-theme="dark"] .topbar-wrap-overlay .menu-toggle:hover,
 body[data-hero-theme="dark"] .topbar-wrap-overlay .mobile-search:hover {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--hero-topbar-link-hover-color, rgba(255, 255, 255, 0.6));
 }
 
 .topbar {
