@@ -83,31 +83,37 @@ body.home-view .topbar-wrap.dropdown-open {
   transition: background-color var(--t-med) var(--ease);
 }
 .site-footer--home .newsletter-form input {
-  font-size: 0.66rem;
-  padding: 0.32em 0.7em;
-  height: 2rem;
-  border-radius: 2px;
-  min-width: 0;
+  font-size: 0.78rem;
+  padding: 0 0.8rem;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  width: 100%;
+  max-width: 320px;
   box-sizing: border-box;
+  background: #fff;
 }
 
 .site-footer--home .newsletter-form button {
-  font-size: 0.58rem;
-  padding: 0.18em 0.7em;
-  height: 1.5rem;
-  min-width: 2.5rem;
-  width: auto;
-  border-radius: 2px;
-  box-sizing: border-box;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  padding: 0 1.4rem;
+  height: 38px;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  text-transform: uppercase;
 }
 .site-footer--home .newsletter-form label {
-  font-size: 0.66rem;
-  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
   line-height: 1.58;
-  font-weight: 400;
+  font-weight: 500;
   color: #111;
   text-transform: uppercase;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.7rem;
 }
 :root {
   --bg: #ffffff;
@@ -2627,6 +2633,20 @@ textarea {
   align-items: center;
 }
 
+.site-footer .newsletter-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.site-footer .newsletter-form > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+}
+
 .site-footer .newsletter-form small {
   display: block;
   margin-top: 0.35rem;
@@ -2677,34 +2697,38 @@ textarea {
 }
 
 .site-footer--compact .newsletter-form label {
-  font-size: 0.66rem;
-  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
   line-height: 1.58;
-  font-weight: 400;
+  font-weight: 500;
   color: #111;
   text-transform: uppercase;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.7rem;
 }
 
 .site-footer--compact .newsletter-form input {
-  font-size: 0.72rem;
-  padding: 0 0.72rem;
-  height: 42px;
+  font-size: 0.78rem;
+  padding: 0 0.8rem;
+  height: 44px;
+  border: 1px solid var(--line);
   border-radius: 0;
-  min-width: 0;
   width: 100%;
-  max-width: 280px;
+  max-width: 320px;
   box-sizing: border-box;
+  background: #fff;
 }
 
 .site-footer--compact .newsletter-form button {
-  font-size: 0.66rem;
-  padding: 0 1.2rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  padding: 0 1.4rem;
   height: 38px;
-  min-width: 3.2rem;
-  width: auto;
+  border: 1px solid var(--line-strong);
   border-radius: 0;
-  box-sizing: border-box;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  text-transform: uppercase;
 }
 
 .site-footer--compact .footer-bottom-row {
