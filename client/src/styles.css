@@ -2626,11 +2626,14 @@ textarea {
 .footer-bottom-row {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .footer-socials {
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
 }
 
 .site-footer .newsletter-form {
