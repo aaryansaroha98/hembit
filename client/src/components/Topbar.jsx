@@ -13,10 +13,30 @@ function SearchIcon() {
   );
 }
 
+function ChevronDown({ open }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="13"
+      height="13"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      className={`mob-chevron${open ? ' mob-chevron--open' : ''}`}
+    >
+      <polyline points="3,6 8,11 13,6" />
+    </svg>
+  );
+}
+
 export function Topbar() {
   const [menuData, setMenuData] = useState({ highlights: [], men: [] });
   const [openMenu, setOpenMenu] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
+  /* Mobile sub-navigation: which top-level section is drilled into */
+  const [mobSection, setMobSection] = useState(null); // 'HIGHLIGHTS' | 'MEN' | null
+  /* Which category accordion is expanded inside a section */
+  const [mobExpanded, setMobExpanded] = useState(null);
   const { isAuthenticated } = useAuth();
   const { items } = useCart();
   const location = useLocation();
@@ -28,19 +48,25 @@ export function Topbar() {
 
   useEffect(() => {
     setOpenMenu('');
-    setMobileOpen(false);
+    closeMobile();
   }, [location.pathname]);
+
+  const closeMobile = () => {
+    setMobileOpen(false);
+    setMobSection(null);
+    setMobExpanded(null);
+  };
 
   const actionLabel = isAuthenticated ? 'ACCOUNT' : 'LOGIN';
   const isHome = location.pathname === '/';
   const useOverlayHeader = isHome && !openMenu && !mobileOpen;
 
+  /* Desktop mega-menu */
   const renderMenu = () => {
-    if (!openMenu) {
-      return null;
-    }
+    if (!openMenu) return null;
 
-    const groups = openMenu === 'HB PRODUCTIONS' ? [] : openMenu === 'MEN' ? menuData.men : menuData.highlights;
+    const groups =
+      openMenu === 'HB PRODUCTIONS' ? [] : openMenu === 'MEN' ? menuData.men : menuData.highlights;
 
     if (openMenu === 'HB PRODUCTIONS') {
       return (
@@ -78,6 +104,9 @@ export function Topbar() {
     );
   };
 
+  /* Mobile sub-menu categories for a given section */
+  const mobGroups = mobSection === 'MEN' ? menuData.men : mobSection === 'HIGHLIGHTS' ? menuData.highlights : [];
+
   return (
     <header
       className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}${openMenu ? ' dropdown-open' : ''}`}
@@ -87,7 +116,7 @@ export function Topbar() {
         <button
           className="menu-toggle"
           type="button"
-          onClick={() => setMobileOpen(!mobileOpen)}
+          onClick={() => (mobileOpen ? closeMobile() : setMobileOpen(true))}
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
         >
           <span className={`menu-toggle-icon${mobileOpen ? ' is-open' : ''}`} aria-hidden="true" />
@@ -125,39 +154,111 @@ export function Topbar() {
         </nav>
       </div>
 
-      {openMenu && <button type="button" className="menu-backdrop" onClick={() => setOpenMenu('')} aria-label="Close menu" />}
-      {mobileOpen && (
-        <button
-          type="button"
-          className="menu-backdrop mobile-menu-backdrop"
-          onClick={() => setMobileOpen(false)}
-          aria-label="Close mobile menu"
-        />
+      {openMenu && (
+        <button type="button" className="menu-backdrop" onClick={() => setOpenMenu('')} aria-label="Close menu" />
       )}
       {renderMenu()}
 
-      {mobileOpen && (
-        <div className="mobile-panel">
-          <Link to="/shop" onClick={() => setMobileOpen(false)}>
-            SHOP
-          </Link>
-          <Link to="/hb-productions" onClick={() => setMobileOpen(false)}>
-            HB PRODUCTIONS
-          </Link>
-          <Link to="/services" onClick={() => setMobileOpen(false)}>
-            SERVICES
-          </Link>
-          <Link to="/cart" onClick={() => setMobileOpen(false)}>
-            CART
-          </Link>
-          <Link to={isAuthenticated ? '/account' : '/signin'} onClick={() => setMobileOpen(false)}>
-            {actionLabel}
-          </Link>
-          <Link to="/order-tracking" onClick={() => setMobileOpen(false)}>
-            ORDER TRACKING
-          </Link>
+      {/* ─── Full-screen mobile overlay ─── */}
+      <div className={`mob-overlay${mobileOpen ? ' mob-overlay--open' : ''}`}>
+        {/* Top bar inside overlay: X and search */}
+        <div className="mob-overlay-top">
+          <button type="button" className="mob-close" onClick={closeMobile} aria-label="Close menu">
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <line x1="3" y1="3" x2="17" y2="17" />
+              <line x1="17" y1="3" x2="3" y2="17" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="mob-search-btn"
+            onClick={() => {
+              closeMobile();
+              navigate('/shop');
+            }}
+            aria-label="Search"
+          >
+            <SearchIcon />
+          </button>
         </div>
-      )}
+
+        {/* Sliding view container */}
+        <div className="mob-views">
+          {/* Main view */}
+          <div className={`mob-view mob-view-main${mobSection ? ' mob-view--left' : ''}`}>
+            <div className="mob-primary">
+              <button type="button" onClick={() => setMobSection('HIGHLIGHTS')}>HIGHLIGHTS</button>
+              <button type="button" onClick={() => setMobSection('MEN')}>MEN</button>
+              <button
+                type="button"
+                onClick={() => {
+                  closeMobile();
+                  navigate('/hb-productions');
+                }}
+              >
+                HB PRODUCTIONS
+              </button>
+            </div>
+            <div className="mob-secondary">
+              <Link to="/services" onClick={closeMobile}>SERVICES</Link>
+              <Link to={isAuthenticated ? '/account' : '/signin'} onClick={closeMobile}>{actionLabel}</Link>
+              <Link to="/cart" onClick={closeMobile}>CART ({items.length})</Link>
+              <Link to="/order-tracking" onClick={closeMobile}>ORDER TRACKING</Link>
+            </div>
+          </div>
+
+          {/* Sub view (categories) */}
+          <div className={`mob-view mob-view-sub${mobSection ? ' mob-view--active' : ''}`}>
+            <button type="button" className="mob-back" onClick={() => { setMobSection(null); setMobExpanded(null); }}>
+              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <polyline points="10,2 4,8 10,14" />
+              </svg>
+              <span>{mobSection}</span>
+            </button>
+
+            <div className="mob-categories">
+              {mobGroups.map((cat) => (
+                <div key={cat.id} className="mob-cat">
+                  <button
+                    type="button"
+                    className={`mob-cat-toggle${mobExpanded === cat.id ? ' mob-cat-toggle--open' : ''}`}
+                    onClick={() => setMobExpanded(mobExpanded === cat.id ? null : cat.id)}
+                  >
+                    <span>{cat.name.toUpperCase()}</span>
+                    <ChevronDown open={mobExpanded === cat.id} />
+                  </button>
+                  {mobExpanded === cat.id && (
+                    <div className="mob-cat-items">
+                      {cat.series.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => {
+                            closeMobile();
+                            navigate(`/shop?category=${cat.slug}&series=${s.slug}`);
+                          }}
+                        >
+                          {s.name.toUpperCase()}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        className="mob-view-all"
+                        onClick={() => {
+                          closeMobile();
+                          navigate(`/shop?category=${cat.slug}`);
+                        }}
+                      >
+                        VIEW ALL
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
   );
 }
