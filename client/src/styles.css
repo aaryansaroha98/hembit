@@ -451,13 +451,14 @@ body.home-view .site-footer--home {
   align-items: center;
   gap: 0.5rem;
   max-width: 320px;
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: 1.6rem;
   padding: 0.6rem 0.8rem;
 }
 
 .search-overlay-inner > svg {
   flex-shrink: 0;
-  color: #999;
+  color: #111;
   width: 13px;
   height: 13px;
 }
@@ -476,7 +477,7 @@ body.home-view .site-footer--home {
 }
 
 .search-overlay-input::placeholder {
-  color: #bbb;
+  color: #111;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.65rem;
@@ -487,7 +488,7 @@ body.home-view .site-footer--home {
   background: none;
   border: none;
   cursor: pointer;
-  color: #bbb;
+  color: #111;
   padding: 0.15rem;
   flex-shrink: 0;
   transition: color 200ms ease;
@@ -3648,6 +3649,11 @@ textarea {
 @media (max-width: 900px) {
   :root {
     --topbar-height: 70px;
+  }
+
+  .search-overlay-inner {
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .menu-toggle {
