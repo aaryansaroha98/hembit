@@ -286,39 +286,39 @@ body.home-view .site-footer--home {
   border-bottom-color: transparent;
 }
 
-.topbar-wrap-overlay .topbar-left button,
-.topbar-wrap-overlay .topbar-right a,
-.topbar-wrap-overlay .topbar-right button,
-.topbar-wrap-overlay .menu-toggle,
-.topbar-wrap-overlay .mobile-search,
-.topbar-wrap-overlay .brand-mark {
+.topbar-wrap-home .topbar-left button,
+.topbar-wrap-home .topbar-right a,
+.topbar-wrap-home .topbar-right button,
+.topbar-wrap-home .menu-toggle,
+.topbar-wrap-home .mobile-search,
+.topbar-wrap-home .brand-mark {
   color: var(--hero-topbar-link-color, #111);
   transition: color 0.45s ease;
 }
 
-.topbar-wrap-overlay .topbar-left button:hover,
-.topbar-wrap-overlay .topbar-right a:hover,
-.topbar-wrap-overlay .topbar-right button:hover,
-.topbar-wrap-overlay .menu-toggle:hover,
-.topbar-wrap-overlay .mobile-search:hover {
+.topbar-wrap-home .topbar-left button:hover,
+.topbar-wrap-home .topbar-right a:hover,
+.topbar-wrap-home .topbar-right button:hover,
+.topbar-wrap-home .menu-toggle:hover,
+.topbar-wrap-home .mobile-search:hover {
   color: var(--hero-topbar-link-hover-color, #555);
 }
 
 /* Dark slide (image / video) → white topbar */
-body[data-hero-theme="dark"] .topbar-wrap-overlay .topbar-left button,
-body[data-hero-theme="dark"] .topbar-wrap-overlay .topbar-right a,
-body[data-hero-theme="dark"] .topbar-wrap-overlay .topbar-right button,
-body[data-hero-theme="dark"] .topbar-wrap-overlay .menu-toggle,
-body[data-hero-theme="dark"] .topbar-wrap-overlay .mobile-search,
-body[data-hero-theme="dark"] .topbar-wrap-overlay .brand-mark {
+body[data-hero-theme="dark"] .topbar-wrap-home .topbar-left button,
+body[data-hero-theme="dark"] .topbar-wrap-home .topbar-right a,
+body[data-hero-theme="dark"] .topbar-wrap-home .topbar-right button,
+body[data-hero-theme="dark"] .topbar-wrap-home .menu-toggle,
+body[data-hero-theme="dark"] .topbar-wrap-home .mobile-search,
+body[data-hero-theme="dark"] .topbar-wrap-home .brand-mark {
   color: var(--hero-topbar-link-color, #fff);
 }
 
-body[data-hero-theme="dark"] .topbar-wrap-overlay .topbar-left button:hover,
-body[data-hero-theme="dark"] .topbar-wrap-overlay .topbar-right a:hover,
-body[data-hero-theme="dark"] .topbar-wrap-overlay .topbar-right button:hover,
-body[data-hero-theme="dark"] .topbar-wrap-overlay .menu-toggle:hover,
-body[data-hero-theme="dark"] .topbar-wrap-overlay .mobile-search:hover {
+body[data-hero-theme="dark"] .topbar-wrap-home .topbar-left button:hover,
+body[data-hero-theme="dark"] .topbar-wrap-home .topbar-right a:hover,
+body[data-hero-theme="dark"] .topbar-wrap-home .topbar-right button:hover,
+body[data-hero-theme="dark"] .topbar-wrap-home .menu-toggle:hover,
+body[data-hero-theme="dark"] .topbar-wrap-home .mobile-search:hover {
   color: var(--hero-topbar-link-hover-color, rgba(255, 255, 255, 0.6));
 }
 

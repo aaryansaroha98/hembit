@@ -234,18 +234,25 @@ export function HeroSlider({ slides, children }) {
     const activeSlide = orderedSlides[activeIndex];
     const rawColor = String(activeSlide?.topbarLinkColor || '').trim();
     const normalized = rawColor.startsWith('#') ? rawColor : `#${rawColor}`;
+    const styleTargets = [document.documentElement.style, document.body.style];
 
     if (HEX_COLOR_REGEX.test(normalized)) {
-      document.body.style.setProperty('--hero-topbar-link-color', normalized);
-      document.body.style.setProperty('--hero-topbar-link-hover-color', toHoverRgba(normalized));
+      styleTargets.forEach((style) => {
+        style.setProperty('--hero-topbar-link-color', normalized);
+        style.setProperty('--hero-topbar-link-hover-color', toHoverRgba(normalized));
+      });
     } else {
-      document.body.style.removeProperty('--hero-topbar-link-color');
-      document.body.style.removeProperty('--hero-topbar-link-hover-color');
+      styleTargets.forEach((style) => {
+        style.removeProperty('--hero-topbar-link-color');
+        style.removeProperty('--hero-topbar-link-hover-color');
+      });
     }
 
     return () => {
-      document.body.style.removeProperty('--hero-topbar-link-color');
-      document.body.style.removeProperty('--hero-topbar-link-hover-color');
+      styleTargets.forEach((style) => {
+        style.removeProperty('--hero-topbar-link-color');
+        style.removeProperty('--hero-topbar-link-hover-color');
+      });
     };
   }, [activeIndex, orderedSlides]);
 
