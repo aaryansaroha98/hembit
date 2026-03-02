@@ -37,7 +37,14 @@ export function ShopPage() {
 
   return (
     <div className="shop-page">
-      <PageHero title={displayCategory} small />
+      {/* Desktop hero */}
+      <div className="shop-hero-desktop">
+        <PageHero title={displayCategory} small />
+      </div>
+      {/* Mobile centered title */}
+      <div className="shop-mob-title">
+        <span>{displayCategory.toUpperCase()}</span>
+      </div>
       {loading ? (
         <div className="page-status">Loading products...</div>
       ) : (

@@ -33,6 +33,9 @@ export function ProductDetailsPage() {
     const gallery = galleryRef.current;
     if (!gallery || !product?.images?.length) return;
 
+    /* Use gallery as root on mobile (horizontal scroll), viewport on desktop */
+    const isMobile = window.innerWidth <= 900;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -42,7 +45,7 @@ export function ProductDetailsPage() {
           }
         });
       },
-      { root: null, threshold: 0.6 }
+      { root: isMobile ? gallery : null, threshold: 0.6 }
     );
 
     gallery.querySelectorAll('.pdp-img').forEach((img) => observer.observe(img));
@@ -67,6 +70,14 @@ export function ProductDetailsPage() {
             <span>{currentImg + 1}</span>
             <span className="pdp-counter-line" />
             <span>{totalImages}</span>
+          </div>
+        )}
+        {/* Mobile dots */}
+        {totalImages > 1 && (
+          <div className="pdp-dots">
+            {product.images.map((_, i) => (
+              <span key={i} className={`pdp-dot${i === currentImg ? ' pdp-dot--active' : ''}`} />
+            ))}
           </div>
         )}
       </div>
