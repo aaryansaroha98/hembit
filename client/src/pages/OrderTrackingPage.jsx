@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { PageHero } from '../components/PageHero';
 import { api } from '../services/api';
 
 export function OrderTrackingPage() {
@@ -22,43 +21,45 @@ export function OrderTrackingPage() {
   };
 
   return (
-    <section>
-      <PageHero title="Order Tracking" subtitle="Track your order status" />
-      <div className="tracking-shell section-pad">
-        <form onSubmit={onSubmit} className="tracking-form">
-          <input
-            type="text"
-            placeholder="Order ID"
-            value={form.orderId}
-            onChange={(e) => setForm((prev) => ({ ...prev, orderId: e.target.value }))}
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-            required
-          />
-          <button type="submit" className="primary-btn">
-            Track
-          </button>
-        </form>
-        {message && <p className="form-message">{message}</p>}
+    <section className="content-page">
+      <div className="content-page-inner">
+        <h1>ORDER TRACKING</h1>
+        <div className="tracking-shell" style={{ marginTop: '3rem' }}>
+          <form onSubmit={onSubmit} className="tracking-form">
+            <input
+              type="text"
+              placeholder="Order ID"
+              value={form.orderId}
+              onChange={(e) => setForm((prev) => ({ ...prev, orderId: e.target.value }))}
+              required
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+              required
+            />
+            <button type="submit" className="primary-btn">
+              Track
+            </button>
+          </form>
+          {message && <p className="form-message">{message}</p>}
 
-        {order && (
-          <article className="order-track-card">
-            <h2>{order.orderNumber || order.id}</h2>
-            <p>Status: {order.status}</p>
-            <p>Total: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(order.total)}</p>
-            <h3>Timeline</h3>
-            <ul>
-              {order.timeline.map((entry) => (
-                <li key={`${entry.status}-${entry.at}`}>{`${entry.status} - ${new Date(entry.at).toLocaleString()}`}</li>
-              ))}
-            </ul>
-          </article>
-        )}
+          {order && (
+            <article className="order-track-card">
+              <h2>{order.orderNumber || order.id}</h2>
+              <p>Status: {order.status}</p>
+              <p>Total: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(order.total)}</p>
+              <h3>Timeline</h3>
+              <ul>
+                {order.timeline.map((entry) => (
+                  <li key={`${entry.status}-${entry.at}`}>{`${entry.status} - ${new Date(entry.at).toLocaleString()}`}</li>
+                ))}
+              </ul>
+            </article>
+          )}
+        </div>
       </div>
     </section>
   );
