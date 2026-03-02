@@ -75,6 +75,7 @@ export function AdminPage() {
   const [postForm, setPostForm] = useState({ title: '', excerpt: '', image: '', body: '' });
   const [editingProductId, setEditingProductId] = useState(null);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editingSeries, setEditingSeries] = useState(null);
   const [editingSlideId, setEditingSlideId] = useState(null);
   const [editingPostId, setEditingPostId] = useState(null);
   const [newsletterForm, setNewsletterForm] = useState({ subject: '', body: '' });
@@ -531,11 +532,12 @@ export function AdminPage() {
               )}
             </div>
 
-            <h3>Add Series</h3>
+            <h3>{editingSeries ? 'Edit Series' : 'Add Series'}</h3>
             <div className="inline-form">
               <select
                 value={seriesForm.categoryId}
                 onChange={(e) => setSeriesForm((prev) => ({ ...prev, categoryId: e.target.value }))}
+                disabled={Boolean(editingSeries)}
               >
                 <option value="">Select Category</option>
                 {categories.map((category) => (
@@ -557,13 +559,40 @@ export function AdminPage() {
               <button
                 type="button"
                 onClick={async () => {
-                  await api.post(`/admin/categories/${seriesForm.categoryId}/series`, seriesForm, token);
-                  setSeriesForm({ categoryId: '', name: '', slug: '' });
-                  loadAll();
+                  try {
+                    if (editingSeries) {
+                      await api.put(
+                        `/admin/categories/${editingSeries.categoryId}/series/${editingSeries.seriesId}`,
+                        { name: seriesForm.name, slug: seriesForm.slug },
+                        token
+                      );
+                      setMessage('Series updated');
+                    } else {
+                      await api.post(`/admin/categories/${seriesForm.categoryId}/series`, seriesForm, token);
+                      setMessage('Series added');
+                    }
+                    setEditingSeries(null);
+                    setSeriesForm({ categoryId: '', name: '', slug: '' });
+                    loadAll();
+                  } catch (err) {
+                    setMessage(err.message);
+                  }
                 }}
               >
-                Add Series
+                {editingSeries ? 'Update Series' : 'Add Series'}
               </button>
+              {editingSeries && (
+                <button
+                  type="button"
+                  style={{ background: '#666' }}
+                  onClick={() => {
+                    setEditingSeries(null);
+                    setSeriesForm({ categoryId: '', name: '', slug: '' });
+                  }}
+                >
+                  Cancel
+                </button>
+              )}
             </div>
 
             {categories.map((category) => (
@@ -572,13 +601,28 @@ export function AdminPage() {
                 <small>{category.slug}</small>
                 <div className="series-list">
                   {category.series.map((series) => (
-                    <span key={series.id}>
-                      {series.name}
+                    <span key={series.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      {series.name} ({series.slug})
                       <button
                         type="button"
-                        style={{ marginLeft: 4, fontSize: '0.7rem', padding: '1px 6px', background: '#c00' }}
+                        style={{ fontSize: '0.62rem', padding: '1px 6px', background: '#1f2937' }}
+                        onClick={() => {
+                          setEditingSeries({ categoryId: category.id, seriesId: series.id });
+                          setSeriesForm({ categoryId: category.id, name: series.name, slug: series.slug });
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        style={{ fontSize: '0.7rem', padding: '1px 6px', background: '#c00' }}
                         onClick={async () => {
                           await api.del(`/admin/categories/${category.id}/series/${series.id}`, token);
+                          if (editingSeries?.seriesId === series.id) {
+                            setEditingSeries(null);
+                            setSeriesForm({ categoryId: '', name: '', slug: '' });
+                          }
                           loadAll();
                         }}
                       >

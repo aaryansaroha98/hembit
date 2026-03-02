@@ -385,6 +385,57 @@ adminRouter.post('/categories/:id/series', (req, res) => {
   return res.status(201).json({ series: addedSeries });
 });
 
+adminRouter.put('/categories/:id/series/:seriesId', (req, res) => {
+  const { id, seriesId } = req.params;
+  const { name, slug } = req.body;
+
+  if (typeof name === 'undefined' && typeof slug === 'undefined') {
+    return res.status(400).json({ message: 'name or slug is required' });
+  }
+
+  if (typeof name !== 'undefined' && !name) {
+    return res.status(400).json({ message: 'name cannot be empty' });
+  }
+
+  if (typeof slug !== 'undefined' && !slug) {
+    return res.status(400).json({ message: 'slug cannot be empty' });
+  }
+
+  let categoryFound = false;
+  let updatedSeries = null;
+  writeDb((db) => {
+    const category = db.categories.find((item) => item.id === id);
+    if (!category) {
+      return;
+    }
+    categoryFound = true;
+
+    const series = category.series.find((item) => item.id === seriesId);
+    if (!series) {
+      return;
+    }
+
+    if (typeof name !== 'undefined') {
+      series.name = name;
+    }
+    if (typeof slug !== 'undefined') {
+      series.slug = slug;
+    }
+
+    updatedSeries = series;
+  });
+
+  if (!categoryFound) {
+    return res.status(404).json({ message: 'Category not found' });
+  }
+
+  if (!updatedSeries) {
+    return res.status(404).json({ message: 'Series not found' });
+  }
+
+  return res.json({ series: updatedSeries });
+});
+
 adminRouter.delete('/categories/:id/series/:seriesId', (req, res) => {
   const { id, seriesId } = req.params;
 
