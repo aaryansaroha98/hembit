@@ -1138,6 +1138,10 @@ textarea {
   margin-top: 0;
 }
 
+.pdp-accordion:first-of-type {
+  margin-top: 1rem;
+}
+
 /* Gallery dots (mobile only) */
 .pdp-dots {
   display: none;
