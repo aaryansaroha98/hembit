@@ -1061,9 +1061,9 @@ textarea {
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  margin-top: 1.8rem;
-  padding-top: 1.2rem;
-  border-top: 1px solid var(--line);
+  margin-top: 1rem;
+  padding-top: 0;
+  border-top: none;
 }
 
 .pdp-size-label {
