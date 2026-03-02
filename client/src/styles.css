@@ -4063,7 +4063,8 @@ textarea {
     padding-top: 1rem;
     display: grid;
     gap: 0.62rem;
-    justify-content: start;
+    justify-content: center;
+    text-align: center;
   }
 
   .site-footer--home .footer-bottom-row {
