@@ -940,6 +940,7 @@ textarea {
 
 .product-gallery img {
   width: 100%;
+  max-width: 520px;
   object-fit: cover;
   border: 1px solid var(--line);
 }
@@ -965,6 +966,14 @@ textarea {
   color: var(--text-soft);
   line-height: 1.7;
   font-size: 0.83rem;
+}
+
+.pdp-series {
+  font-size: 0.68rem !important;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft) !important;
+  font-weight: 400;
 }
 
 .product-info h1 {

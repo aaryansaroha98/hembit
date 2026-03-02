@@ -38,7 +38,7 @@ export function ProductDetailsPage() {
       </div>
 
       <div className="product-info">
-        <p>{product.categoryName}</p>
+        <p className="pdp-series">{product.seriesName}</p>
         <h1>{product.name}</h1>
         <strong>{product.displayPrice || formatPrice(product.price)}</strong>
         <p>{product.description}</p>
