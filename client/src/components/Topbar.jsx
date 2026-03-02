@@ -300,9 +300,9 @@ export function Topbar() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button type="button" className="search-overlay-close" onClick={closeSearch} aria-label="Close search">
-            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <line x1="3" y1="3" x2="17" y2="17" />
-              <line x1="17" y1="3" x2="3" y2="17" />
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="4" y1="4" x2="16" y2="16" />
+              <line x1="16" y1="4" x2="4" y2="16" />
             </svg>
           </button>
         </form>
