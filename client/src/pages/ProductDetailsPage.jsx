@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { useCart } from '../context/CartContext';
@@ -17,52 +17,90 @@ export function ProductDetailsPage() {
   const [product, setProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState('M');
   const [message, setMessage] = useState('');
+  const [currentImg, setCurrentImg] = useState(0);
+  const galleryRef = useRef(null);
 
   useEffect(() => {
     api.get(`/public/product/${slug}`).then((response) => {
       setProduct(response.product);
       setSelectedSize(response.product.sizes?.[0] || 'M');
+      setCurrentImg(0);
     });
   }, [slug]);
+
+  /* Track which image is in view */
+  useEffect(() => {
+    const gallery = galleryRef.current;
+    if (!gallery || !product?.images?.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number(entry.target.dataset.idx);
+            if (!isNaN(idx)) setCurrentImg(idx);
+          }
+        });
+      },
+      { root: null, threshold: 0.6 }
+    );
+
+    gallery.querySelectorAll('.pdp-img').forEach((img) => observer.observe(img));
+    return () => observer.disconnect();
+  }, [product]);
 
   if (!product) {
     return <div className="page-status">Loading product...</div>;
   }
 
+  const totalImages = product.images?.length || 0;
+
   return (
-    <section className="section-pad product-page">
-      <div className="product-gallery">
-        {product.images?.map((image) => (
-          <img key={image} src={image} alt={product.name} />
+    <section className="pdp">
+      {/* Gallery */}
+      <div className="pdp-gallery" ref={galleryRef}>
+        {product.images?.map((image, i) => (
+          <img key={image} src={image} alt={product.name} className="pdp-img" data-idx={i} />
         ))}
+        {totalImages > 1 && (
+          <div className="pdp-counter">
+            <span>{currentImg + 1}</span>
+            <span className="pdp-counter-line" />
+            <span>{totalImages}</span>
+          </div>
+        )}
       </div>
 
-      <div className="product-info">
+      {/* Product info */}
+      <div className="pdp-info">
+        <h1 className="pdp-name">{product.name}</h1>
         <p className="pdp-series">{product.seriesName}</p>
-        <h1>{product.name}</h1>
-        <strong>{product.displayPrice || formatPrice(product.price)}</strong>
-        <p>{product.description}</p>
 
-        <label htmlFor="size">Size</label>
-        <select id="size" value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)}>
-          {(product.sizes || []).map((size) => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </select>
+        <div className="pdp-size-row">
+          <span className="pdp-size-label">SIZE</span>
+          <select value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)}>
+            {(product.sizes || []).map((size) => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
+        </div>
+
+        <p className="pdp-desc">{product.description}</p>
+
+        <strong className="pdp-price">{product.displayPrice || formatPrice(product.price)}</strong>
 
         <button
           type="button"
-          className="primary-btn"
+          className="pdp-add-btn"
           onClick={() => {
             addItem(product, selectedSize, 1);
             setMessage('Added to cart');
+            setTimeout(() => setMessage(''), 2500);
           }}
         >
           ADD TO CART
         </button>
-        {message && <small>{message}</small>}
+        {message && <small className="pdp-msg">{message}</small>}
 
         <details className="pdp-accordion">
           <summary>More Details</summary>

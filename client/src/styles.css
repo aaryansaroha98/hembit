@@ -924,87 +924,164 @@ textarea {
   color: #8a8a8a;
 }
 
-/* Product detail */
-.product-page {
+/* Product detail — YSL-inspired */
+.pdp {
   display: grid;
-  grid-template-columns: 1.08fr 1fr;
-  gap: 1.6rem;
-  align-items: start;
+  grid-template-columns: 1.35fr 1fr;
+  min-height: calc(100vh - var(--topbar-height));
 }
 
-.product-gallery {
+/* Gallery */
+.pdp-gallery {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 2px;
+  background: #f5f5f3;
 }
 
-.product-gallery img {
+.pdp-img {
   width: 100%;
-  max-width: 520px;
+  display: block;
   object-fit: cover;
-  border: 1px solid var(--line);
 }
 
-.product-info {
+.pdp-counter {
+  position: fixed;
+  left: 1.6rem;
+  bottom: 50%;
+  transform: translateY(50%);
   display: flex;
   flex-direction: column;
-  gap: 0.72rem;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: #555;
+}
+
+.pdp-counter-line {
+  width: 1px;
+  height: 18px;
+  background: #999;
+}
+
+/* Info panel */
+.pdp-info {
+  padding: clamp(2rem, 4vw, 3.5rem) clamp(2rem, 5vw, 4.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   position: sticky;
-  top: calc(var(--topbar-height) + 1.6rem);
-  max-height: calc(100vh - var(--topbar-height) - 3.2rem);
+  top: var(--topbar-height);
+  max-height: calc(100vh - var(--topbar-height));
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-.product-info::-webkit-scrollbar {
+.pdp-info::-webkit-scrollbar {
   display: none;
 }
 
-.product-info p {
+.pdp-name {
   margin: 0;
-  color: var(--text-soft);
-  line-height: 1.7;
-  font-size: 0.83rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.4;
 }
 
 .pdp-series {
-  font-size: 0.68rem !important;
-  letter-spacing: 0.12em;
+  margin: 0.5rem 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-soft) !important;
+  color: var(--text-soft);
   font-weight: 400;
 }
 
-.product-info h1 {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  margin: 0.5em 0 0.7em 0;
-  text-transform: uppercase;
-}
-  line-height: 1.2;
+.pdp-size-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.8rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line);
 }
 
-.product-info strong {
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-.product-info label {
-  font-size: 0.7rem;
+.pdp-size-label {
+  font-size: 0.68rem;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.product-info select {
-  max-width: 160px;
+.pdp-size-row select {
+  flex: 1;
+  max-width: 240px;
+  appearance: auto;
+  border: 1px solid var(--line);
+  background: transparent;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #555;
+  cursor: pointer;
+}
+
+.pdp-desc {
+  margin: 1.6rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.7;
+  color: #111;
+}
+
+.pdp-price {
+  display: block;
+  margin-top: 1.4rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.pdp-add-btn {
+  margin-top: 1.4rem;
+  width: 100%;
+  height: 48px;
+  background: #111;
+  color: #fff;
+  border: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 200ms ease;
+}
+
+.pdp-add-btn:hover {
+  background: #333;
+}
+
+.pdp-msg {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--text-soft);
 }
 
 .pdp-accordion {
   border-top: 1px solid var(--line);
   padding: 0;
+  margin-top: 0.3rem;
 }
 
 .pdp-accordion summary {
@@ -1025,14 +1102,15 @@ textarea {
 }
 
 .pdp-accordion summary::after {
-  content: '+';
-  font-size: 1rem;
-  font-weight: 300;
+  content: '>';
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0;
   transition: transform var(--t-fast) var(--ease);
 }
 
 .pdp-accordion[open] summary::after {
-  content: '−';
+  transform: rotate(90deg);
 }
 
 .pdp-accordion-body {
@@ -3318,7 +3396,7 @@ textarea {
   }
 
   .shop-toolbar,
-  .product-page,
+  .pdp,
   .cart-layout,
   .checkout-layout,
   .co-page,
@@ -3326,6 +3404,19 @@ textarea {
   .admin-form-grid,
   .inline-form {
     grid-template-columns: 1fr;
+  }
+
+  .pdp-counter {
+    position: absolute;
+    left: 0.8rem;
+    bottom: 1rem;
+    transform: none;
+  }
+
+  .pdp-info {
+    position: static;
+    max-height: none;
+    padding: 1.5rem 1.2rem 3rem;
   }
 
   .co-page { gap: 1.5rem; }
