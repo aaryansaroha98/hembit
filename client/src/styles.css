@@ -83,22 +83,22 @@ body.home-view .topbar-wrap.dropdown-open {
   transition: background-color var(--t-med) var(--ease);
 }
 .site-footer--home .newsletter-form input {
-  font-size: 0.78rem;
-  padding: 0 0.8rem;
-  height: 44px;
+  font-size: 0.66rem;
+  padding: 0 0.6rem;
+  height: 30px;
   border: 1px solid var(--line);
   border-radius: 0;
   width: 100%;
-  max-width: 320px;
+  max-width: 220px;
   box-sizing: border-box;
   background: #fff;
 }
 
 .site-footer--home .newsletter-form button {
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  padding: 0 1.4rem;
-  height: 38px;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  padding: 0 0.9rem;
+  height: 26px;
   border: 1px solid var(--line-strong);
   border-radius: 0;
   background: #fff;
@@ -107,13 +107,13 @@ body.home-view .topbar-wrap.dropdown-open {
   text-transform: uppercase;
 }
 .site-footer--home .newsletter-form label {
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
   line-height: 1.58;
   font-weight: 500;
   color: #111;
   text-transform: uppercase;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.45rem;
 }
 :root {
   --bg: #ffffff;
@@ -1135,7 +1135,7 @@ textarea {
 .pdp-accordion {
   border-top: none;
   padding: 0;
-  margin-top: 0.3rem;
+  margin-top: 0;
 }
 
 /* Gallery dots (mobile only) */
@@ -2670,12 +2670,12 @@ textarea {
 
 .site-footer--compact .footer-main-grid {
   margin-top: clamp(3rem, 6vh, 5rem);
-  grid-template-columns: repeat(4, minmax(122px, max-content));
-  max-width: 1080px;
+  grid-template-columns: repeat(4, minmax(100px, max-content));
+  max-width: 900px;
   gap: 1.05rem clamp(2rem, 5.2vw, 4.6rem);
   justify-content: center;
-  justify-items: start;
-  text-align: left;
+  justify-items: center;
+  text-align: center;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -2700,32 +2700,32 @@ textarea {
 }
 
 .site-footer--compact .newsletter-form label {
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
   line-height: 1.58;
   font-weight: 500;
   color: #111;
   text-transform: uppercase;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.45rem;
 }
 
 .site-footer--compact .newsletter-form input {
-  font-size: 0.78rem;
-  padding: 0 0.8rem;
-  height: 44px;
+  font-size: 0.66rem;
+  padding: 0 0.6rem;
+  height: 30px;
   border: 1px solid var(--line);
   border-radius: 0;
   width: 100%;
-  max-width: 320px;
+  max-width: 220px;
   box-sizing: border-box;
   background: #fff;
 }
 
 .site-footer--compact .newsletter-form button {
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  padding: 0 1.4rem;
-  height: 38px;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  padding: 0 0.9rem;
+  height: 26px;
   border: 1px solid var(--line-strong);
   border-radius: 0;
   background: #fff;
@@ -4039,9 +4039,13 @@ textarea {
     font-size: 0.72rem;
   }
 
-  .site-footer--compact .newsletter-form input,
+  .site-footer--compact .newsletter-form input {
+    height: 36px;
+    max-width: 240px;
+  }
+
   .site-footer--compact .newsletter-form button {
-    height: 44px;
+    height: 30px;
   }
 
   .site-footer--home {
