@@ -292,8 +292,7 @@ body.home-view .site-footer--home {
 .topbar-wrap-overlay .menu-toggle,
 .topbar-wrap-overlay .mobile-search,
 .topbar-wrap-overlay .brand-mark {
-  color: #fff;
-  transition: color 300ms ease;
+  color: #111;
 }
 
 .topbar-wrap-overlay .topbar-left button:hover,
@@ -301,24 +300,6 @@ body.home-view .site-footer--home {
 .topbar-wrap-overlay .topbar-right button:hover,
 .topbar-wrap-overlay .menu-toggle:hover,
 .topbar-wrap-overlay .mobile-search:hover {
-  color: rgba(255, 255, 255, 0.65);
-}
-
-/* Light slide (e.g. product panel) → dark topbar text */
-body[data-hero-theme="light"] .topbar-wrap-overlay .topbar-left button,
-body[data-hero-theme="light"] .topbar-wrap-overlay .topbar-right a,
-body[data-hero-theme="light"] .topbar-wrap-overlay .topbar-right button,
-body[data-hero-theme="light"] .topbar-wrap-overlay .menu-toggle,
-body[data-hero-theme="light"] .topbar-wrap-overlay .mobile-search,
-body[data-hero-theme="light"] .topbar-wrap-overlay .brand-mark {
-  color: #111;
-}
-
-body[data-hero-theme="light"] .topbar-wrap-overlay .topbar-left button:hover,
-body[data-hero-theme="light"] .topbar-wrap-overlay .topbar-right a:hover,
-body[data-hero-theme="light"] .topbar-wrap-overlay .topbar-right button:hover,
-body[data-hero-theme="light"] .topbar-wrap-overlay .menu-toggle:hover,
-body[data-hero-theme="light"] .topbar-wrap-overlay .mobile-search:hover {
   color: #555;
 }
 

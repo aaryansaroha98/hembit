@@ -128,13 +128,6 @@ export function HeroSlider({ slides, children }) {
 
   const isProductSlide = orderedSlides[activeIndex]?.type === 'products';
 
-  // Communicate slide theme to Topbar via body attribute
-  useEffect(() => {
-    const theme = isProductSlide ? 'light' : 'dark';
-    document.body.setAttribute('data-hero-theme', theme);
-    return () => document.body.removeAttribute('data-hero-theme');
-  }, [isProductSlide]);
-
   return (
     <section className="hero-slider">
       {/* Navigation dots */}
