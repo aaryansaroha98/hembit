@@ -783,7 +783,7 @@ body.home-view .mega-menu {
 
 /* Shop page */
 .shop-page {
-  background: #f5f5f3;
+  background: #fff;
   min-height: calc(100vh - var(--topbar-height));
 }
 
@@ -792,14 +792,14 @@ body.home-view .mega-menu {
 }
 
 .shop-grid-wrap {
-  padding: 0.6rem 0 3rem;
+  padding: 0.4rem 1.6rem 3rem;
 }
 
 /* Product grid */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
+  gap: 1rem;
 }
 
 .product-card {
@@ -3751,6 +3751,10 @@ textarea {
 
   .shop-grid-wrap {
     padding: 0 0 2rem;
+  }
+
+  .shop-page {
+    background: #f5f5f3;
   }
 
   .pc-arrow,
