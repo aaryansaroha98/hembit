@@ -804,21 +804,10 @@ body.home-view .mega-menu {
 
 .hero-overlay h1 {
   margin: 0.7rem 0 1.15rem;
+  font-size: var(--hero-title-size, 72px);
   line-height: 1.02;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-}
-
-.hero-overlay--title-small h1 {
-  font-size: clamp(1.3rem, 3.7vw, 3rem);
-}
-
-.hero-overlay--title-medium h1 {
-  font-size: clamp(1.75rem, 5.2vw, 4.5rem);
-}
-
-.hero-overlay--title-large h1 {
-  font-size: clamp(2rem, 6vw, 5.8rem);
 }
 
 .hero-overlay a {
@@ -911,22 +900,11 @@ body.home-view .mega-menu {
 
 .hero-product-header h2 {
   margin: 0.4rem 0 0;
+  font-size: var(--hero-product-title-size, 36px);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-weight: 600;
   color: #111;
-}
-
-.hero-product-header--title-small h2 {
-  font-size: clamp(0.95rem, 2.4vw, 1.85rem);
-}
-
-.hero-product-header--title-medium h2 {
-  font-size: clamp(1.1rem, 3vw, 2.2rem);
-}
-
-.hero-product-header--title-large h2 {
-  font-size: clamp(1.35rem, 3.8vw, 2.8rem);
 }
 
 .hero-product-grid {
@@ -4370,6 +4348,14 @@ textarea {
 
   .hero-overlay {
     max-width: calc(100vw - 1.8rem);
+  }
+
+  .hero-overlay h1 {
+    font-size: clamp(1.25rem, 8.6vw, var(--hero-title-size, 72px));
+  }
+
+  .hero-product-header h2 {
+    font-size: clamp(0.95rem, 5.4vw, var(--hero-product-title-size, 36px));
   }
 
   .hero-overlay--pos-bottom-left,

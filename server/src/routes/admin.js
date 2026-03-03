@@ -59,7 +59,7 @@ function normalizeHexColor(value) {
   return { value: normalized.toUpperCase(), valid: isValid };
 }
 
-const ALLOWED_SLIDE_TITLE_SIZES = new Set(['small', 'medium', 'large']);
+const LEGACY_SLIDE_TITLE_SIZES = new Set(['small', 'medium', 'large']);
 const ALLOWED_SLIDE_TITLE_POSITIONS = new Set([
   'bottom-left',
   'bottom-center',
@@ -71,16 +71,29 @@ const ALLOWED_SLIDE_TITLE_POSITIONS = new Set([
   'top-center',
   'top-right',
 ]);
+const MIN_SLIDE_TITLE_SIZE_PX = 20;
+const MAX_SLIDE_TITLE_SIZE_PX = 120;
 
 function normalizeSlideTitleSize(value) {
   const raw = String(value || '').trim().toLowerCase();
   if (!raw) {
-    return { value: 'medium', valid: true };
+    return { value: '72px', valid: true };
   }
 
+  if (LEGACY_SLIDE_TITLE_SIZES.has(raw)) {
+    return { value: raw, valid: true };
+  }
+
+  const match = raw.match(/^(\d{1,3})(?:px)?$/);
+  if (!match) {
+    return { value: '72px', valid: false };
+  }
+
+  const sizePx = Number(match[1]);
+  const valid = Number.isInteger(sizePx) && sizePx >= MIN_SLIDE_TITLE_SIZE_PX && sizePx <= MAX_SLIDE_TITLE_SIZE_PX;
   return {
-    value: ALLOWED_SLIDE_TITLE_SIZES.has(raw) ? raw : 'medium',
-    valid: ALLOWED_SLIDE_TITLE_SIZES.has(raw),
+    value: `${sizePx}px`,
+    valid,
   };
 }
 
@@ -564,7 +577,9 @@ adminRouter.post('/slides', (req, res) => {
     return res.status(400).json({ message: 'topbarLinkColor must be a valid hex color' });
   }
   if (!parsedTitleSize.valid) {
-    return res.status(400).json({ message: 'titleSize must be one of: small, medium, large' });
+    return res.status(400).json({
+      message: `titleSize must be a px value between ${MIN_SLIDE_TITLE_SIZE_PX}px and ${MAX_SLIDE_TITLE_SIZE_PX}px (legacy small/medium/large also supported)`,
+    });
   }
   if (!parsedTitlePosition.valid) {
     return res.status(400).json({
@@ -634,7 +649,9 @@ adminRouter.put('/slides/:id', (req, res) => {
     return res.status(400).json({ message: 'topbarLinkColor must be a valid hex color' });
   }
   if (parsedTitleSize && !parsedTitleSize.valid) {
-    return res.status(400).json({ message: 'titleSize must be one of: small, medium, large' });
+    return res.status(400).json({
+      message: `titleSize must be a px value between ${MIN_SLIDE_TITLE_SIZE_PX}px and ${MAX_SLIDE_TITLE_SIZE_PX}px (legacy small/medium/large also supported)`,
+    });
   }
   if (parsedTitlePosition && !parsedTitlePosition.valid) {
     return res.status(400).json({
@@ -657,7 +674,7 @@ adminRouter.put('/slides/:id', (req, res) => {
       ctaLabel: payload.ctaLabel ?? slide.ctaLabel,
       ctaLink: payload.ctaLink ?? slide.ctaLink,
       topbarLinkColor: parsedTopbarColor ? parsedTopbarColor.value : (slide.topbarLinkColor || ''),
-      titleSize: parsedTitleSize ? parsedTitleSize.value : (slide.titleSize || 'medium'),
+      titleSize: parsedTitleSize ? parsedTitleSize.value : (slide.titleSize || '72px'),
       titlePosition: parsedTitlePosition ? parsedTitlePosition.value : (slide.titlePosition || 'bottom-left'),
       productIds: payload.productIds ?? slide.productIds ?? [],
       layout: payload.layout !== undefined ? Number(payload.layout) : (slide.layout ?? 0),

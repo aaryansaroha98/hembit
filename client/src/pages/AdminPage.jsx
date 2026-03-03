@@ -17,11 +17,11 @@ const TABS = [
   'Users & Subscribers Mail',
 ];
 const HEX_COLOR_PATTERN = /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
-const SLIDE_TITLE_SIZES = [
-  { value: 'small', label: 'Title Size: Small' },
-  { value: 'medium', label: 'Title Size: Medium' },
-  { value: 'large', label: 'Title Size: Large' },
-];
+const SLIDE_TITLE_SIZE_OPTIONS_PX = [24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 72, 80, 88, 96];
+const SLIDE_TITLE_SIZES = SLIDE_TITLE_SIZE_OPTIONS_PX.map((px) => ({
+  value: `${px}px`,
+  label: `Title Size: ${px}px`,
+}));
 const SLIDE_TITLE_POSITIONS = [
   { value: 'bottom-left', label: 'Title Position: Bottom Left' },
   { value: 'bottom-center', label: 'Title Position: Bottom Center' },
@@ -33,6 +33,34 @@ const SLIDE_TITLE_POSITIONS = [
   { value: 'top-center', label: 'Title Position: Top Center' },
   { value: 'top-right', label: 'Title Position: Top Right' },
 ];
+const LEGACY_SLIDE_TITLE_SIZE_MAP = {
+  small: '48px',
+  medium: '72px',
+  large: '96px',
+};
+const DEFAULT_SLIDE_TITLE_SIZE = '72px';
+
+function normalizeSlideTitleSizeForForm(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) {
+    return DEFAULT_SLIDE_TITLE_SIZE;
+  }
+  if (LEGACY_SLIDE_TITLE_SIZE_MAP[raw]) {
+    return LEGACY_SLIDE_TITLE_SIZE_MAP[raw];
+  }
+
+  const match = raw.match(/^(\d{1,3})(?:px)?$/);
+  if (!match) {
+    return DEFAULT_SLIDE_TITLE_SIZE;
+  }
+
+  const requestedPx = Number(match[1]);
+  const closest = SLIDE_TITLE_SIZE_OPTIONS_PX.reduce((best, sizePx) => {
+    return Math.abs(sizePx - requestedPx) < Math.abs(best - requestedPx) ? sizePx : best;
+  }, SLIDE_TITLE_SIZE_OPTIONS_PX[0]);
+
+  return `${closest}px`;
+}
 
 function createInitialSlideForm() {
   return {
@@ -45,7 +73,7 @@ function createInitialSlideForm() {
     topbarLinkColor: '',
     productIds: [],
     layout: 2,
-    titleSize: 'medium',
+    titleSize: DEFAULT_SLIDE_TITLE_SIZE,
     titlePosition: 'bottom-left',
   };
 }
@@ -961,7 +989,7 @@ export function AdminPage() {
                   <p>
                     {slide.type}
                     {slide.type === 'products' ? ` · ${slide.layout || 2} products` : ''}
-                    {` · ${slide.titleSize || 'medium'} · ${slide.titlePosition || 'bottom-left'}`}
+                    {` · ${normalizeSlideTitleSizeForForm(slide.titleSize)} · ${slide.titlePosition || 'bottom-left'}`}
                   </p>
                 </div>
                 <button
@@ -978,7 +1006,7 @@ export function AdminPage() {
                       topbarLinkColor: slide.topbarLinkColor || '',
                       productIds: slide.productIds || [],
                       layout: slide.layout || 2,
-                      titleSize: slide.titleSize || 'medium',
+                      titleSize: normalizeSlideTitleSizeForForm(slide.titleSize),
                       titlePosition: slide.titlePosition || 'bottom-left',
                     });
                     window.scrollTo({ top: 0, behavior: 'smooth' });

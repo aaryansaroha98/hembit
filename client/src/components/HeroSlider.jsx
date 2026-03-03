@@ -6,7 +6,11 @@ const COOLDOWN = TRANSITION_DURATION + 60;
 const WHEEL_THRESHOLD = 30;
 const TOUCH_THRESHOLD = 40;
 const HEX_COLOR_REGEX = /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
-const ALLOWED_TITLE_SIZES = new Set(['small', 'medium', 'large']);
+const LEGACY_TITLE_SIZE_TO_PX = {
+  small: 48,
+  medium: 72,
+  large: 96,
+};
 const ALLOWED_TITLE_POSITIONS = new Set([
   'bottom-left',
   'bottom-center',
@@ -18,6 +22,8 @@ const ALLOWED_TITLE_POSITIONS = new Set([
   'top-center',
   'top-right',
 ]);
+const MIN_TITLE_SIZE_PX = 20;
+const MAX_TITLE_SIZE_PX = 120;
 
 function toHoverRgba(hexColor) {
   if (!HEX_COLOR_REGEX.test(hexColor)) {
@@ -36,9 +42,25 @@ function toHoverRgba(hexColor) {
   return `rgba(${r}, ${g}, ${b}, 0.72)`;
 }
 
-function getSlideTitleSize(slide) {
+function clampTitleSizePx(value, fallbackPx = 72) {
+  if (!Number.isFinite(value)) {
+    return fallbackPx;
+  }
+  return Math.min(MAX_TITLE_SIZE_PX, Math.max(MIN_TITLE_SIZE_PX, Math.round(value)));
+}
+
+function getSlideTitleSizePx(slide, fallbackPx = 72) {
   const value = String(slide?.titleSize || '').trim().toLowerCase();
-  return ALLOWED_TITLE_SIZES.has(value) ? value : 'medium';
+  if (LEGACY_TITLE_SIZE_TO_PX[value]) {
+    return LEGACY_TITLE_SIZE_TO_PX[value];
+  }
+
+  const match = value.match(/^(\d{1,3})(?:px)?$/);
+  if (match) {
+    return clampTitleSizePx(Number(match[1]), fallbackPx);
+  }
+
+  return fallbackPx;
 }
 
 function getSlideTitlePosition(slide) {
@@ -295,7 +317,8 @@ export function HeroSlider({ slides, children }) {
 
       {/* Image / video / product slides */}
       {orderedSlides.map((slide, i) => {
-        const titleSize = getSlideTitleSize(slide);
+        const titleSizePx = getSlideTitleSizePx(slide);
+        const productTitleSizePx = Math.max(20, Math.round(titleSizePx * 0.5));
         const titlePosition = getSlideTitlePosition(slide);
 
         return (
@@ -304,7 +327,10 @@ export function HeroSlider({ slides, children }) {
               /* ─── Product Grid Panel ─── */
               <div className="hero-product-panel">
                 {hasOverlay(slide) && (
-                  <div className={`hero-product-header hero-product-header--title-${titleSize}${i === activeIndex ? ' hero-overlay--visible' : ''}`}>
+                  <div
+                    className={`hero-product-header${i === activeIndex ? ' hero-overlay--visible' : ''}`}
+                    style={{ '--hero-product-title-size': `${productTitleSizePx}px` }}
+                  >
                     {slide.subtitle && <p className="hero-overline">{slide.subtitle}</p>}
                     {slide.title && <h2>{slide.title}</h2>}
                   </div>
@@ -345,7 +371,8 @@ export function HeroSlider({ slides, children }) {
                 {hasOverlay(slide) && <div className="hero-slide-mask" />}
                 {hasOverlay(slide) && (
                   <div
-                    className={`hero-overlay hero-overlay--title-${titleSize} hero-overlay--pos-${titlePosition}${i === activeIndex ? ' hero-overlay--visible' : ''}`}
+                    className={`hero-overlay hero-overlay--pos-${titlePosition}${i === activeIndex ? ' hero-overlay--visible' : ''}`}
+                    style={{ '--hero-title-size': `${titleSizePx}px` }}
                   >
                     {slide.subtitle && <p className="hero-overline">{slide.subtitle}</p>}
                     {slide.title && <h1>{slide.title}</h1>}
