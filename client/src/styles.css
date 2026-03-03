@@ -322,6 +322,24 @@ body[data-hero-theme="dark"] .topbar-wrap-home .mobile-search:hover {
   color: var(--hero-topbar-link-hover-color, rgba(255, 255, 255, 0.6));
 }
 
+/* When desktop dropdown menu is open, force topbar text/icons to black */
+body.home-view .topbar-wrap.dropdown-open .topbar-left button,
+body.home-view .topbar-wrap.dropdown-open .topbar-right a,
+body.home-view .topbar-wrap.dropdown-open .topbar-right button,
+body.home-view .topbar-wrap.dropdown-open .menu-toggle,
+body.home-view .topbar-wrap.dropdown-open .mobile-search,
+body.home-view .topbar-wrap.dropdown-open .brand-mark {
+  color: #111;
+}
+
+body.home-view .topbar-wrap.dropdown-open .topbar-left button:hover,
+body.home-view .topbar-wrap.dropdown-open .topbar-right a:hover,
+body.home-view .topbar-wrap.dropdown-open .topbar-right button:hover,
+body.home-view .topbar-wrap.dropdown-open .menu-toggle:hover,
+body.home-view .topbar-wrap.dropdown-open .mobile-search:hover {
+  color: #555;
+}
+
 .topbar {
   width: min(var(--max-width), 100% - 2.6rem);
   height: 80px;
