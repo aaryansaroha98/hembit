@@ -2,19 +2,30 @@ import { useEffect, useRef, useState } from 'react';
 import logoVideo from '../assets/logo-animation.mp4';
 
 export function LoadingScreen({ onFinished, waitForBackend = false }) {
+  const MIN_LOADING_MS = 750;
+  const BACKEND_RETRY_MS = 750;
   const [phase, setPhase] = useState('playing'); // playing → fading → done
   const [isColdStart, setIsColdStart] = useState(false);
   const videoRef = useRef(null);
-  const videoEnded = useRef(false);
+  const minDelayPassed = useRef(false);
   const backendReady = useRef(!waitForBackend); // skip check if not needed
   const fadeStarted = useRef(false);
 
   const tryFade = () => {
     if (fadeStarted.current) return;
-    if (!videoEnded.current || !backendReady.current) return;
+    if (!minDelayPassed.current || !backendReady.current) return;
     fadeStarted.current = true;
     setPhase('fading');
   };
+
+  /* Enforce minimum loader time */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      minDelayPassed.current = true;
+      tryFade();
+    }, MIN_LOADING_MS);
+    return () => clearTimeout(timer);
+  }, []);
 
   /* Ping backend health until it responds */
   useEffect(() => {
@@ -40,7 +51,7 @@ export function LoadingScreen({ onFinished, waitForBackend = false }) {
           firstAttempt = false;
           if (!cancelled) setIsColdStart(true);
         }
-        await new Promise((r) => setTimeout(r, 2000));
+        await new Promise((r) => setTimeout(r, BACKEND_RETRY_MS));
       }
     };
 
@@ -59,28 +70,16 @@ export function LoadingScreen({ onFinished, waitForBackend = false }) {
 
     const playPromise = vid.play();
     if (playPromise && playPromise.catch) {
-      playPromise.catch(() => {
-        videoEnded.current = true;
-        tryFade();
-      });
+      playPromise.catch(() => {});
     }
-
-    /* Safety fallback */
-    const fallback = setTimeout(() => {
-      videoEnded.current = true;
-      tryFade();
-    }, 4000);
-    return () => clearTimeout(fallback);
   }, []);
 
   const handleEnded = () => {
-    videoEnded.current = true;
-    /* If backend still loading, loop the video */
-    if (!backendReady.current && videoRef.current) {
+    /* If minimum delay/backend still not ready, loop the video */
+    if ((!backendReady.current || !minDelayPassed.current) && videoRef.current) {
       videoRef.current.play().catch(() => {});
-    } else {
-      tryFade();
     }
+    tryFade();
   };
 
   useEffect(() => {
