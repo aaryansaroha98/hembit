@@ -38,6 +38,11 @@ const LEGACY_SLIDE_TITLE_SIZE_MAP = {
   medium: '72px',
   large: '96px',
 };
+const LEGACY_SLIDE_TITLE_SIZE_POINTS = [
+  { key: 'small', px: 48 },
+  { key: 'medium', px: 72 },
+  { key: 'large', px: 96 },
+];
 const DEFAULT_SLIDE_TITLE_SIZE = '72px';
 
 function normalizeSlideTitleSizeForForm(value) {
@@ -60,6 +65,24 @@ function normalizeSlideTitleSizeForForm(value) {
   }, SLIDE_TITLE_SIZE_OPTIONS_PX[0]);
 
   return `${closest}px`;
+}
+
+function toLegacySlideTitleSize(value) {
+  const normalized = normalizeSlideTitleSizeForForm(value);
+  const px = Number.parseInt(normalized, 10);
+  if (!Number.isFinite(px)) {
+    return 'medium';
+  }
+
+  const closest = LEGACY_SLIDE_TITLE_SIZE_POINTS.reduce((best, item) => {
+    return Math.abs(item.px - px) < Math.abs(best.px - px) ? item : best;
+  }, LEGACY_SLIDE_TITLE_SIZE_POINTS[0]);
+
+  return closest.key;
+}
+
+function hasLegacyTitleSizeValidationError(error) {
+  return /titleSize must be one of:\s*small,\s*medium,\s*large/i.test(String(error?.message || ''));
 }
 
 function createInitialSlideForm() {
@@ -920,14 +943,34 @@ export function AdminPage() {
               type="button"
               onClick={async () => {
                 try {
-                  if (editingSlideId) {
-                    await api.put(`/admin/slides/${editingSlideId}`, slideForm, token);
-                    setMessage('Slide updated');
-                    setEditingSlideId(null);
-                  } else {
-                    await api.post('/admin/slides', slideForm, token);
-                    setMessage('Slide added');
+                  let legacyModeUsed = false;
+                  const submit = async (payload) => {
+                    if (editingSlideId) {
+                      await api.put(`/admin/slides/${editingSlideId}`, payload, token);
+                    } else {
+                      await api.post('/admin/slides', payload, token);
+                    }
+                  };
+
+                  try {
+                    await submit(slideForm);
+                  } catch (error) {
+                    if (!hasLegacyTitleSizeValidationError(error)) {
+                      throw error;
+                    }
+                    legacyModeUsed = true;
+                    await submit({
+                      ...slideForm,
+                      titleSize: toLegacySlideTitleSize(slideForm.titleSize),
+                    });
                   }
+
+                  setMessage(
+                    editingSlideId
+                      ? (legacyModeUsed ? 'Slide updated (legacy title size mode)' : 'Slide updated')
+                      : (legacyModeUsed ? 'Slide added (legacy title size mode)' : 'Slide added')
+                  );
+                  setEditingSlideId(null);
                   setSlideForm(createInitialSlideForm());
                   loadAll();
                 } catch (error) {
