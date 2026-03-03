@@ -71,7 +71,7 @@ const ALLOWED_SLIDE_TITLE_POSITIONS = new Set([
   'top-center',
   'top-right',
 ]);
-const MIN_SLIDE_TITLE_SIZE_PX = 20;
+const MIN_SLIDE_TITLE_SIZE_PX = 5;
 const MAX_SLIDE_TITLE_SIZE_PX = 120;
 
 function normalizeSlideTitleSize(value) {

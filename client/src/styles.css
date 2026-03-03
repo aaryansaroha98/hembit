@@ -4351,11 +4351,11 @@ textarea {
   }
 
   .hero-overlay h1 {
-    font-size: clamp(1.25rem, 8.6vw, var(--hero-title-size, 72px));
+    font-size: clamp(0.3125rem, 8.6vw, var(--hero-title-size, 72px));
   }
 
   .hero-product-header h2 {
-    font-size: clamp(0.95rem, 5.4vw, var(--hero-product-title-size, 36px));
+    font-size: clamp(0.3125rem, 5.4vw, var(--hero-product-title-size, 36px));
   }
 
   .hero-overlay--pos-bottom-left,

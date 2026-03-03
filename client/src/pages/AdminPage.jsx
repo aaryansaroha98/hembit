@@ -17,7 +17,7 @@ const TABS = [
   'Users & Subscribers Mail',
 ];
 const HEX_COLOR_PATTERN = /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
-const SLIDE_TITLE_SIZE_OPTIONS_PX = [24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 72, 80, 88, 96];
+const SLIDE_TITLE_SIZE_OPTIONS_PX = [5, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 72, 80, 88, 96];
 const SLIDE_TITLE_SIZES = SLIDE_TITLE_SIZE_OPTIONS_PX.map((px) => ({
   value: `${px}px`,
   label: `Title Size: ${px}px`,

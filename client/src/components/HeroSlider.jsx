@@ -22,7 +22,7 @@ const ALLOWED_TITLE_POSITIONS = new Set([
   'top-center',
   'top-right',
 ]);
-const MIN_TITLE_SIZE_PX = 20;
+const MIN_TITLE_SIZE_PX = 5;
 const MAX_TITLE_SIZE_PX = 120;
 
 function toHoverRgba(hexColor) {
@@ -318,7 +318,7 @@ export function HeroSlider({ slides, children }) {
       {/* Image / video / product slides */}
       {orderedSlides.map((slide, i) => {
         const titleSizePx = getSlideTitleSizePx(slide);
-        const productTitleSizePx = Math.max(20, Math.round(titleSizePx * 0.5));
+        const productTitleSizePx = Math.max(MIN_TITLE_SIZE_PX, Math.round(titleSizePx * 0.5));
         const titlePosition = getSlideTitlePosition(slide);
 
         return (
