@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import logoVideo from '../assets/logo-animation.mp4';
 
 export function LoadingScreen({ onFinished, waitForBackend = false }) {
-  const MIN_LOADING_MS = 750;
+  const MIN_LOADING_MS = 1000;
   const BACKEND_RETRY_MS = 750;
   const [phase, setPhase] = useState('playing'); // playing → fading → done
   const [isColdStart, setIsColdStart] = useState(false);
