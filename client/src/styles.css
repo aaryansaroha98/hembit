@@ -1152,6 +1152,7 @@ textarea {
   padding: clamp(4rem, 6vw, 5.5rem) clamp(1.5rem, 3vw, 2.8rem) clamp(2rem, 4vw, 3.5rem);
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 0;
   position: sticky;
   top: var(--topbar-height);
@@ -4022,6 +4023,7 @@ textarea {
     position: static;
     max-height: none;
     padding: 1.2rem 1.2rem 3rem;
+    justify-content: flex-start;
   }
 
   .co-page { gap: 1.5rem; }
