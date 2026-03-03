@@ -1149,7 +1149,7 @@ textarea {
 
 /* Info panel */
 .pdp-info {
-  padding: clamp(2rem, 4vw, 3.5rem) clamp(1.5rem, 3vw, 2.8rem);
+  padding: clamp(3rem, 5vw, 4.5rem) clamp(1.5rem, 3vw, 2.8rem) clamp(2rem, 4vw, 3.5rem);
   display: flex;
   flex-direction: column;
   gap: 0;
