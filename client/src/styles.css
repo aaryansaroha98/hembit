@@ -685,20 +685,114 @@ body.home-view .mega-menu {
 
 .hero-overlay {
   position: absolute;
-  left: min(10vw, 130px);
-  bottom: clamp(1.6rem, 5.2vw, 4rem);
   max-width: 560px;
   color: #fff;
   z-index: 4;
   opacity: 0;
-  transform: translateY(40px);
+  --hero-overlay-x: 0;
+  --hero-overlay-y-hidden: 40px;
+  --hero-overlay-y-visible: 0;
+  transform: translate(var(--hero-overlay-x), var(--hero-overlay-y-hidden));
   transition: opacity 250ms ease, transform 350ms cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 .hero-overlay--visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(var(--hero-overlay-x), var(--hero-overlay-y-visible));
   transition-delay: 180ms;
+}
+
+.hero-overlay--pos-bottom-left {
+  left: min(10vw, 130px);
+  right: auto;
+  top: auto;
+  bottom: clamp(1.6rem, 5.2vw, 4rem);
+  text-align: left;
+}
+
+.hero-overlay--pos-bottom-center {
+  left: 50%;
+  right: auto;
+  top: auto;
+  bottom: clamp(1.6rem, 5.2vw, 4rem);
+  width: min(90vw, 700px);
+  max-width: 700px;
+  text-align: center;
+  --hero-overlay-x: -50%;
+}
+
+.hero-overlay--pos-bottom-right {
+  right: min(10vw, 130px);
+  left: auto;
+  top: auto;
+  bottom: clamp(1.6rem, 5.2vw, 4rem);
+  text-align: right;
+}
+
+.hero-overlay--pos-middle-left {
+  left: min(10vw, 130px);
+  right: auto;
+  top: 50%;
+  bottom: auto;
+  text-align: left;
+  --hero-overlay-y-hidden: calc(-50% + 40px);
+  --hero-overlay-y-visible: -50%;
+}
+
+.hero-overlay--pos-middle-center {
+  left: 50%;
+  right: auto;
+  top: 50%;
+  bottom: auto;
+  width: min(90vw, 700px);
+  max-width: 700px;
+  text-align: center;
+  --hero-overlay-x: -50%;
+  --hero-overlay-y-hidden: calc(-50% + 40px);
+  --hero-overlay-y-visible: -50%;
+}
+
+.hero-overlay--pos-middle-right {
+  right: min(10vw, 130px);
+  left: auto;
+  top: 50%;
+  bottom: auto;
+  text-align: right;
+  --hero-overlay-y-hidden: calc(-50% + 40px);
+  --hero-overlay-y-visible: -50%;
+}
+
+.hero-overlay--pos-top-left {
+  left: min(10vw, 130px);
+  right: auto;
+  top: calc(var(--topbar-height, 64px) + clamp(0.8rem, 2.2vw, 1.7rem));
+  bottom: auto;
+  text-align: left;
+  --hero-overlay-y-hidden: -24px;
+  --hero-overlay-y-visible: 0;
+}
+
+.hero-overlay--pos-top-center {
+  left: 50%;
+  right: auto;
+  top: calc(var(--topbar-height, 64px) + clamp(0.8rem, 2.2vw, 1.7rem));
+  bottom: auto;
+  width: min(90vw, 700px);
+  max-width: 700px;
+  text-align: center;
+  --hero-overlay-x: -50%;
+  --hero-overlay-y-hidden: -24px;
+  --hero-overlay-y-visible: 0;
+}
+
+.hero-overlay--pos-top-right {
+  right: min(10vw, 130px);
+  left: auto;
+  top: calc(var(--topbar-height, 64px) + clamp(0.8rem, 2.2vw, 1.7rem));
+  bottom: auto;
+  text-align: right;
+  --hero-overlay-y-hidden: -24px;
+  --hero-overlay-y-visible: 0;
 }
 
 .hero-overline {
@@ -710,10 +804,21 @@ body.home-view .mega-menu {
 
 .hero-overlay h1 {
   margin: 0.7rem 0 1.15rem;
-  font-size: clamp(1.75rem, 5.2vw, 4.5rem);
   line-height: 1.02;
   letter-spacing: 0.03em;
   text-transform: uppercase;
+}
+
+.hero-overlay--title-small h1 {
+  font-size: clamp(1.3rem, 3.7vw, 3rem);
+}
+
+.hero-overlay--title-medium h1 {
+  font-size: clamp(1.75rem, 5.2vw, 4.5rem);
+}
+
+.hero-overlay--title-large h1 {
+  font-size: clamp(2rem, 6vw, 5.8rem);
 }
 
 .hero-overlay a {
@@ -806,11 +911,22 @@ body.home-view .mega-menu {
 
 .hero-product-header h2 {
   margin: 0.4rem 0 0;
-  font-size: clamp(1.1rem, 3vw, 2.2rem);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-weight: 600;
   color: #111;
+}
+
+.hero-product-header--title-small h2 {
+  font-size: clamp(0.95rem, 2.4vw, 1.85rem);
+}
+
+.hero-product-header--title-medium h2 {
+  font-size: clamp(1.1rem, 3vw, 2.2rem);
+}
+
+.hero-product-header--title-large h2 {
+  font-size: clamp(1.35rem, 3.8vw, 2.8rem);
 }
 
 .hero-product-grid {
@@ -4253,9 +4369,28 @@ textarea {
   }
 
   .hero-overlay {
+    max-width: calc(100vw - 1.8rem);
+  }
+
+  .hero-overlay--pos-bottom-left,
+  .hero-overlay--pos-middle-left,
+  .hero-overlay--pos-top-left {
     left: 0.9rem;
+    right: auto;
+  }
+
+  .hero-overlay--pos-bottom-right,
+  .hero-overlay--pos-middle-right,
+  .hero-overlay--pos-top-right {
     right: 0.9rem;
-    max-width: none;
+    left: auto;
+  }
+
+  .hero-overlay--pos-bottom-center,
+  .hero-overlay--pos-middle-center,
+  .hero-overlay--pos-top-center {
+    width: calc(100vw - 1.8rem);
+    max-width: calc(100vw - 1.8rem);
   }
 
   .hero-product-grid--3 {

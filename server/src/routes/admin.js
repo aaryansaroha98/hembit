@@ -59,6 +59,43 @@ function normalizeHexColor(value) {
   return { value: normalized.toUpperCase(), valid: isValid };
 }
 
+const ALLOWED_SLIDE_TITLE_SIZES = new Set(['small', 'medium', 'large']);
+const ALLOWED_SLIDE_TITLE_POSITIONS = new Set([
+  'bottom-left',
+  'bottom-center',
+  'bottom-right',
+  'middle-left',
+  'middle-center',
+  'middle-right',
+  'top-left',
+  'top-center',
+  'top-right',
+]);
+
+function normalizeSlideTitleSize(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) {
+    return { value: 'medium', valid: true };
+  }
+
+  return {
+    value: ALLOWED_SLIDE_TITLE_SIZES.has(raw) ? raw : 'medium',
+    valid: ALLOWED_SLIDE_TITLE_SIZES.has(raw),
+  };
+}
+
+function normalizeSlideTitlePosition(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) {
+    return { value: 'bottom-left', valid: true };
+  }
+
+  return {
+    value: ALLOWED_SLIDE_TITLE_POSITIONS.has(raw) ? raw : 'bottom-left',
+    valid: ALLOWED_SLIDE_TITLE_POSITIONS.has(raw),
+  };
+}
+
 function getAudienceEmails(db, audience) {
   const userEmails = dedupeEmails(db.users.map((item) => item.email));
   const subscriberEmails = dedupeEmails(db.newsletterSubscribers.map((item) => item.email));
@@ -506,11 +543,33 @@ adminRouter.get('/slides', (_req, res) => {
 });
 
 adminRouter.post('/slides', (req, res) => {
-  const { title, subtitle, type, url, ctaLabel, ctaLink, topbarLinkColor, productIds, layout } = req.body;
+  const {
+    title,
+    subtitle,
+    type,
+    url,
+    ctaLabel,
+    ctaLink,
+    topbarLinkColor,
+    productIds,
+    layout,
+    titleSize,
+    titlePosition,
+  } = req.body;
   const parsedTopbarColor = normalizeHexColor(topbarLinkColor);
+  const parsedTitleSize = normalizeSlideTitleSize(titleSize);
+  const parsedTitlePosition = normalizeSlideTitlePosition(titlePosition);
 
   if (!parsedTopbarColor.valid) {
     return res.status(400).json({ message: 'topbarLinkColor must be a valid hex color' });
+  }
+  if (!parsedTitleSize.valid) {
+    return res.status(400).json({ message: 'titleSize must be one of: small, medium, large' });
+  }
+  if (!parsedTitlePosition.valid) {
+    return res.status(400).json({
+      message: 'titlePosition must be one of: bottom-left, bottom-center, bottom-right, middle-left, middle-center, middle-right, top-left, top-center, top-right',
+    });
   }
 
   if (type === 'products') {
@@ -534,6 +593,8 @@ adminRouter.post('/slides', (req, res) => {
       ctaLabel: ctaLabel || '',
       ctaLink: ctaLink || '',
       topbarLinkColor: parsedTopbarColor.value,
+      titleSize: parsedTitleSize.value,
+      titlePosition: parsedTitlePosition.value,
       productIds: type === 'products' ? productIds : [],
       layout: type === 'products' ? (Number(layout) || 2) : 0,
       order: db.slides.length + 1,
@@ -563,10 +624,22 @@ adminRouter.put('/slides/:id', (req, res) => {
   const id = req.params.id;
   const payload = req.body || {};
   const hasTopbarColor = Object.prototype.hasOwnProperty.call(payload, 'topbarLinkColor');
+  const hasTitleSize = Object.prototype.hasOwnProperty.call(payload, 'titleSize');
+  const hasTitlePosition = Object.prototype.hasOwnProperty.call(payload, 'titlePosition');
   const parsedTopbarColor = hasTopbarColor ? normalizeHexColor(payload.topbarLinkColor) : null;
+  const parsedTitleSize = hasTitleSize ? normalizeSlideTitleSize(payload.titleSize) : null;
+  const parsedTitlePosition = hasTitlePosition ? normalizeSlideTitlePosition(payload.titlePosition) : null;
 
   if (parsedTopbarColor && !parsedTopbarColor.valid) {
     return res.status(400).json({ message: 'topbarLinkColor must be a valid hex color' });
+  }
+  if (parsedTitleSize && !parsedTitleSize.valid) {
+    return res.status(400).json({ message: 'titleSize must be one of: small, medium, large' });
+  }
+  if (parsedTitlePosition && !parsedTitlePosition.valid) {
+    return res.status(400).json({
+      message: 'titlePosition must be one of: bottom-left, bottom-center, bottom-right, middle-left, middle-center, middle-right, top-left, top-center, top-right',
+    });
   }
 
   let slide;
@@ -584,6 +657,8 @@ adminRouter.put('/slides/:id', (req, res) => {
       ctaLabel: payload.ctaLabel ?? slide.ctaLabel,
       ctaLink: payload.ctaLink ?? slide.ctaLink,
       topbarLinkColor: parsedTopbarColor ? parsedTopbarColor.value : (slide.topbarLinkColor || ''),
+      titleSize: parsedTitleSize ? parsedTitleSize.value : (slide.titleSize || 'medium'),
+      titlePosition: parsedTitlePosition ? parsedTitlePosition.value : (slide.titlePosition || 'bottom-left'),
       productIds: payload.productIds ?? slide.productIds ?? [],
       layout: payload.layout !== undefined ? Number(payload.layout) : (slide.layout ?? 0),
       order: payload.order !== undefined ? Number(payload.order) : slide.order,

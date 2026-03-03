@@ -17,6 +17,38 @@ const TABS = [
   'Users & Subscribers Mail',
 ];
 const HEX_COLOR_PATTERN = /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+const SLIDE_TITLE_SIZES = [
+  { value: 'small', label: 'Title Size: Small' },
+  { value: 'medium', label: 'Title Size: Medium' },
+  { value: 'large', label: 'Title Size: Large' },
+];
+const SLIDE_TITLE_POSITIONS = [
+  { value: 'bottom-left', label: 'Title Position: Bottom Left' },
+  { value: 'bottom-center', label: 'Title Position: Bottom Center' },
+  { value: 'bottom-right', label: 'Title Position: Bottom Right' },
+  { value: 'middle-left', label: 'Title Position: Middle Left' },
+  { value: 'middle-center', label: 'Title Position: Middle Center' },
+  { value: 'middle-right', label: 'Title Position: Middle Right' },
+  { value: 'top-left', label: 'Title Position: Top Left' },
+  { value: 'top-center', label: 'Title Position: Top Center' },
+  { value: 'top-right', label: 'Title Position: Top Right' },
+];
+
+function createInitialSlideForm() {
+  return {
+    title: '',
+    subtitle: '',
+    type: 'image',
+    url: '',
+    ctaLabel: '',
+    ctaLink: '',
+    topbarLinkColor: '',
+    productIds: [],
+    layout: 2,
+    titleSize: 'medium',
+    titlePosition: 'bottom-left',
+  };
+}
 
 export function AdminPage() {
   const { token, signout } = useAuth();
@@ -62,17 +94,7 @@ export function AdminPage() {
   const fileInputRef = useRef(null);
   const [categoryForm, setCategoryForm] = useState({ name: '', slug: '' });
   const [seriesForm, setSeriesForm] = useState({ categoryId: '', name: '', slug: '' });
-  const [slideForm, setSlideForm] = useState({
-    title: '',
-    subtitle: '',
-    type: 'image',
-    url: '',
-    ctaLabel: '',
-    ctaLink: '',
-    topbarLinkColor: '',
-    productIds: [],
-    layout: 2,
-  });
+  const [slideForm, setSlideForm] = useState(createInitialSlideForm);
   const [slideUploadState, setSlideUploadState] = useState({ loading: false, message: '' });
   const [postForm, setPostForm] = useState({ title: '', excerpt: '', image: '', body: '' });
   const [editingProductId, setEditingProductId] = useState(null);
@@ -738,6 +760,22 @@ export function AdminPage() {
                 value={slideForm.subtitle}
                 onChange={(e) => setSlideForm((prev) => ({ ...prev, subtitle: e.target.value }))}
               />
+              <select
+                value={slideForm.titleSize}
+                onChange={(e) => setSlideForm((prev) => ({ ...prev, titleSize: e.target.value }))}
+              >
+                {SLIDE_TITLE_SIZES.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+              <select
+                value={slideForm.titlePosition}
+                onChange={(e) => setSlideForm((prev) => ({ ...prev, titlePosition: e.target.value }))}
+              >
+                {SLIDE_TITLE_POSITIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
               <select value={slideForm.type} onChange={(e) => setSlideForm((prev) => ({ ...prev, type: e.target.value }))}>
                 <option value="image">Image</option>
                 <option value="video">Video</option>
@@ -862,17 +900,7 @@ export function AdminPage() {
                     await api.post('/admin/slides', slideForm, token);
                     setMessage('Slide added');
                   }
-                  setSlideForm({
-                    title: '',
-                    subtitle: '',
-                    type: 'image',
-                    url: '',
-                    ctaLabel: '',
-                    ctaLink: '',
-                    topbarLinkColor: '',
-                    productIds: [],
-                    layout: 2,
-                  });
+                  setSlideForm(createInitialSlideForm());
                   loadAll();
                 } catch (error) {
                   setMessage(error.message);
@@ -887,17 +915,7 @@ export function AdminPage() {
                 style={{ marginLeft: 8, background: '#666' }}
                 onClick={() => {
                   setEditingSlideId(null);
-                  setSlideForm({
-                    title: '',
-                    subtitle: '',
-                    type: 'image',
-                    url: '',
-                    ctaLabel: '',
-                    ctaLink: '',
-                    topbarLinkColor: '',
-                    productIds: [],
-                    layout: 2,
-                  });
+                  setSlideForm(createInitialSlideForm());
                 }}
               >
                 Cancel
@@ -940,7 +958,11 @@ export function AdminPage() {
                 <span className="admin-reorder-pos">{idx + 1}</span>
                 <div className="admin-list-item-info">
                   <strong>{slide.title || (slide.type === 'products' ? 'Product Grid' : 'Image/Video Slide')}</strong>
-                  <p>{slide.type}{slide.type === 'products' ? ` · ${slide.layout || 2} products` : ''}</p>
+                  <p>
+                    {slide.type}
+                    {slide.type === 'products' ? ` · ${slide.layout || 2} products` : ''}
+                    {` · ${slide.titleSize || 'medium'} · ${slide.titlePosition || 'bottom-left'}`}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -956,6 +978,8 @@ export function AdminPage() {
                       topbarLinkColor: slide.topbarLinkColor || '',
                       productIds: slide.productIds || [],
                       layout: slide.layout || 2,
+                      titleSize: slide.titleSize || 'medium',
+                      titlePosition: slide.titlePosition || 'bottom-left',
                     });
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
