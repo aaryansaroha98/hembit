@@ -37,12 +37,24 @@ publicRouter.get('/home', (req, res) => {
 
   const slides = [...db.slides].sort((a, b) => a.order - b.order).map((slide) => {
     if (slide.type === 'products' && Array.isArray(slide.productIds)) {
+      const categoryCards = Array.isArray(slide.categoryCards) ? slide.categoryCards : [];
       return {
         ...slide,
         products: slide.productIds
           .map((pid) => db.products.find((p) => p.id === pid))
           .filter(Boolean)
           .map((p) => withDerivedProduct(db, p)),
+        categoryCards: categoryCards
+          .map((card) => {
+            const category = db.categories.find((item) => item.id === card.categoryId);
+            return {
+              categoryId: category?.id || card.categoryId,
+              categoryName: category?.name || 'Category',
+              categorySlug: category?.slug || card.categoryId,
+              imageUrl: card.imageUrl || '',
+            };
+          })
+          .filter((card) => card.imageUrl),
       };
     }
     return slide;

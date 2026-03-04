@@ -44,6 +44,7 @@ const LEGACY_SLIDE_TITLE_SIZE_POINTS = [
   { key: 'large', px: 96 },
 ];
 const DEFAULT_SLIDE_TITLE_SIZE = '72px';
+const PRODUCT_SLIDE_LAYOUT_OPTIONS = [1, 2, 3];
 
 function normalizeSlideTitleSizeForForm(value) {
   const raw = String(value || '').trim().toLowerCase();
@@ -85,6 +86,25 @@ function hasLegacyTitleSizeValidationError(error) {
   return /titleSize must be one of:\s*small,\s*medium,\s*large/i.test(String(error?.message || ''));
 }
 
+function normalizeProductSlideLayout(value) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) {
+    return 2;
+  }
+  return Math.min(3, Math.max(1, parsed));
+}
+
+function normalizeSlideCategoryCardsForForm(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.map((item) => ({
+    categoryId: String(item?.categoryId || '').trim(),
+    imageUrl: String(item?.imageUrl || '').trim(),
+  }));
+}
+
 function createInitialSlideForm() {
   return {
     title: '',
@@ -95,6 +115,7 @@ function createInitialSlideForm() {
     ctaLink: '',
     topbarLinkColor: '',
     productIds: [],
+    categoryCards: [],
     layout: 2,
     titleSize: DEFAULT_SLIDE_TITLE_SIZE,
     titlePosition: 'bottom-left',
@@ -147,6 +168,7 @@ export function AdminPage() {
   const [seriesForm, setSeriesForm] = useState({ categoryId: '', name: '', slug: '' });
   const [slideForm, setSlideForm] = useState(createInitialSlideForm);
   const [slideUploadState, setSlideUploadState] = useState({ loading: false, message: '' });
+  const [slideCategoryUploadState, setSlideCategoryUploadState] = useState({ loadingIndex: -1, message: '' });
   const [postForm, setPostForm] = useState({ title: '', excerpt: '', image: '', body: '' });
   const [editingProductId, setEditingProductId] = useState(null);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
@@ -214,6 +236,12 @@ export function AdminPage() {
     () => categories.find((item) => item.id === productForm.categoryId),
     [categories, productForm.categoryId]
   );
+  const slideLayout = normalizeProductSlideLayout(slideForm.layout);
+  const slideCategoryCardRows = normalizeSlideCategoryCardsForForm(slideForm.categoryCards);
+  const completedSlideCategoryCards = slideCategoryCardRows.filter((item) => item.categoryId && item.imageUrl);
+  const totalSlideCardsSelected = (slideForm.productIds?.length || 0) + completedSlideCategoryCards.length;
+  const remainingProductSlots = Math.max(0, slideLayout - completedSlideCategoryCards.length);
+  const canAddCategoryCard = (slideForm.productIds?.length || 0) + slideCategoryCardRows.length < slideLayout;
 
   const uploadSlideFile = async (file) => {
     if (!file) {
@@ -247,6 +275,26 @@ export function AdminPage() {
       setSlideUploadState({ loading: false, message: 'File uploaded and URL applied' });
     } catch (error) {
       setSlideUploadState({ loading: false, message: error.message });
+    }
+  };
+
+  const uploadCategoryCardImage = async (index, file) => {
+    if (!file) {
+      return;
+    }
+
+    setSlideCategoryUploadState({ loadingIndex: index, message: '' });
+    try {
+      const uploaded = await api.uploadFile(file, token);
+      setSlideForm((prev) => ({
+        ...prev,
+        categoryCards: (prev.categoryCards || []).map((item, cardIndex) =>
+          cardIndex === index ? { ...item, imageUrl: uploaded.url } : item
+        ),
+      }));
+      setSlideCategoryUploadState({ loadingIndex: -1, message: 'Category image uploaded' });
+    } catch (error) {
+      setSlideCategoryUploadState({ loadingIndex: -1, message: error.message });
     }
   };
 
@@ -827,7 +875,22 @@ export function AdminPage() {
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
-              <select value={slideForm.type} onChange={(e) => setSlideForm((prev) => ({ ...prev, type: e.target.value }))}>
+              <select
+                value={slideForm.type}
+                onChange={(e) => {
+                  const nextType = e.target.value;
+                  setSlideForm((prev) => ({
+                    ...prev,
+                    type: nextType,
+                    layout: normalizeProductSlideLayout(prev.layout),
+                    productIds: nextType === 'products' ? (prev.productIds || []) : [],
+                    categoryCards: nextType === 'products' ? normalizeSlideCategoryCardsForForm(prev.categoryCards) : [],
+                  }));
+                  if (nextType !== 'products') {
+                    setSlideCategoryUploadState({ loadingIndex: -1, message: '' });
+                  }
+                }}
+              >
                 <option value="image">Image</option>
                 <option value="video">Video</option>
                 <option value="products">Product Grid</option>
@@ -878,11 +941,25 @@ export function AdminPage() {
               {slideForm.type === 'products' && (
                 <>
                   <select
-                    value={slideForm.layout}
-                    onChange={(e) => setSlideForm((prev) => ({ ...prev, layout: Number(e.target.value) }))}
+                    value={slideLayout}
+                    onChange={(e) => {
+                      const nextLayout = normalizeProductSlideLayout(e.target.value);
+                      setSlideForm((prev) => {
+                        const nextProductIds = (prev.productIds || []).slice(0, nextLayout);
+                        const remainingSlots = Math.max(0, nextLayout - nextProductIds.length);
+                        const nextCategoryCards = normalizeSlideCategoryCardsForForm(prev.categoryCards).slice(0, remainingSlots);
+                        return {
+                          ...prev,
+                          layout: nextLayout,
+                          productIds: nextProductIds,
+                          categoryCards: nextCategoryCards,
+                        };
+                      });
+                    }}
                   >
-                    <option value={2}>2 Products</option>
-                    <option value={3}>3 Products</option>
+                    {PRODUCT_SLIDE_LAYOUT_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option} Slot{option > 1 ? 's' : ''}</option>
+                    ))}
                   </select>
                 </>
               )}
@@ -891,11 +968,12 @@ export function AdminPage() {
             {slideForm.type === 'products' && (
               <div className="admin-product-picker">
                 <p className="admin-image-uploader-label">
-                  Select Products ({slideForm.productIds.length}/{slideForm.layout})
+                  Select Products ({slideForm.productIds.length}/{remainingProductSlots})
                 </p>
                 <div className="admin-product-picker-grid">
                   {products.map((product) => {
                     const isSelected = slideForm.productIds.includes(product.id);
+                    const disableUnchecked = !isSelected && totalSlideCardsSelected >= slideLayout;
                     return (
                       <label
                         key={product.id}
@@ -904,11 +982,16 @@ export function AdminPage() {
                         <input
                           type="checkbox"
                           checked={isSelected}
+                          disabled={disableUnchecked}
                           onChange={() => {
                             setSlideForm((prev) => {
+                              const completedCategoryCount = normalizeSlideCategoryCardsForForm(prev.categoryCards)
+                                .filter((item) => item.categoryId && item.imageUrl).length;
+                              const maxCards = normalizeProductSlideLayout(prev.layout);
+                              const currentlySelected = (prev.productIds || []).length + completedCategoryCount;
                               const ids = prev.productIds.includes(product.id)
                                 ? prev.productIds.filter((id) => id !== product.id)
-                                : prev.productIds.length < prev.layout
+                                : currentlySelected < maxCards
                                   ? [...prev.productIds, product.id]
                                   : prev.productIds;
                               return { ...prev, productIds: ids };
@@ -923,6 +1006,103 @@ export function AdminPage() {
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {slideForm.type === 'products' && (
+              <div className="admin-slide-category-manager">
+                <div className="admin-slide-category-head">
+                  <p className="admin-image-uploader-label">
+                    Category Cards ({completedSlideCategoryCards.length}/{slideLayout})
+                  </p>
+                  <button
+                    type="button"
+                    className="admin-slide-category-add"
+                    onClick={() => {
+                      setSlideForm((prev) => ({
+                        ...prev,
+                        categoryCards: [...normalizeSlideCategoryCardsForForm(prev.categoryCards), { categoryId: '', imageUrl: '' }],
+                      }));
+                    }}
+                    disabled={!canAddCategoryCard || !categories.length}
+                  >
+                    Add Category Card
+                  </button>
+                </div>
+
+                {!categories.length && (
+                  <p className="form-message">Add categories first to use category cards in slides.</p>
+                )}
+
+                {slideCategoryCardRows.length > 0 && (
+                  <div className="admin-slide-category-list">
+                    {slideCategoryCardRows.map((card, index) => (
+                      <div className="admin-slide-category-row" key={`${card.categoryId || 'new'}-${index}`}>
+                        <select
+                          value={card.categoryId}
+                          onChange={(e) => {
+                            const nextCategoryId = e.target.value;
+                            setSlideForm((prev) => ({
+                              ...prev,
+                              categoryCards: normalizeSlideCategoryCardsForForm(prev.categoryCards).map((item, itemIndex) =>
+                                itemIndex === index ? { ...item, categoryId: nextCategoryId } : item
+                              ),
+                            }));
+                          }}
+                        >
+                          <option value="">Select Category</option>
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          placeholder="Category Image URL"
+                          value={card.imageUrl}
+                          onChange={(e) => {
+                            const nextImageUrl = e.target.value;
+                            setSlideForm((prev) => ({
+                              ...prev,
+                              categoryCards: normalizeSlideCategoryCardsForForm(prev.categoryCards).map((item, itemIndex) =>
+                                itemIndex === index ? { ...item, imageUrl: nextImageUrl } : item
+                              ),
+                            }));
+                          }}
+                        />
+                        <div className="admin-slide-category-actions">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              uploadCategoryCardImage(index, file);
+                              e.target.value = '';
+                            }}
+                          />
+                          <button
+                            type="button"
+                            style={{ background: '#991b1b' }}
+                            onClick={() => {
+                              setSlideForm((prev) => ({
+                                ...prev,
+                                categoryCards: normalizeSlideCategoryCardsForForm(prev.categoryCards).filter(
+                                  (_item, itemIndex) => itemIndex !== index
+                                ),
+                              }));
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        {slideCategoryUploadState.loadingIndex === index && (
+                          <small className="admin-slide-category-note">Uploading image...</small>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {slideCategoryUploadState.message && <p className="form-message">{slideCategoryUploadState.message}</p>}
               </div>
             )}
 
@@ -944,6 +1124,47 @@ export function AdminPage() {
               onClick={async () => {
                 try {
                   let legacyModeUsed = false;
+                  const layout = normalizeProductSlideLayout(slideForm.layout);
+                  const categoryRows = normalizeSlideCategoryCardsForForm(slideForm.categoryCards);
+                  const hasIncompleteCategoryCard = categoryRows.some((item) => {
+                    return (item.categoryId && !item.imageUrl) || (!item.categoryId && item.imageUrl);
+                  });
+                  const preparedCategoryCards = categoryRows.filter((item) => item.categoryId && item.imageUrl);
+                  const preparedProductIds = Array.isArray(slideForm.productIds)
+                    ? [...new Set(slideForm.productIds.filter(Boolean))]
+                    : [];
+
+                  if (slideForm.type === 'products' && hasIncompleteCategoryCard) {
+                    setMessage('Each category card must include both category and category image');
+                    return;
+                  }
+
+                  if (slideForm.type === 'products') {
+                    const totalCards = preparedProductIds.length + preparedCategoryCards.length;
+                    if (totalCards < 1) {
+                      setMessage('Select at least 1 product or category for product slides');
+                      return;
+                    }
+                    if (totalCards > layout) {
+                      setMessage(`Total selected products + categories cannot exceed ${layout}`);
+                      return;
+                    }
+                  }
+
+                  const preparedSlidePayload = slideForm.type === 'products'
+                    ? {
+                      ...slideForm,
+                      layout,
+                      productIds: preparedProductIds,
+                      categoryCards: preparedCategoryCards,
+                    }
+                    : {
+                      ...slideForm,
+                      productIds: [],
+                      categoryCards: [],
+                      layout: 0,
+                    };
+
                   const submit = async (payload) => {
                     if (editingSlideId) {
                       await api.put(`/admin/slides/${editingSlideId}`, payload, token);
@@ -953,15 +1174,15 @@ export function AdminPage() {
                   };
 
                   try {
-                    await submit(slideForm);
+                    await submit(preparedSlidePayload);
                   } catch (error) {
                     if (!hasLegacyTitleSizeValidationError(error)) {
                       throw error;
                     }
                     legacyModeUsed = true;
                     await submit({
-                      ...slideForm,
-                      titleSize: toLegacySlideTitleSize(slideForm.titleSize),
+                      ...preparedSlidePayload,
+                      titleSize: toLegacySlideTitleSize(preparedSlidePayload.titleSize),
                     });
                   }
 
@@ -972,6 +1193,7 @@ export function AdminPage() {
                   );
                   setEditingSlideId(null);
                   setSlideForm(createInitialSlideForm());
+                  setSlideCategoryUploadState({ loadingIndex: -1, message: '' });
                   loadAll();
                 } catch (error) {
                   setMessage(error.message);
@@ -987,6 +1209,7 @@ export function AdminPage() {
                 onClick={() => {
                   setEditingSlideId(null);
                   setSlideForm(createInitialSlideForm());
+                  setSlideCategoryUploadState({ loadingIndex: -1, message: '' });
                 }}
               >
                 Cancel
@@ -1031,7 +1254,9 @@ export function AdminPage() {
                   <strong>{slide.title || (slide.type === 'products' ? 'Product Grid' : 'Image/Video Slide')}</strong>
                   <p>
                     {slide.type}
-                    {slide.type === 'products' ? ` · ${slide.layout || 2} products` : ''}
+                    {slide.type === 'products'
+                      ? ` · ${normalizeProductSlideLayout(slide.layout)} slots · ${(slide.productIds || []).length} products · ${(slide.categoryCards || []).length} categories`
+                      : ''}
                     {` · ${normalizeSlideTitleSizeForForm(slide.titleSize)} · ${slide.titlePosition || 'bottom-left'}`}
                   </p>
                 </div>
@@ -1048,10 +1273,12 @@ export function AdminPage() {
                       ctaLink: slide.ctaLink || '',
                       topbarLinkColor: slide.topbarLinkColor || '',
                       productIds: slide.productIds || [],
-                      layout: slide.layout || 2,
+                      categoryCards: normalizeSlideCategoryCardsForForm(slide.categoryCards),
+                      layout: normalizeProductSlideLayout(slide.layout || 2),
                       titleSize: normalizeSlideTitleSizeForForm(slide.titleSize),
                       titlePosition: slide.titlePosition || 'bottom-left',
                     });
+                    setSlideCategoryUploadState({ loadingIndex: -1, message: '' });
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 >

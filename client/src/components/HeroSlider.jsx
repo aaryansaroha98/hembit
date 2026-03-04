@@ -336,22 +336,54 @@ export function HeroSlider({ slides, children }) {
                   </div>
                 )}
                 <div className={`hero-product-grid hero-product-grid--${slide.layout || 2}`}>
-                  {(slide.products || []).map((product) => {
-                    const linkSlug = product.slug || product.id;
+                  {[
+                    ...(slide.products || []).map((product) => ({ kind: 'product', id: product.id, product })),
+                    ...(slide.categoryCards || []).map((categoryCard, index) => ({
+                      kind: 'category',
+                      id: `${categoryCard.categoryId || 'cat'}-${index}`,
+                      categoryCard,
+                    })),
+                  ].map((item) => {
+                    if (item.kind === 'product') {
+                      const product = item.product;
+                      const linkSlug = product.slug || product.id;
+                      return (
+                        <Link
+                          to={`/product/${linkSlug}`}
+                          className="hero-product-card"
+                          key={`product-${item.id}`}
+                        >
+                          <div className="hero-product-img">
+                            <img src={product.images?.[0]} alt={product.name} />
+                          </div>
+                          <div className="hero-product-info">
+                            <span className="hero-product-name">{product.name}</span>
+                            {product.seriesName && (
+                              <span className="hero-product-series">{product.seriesName}</span>
+                            )}
+                          </div>
+                        </Link>
+                      );
+                    }
+
+                    const categoryCard = item.categoryCard;
+                    const categorySlug = categoryCard?.categorySlug || categoryCard?.categoryId;
+                    const categoryLink = categorySlug
+                      ? `/shop?category=${encodeURIComponent(categorySlug)}`
+                      : '/shop';
+
                     return (
                       <Link
-                        to={`/product/${linkSlug}`}
-                        className="hero-product-card"
-                        key={product.id}
+                        to={categoryLink}
+                        className="hero-product-card hero-product-card--category"
+                        key={`category-${item.id}`}
                       >
                         <div className="hero-product-img">
-                          <img src={product.images?.[0]} alt={product.name} />
+                          <img src={categoryCard.imageUrl} alt={categoryCard.categoryName || 'Category'} />
                         </div>
                         <div className="hero-product-info">
-                          <span className="hero-product-name">{product.name}</span>
-                          {product.seriesName && (
-                            <span className="hero-product-series">{product.seriesName}</span>
-                          )}
+                          <span className="hero-product-name">{categoryCard.categoryName || 'Category'}</span>
+                          <span className="hero-category-cta">Explore</span>
                         </div>
                       </Link>
                     );

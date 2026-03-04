@@ -73,6 +73,8 @@ const ALLOWED_SLIDE_TITLE_POSITIONS = new Set([
 ]);
 const MIN_SLIDE_TITLE_SIZE_PX = 5;
 const MAX_SLIDE_TITLE_SIZE_PX = 120;
+const MIN_PRODUCT_SLIDE_LAYOUT = 1;
+const MAX_PRODUCT_SLIDE_LAYOUT = 3;
 
 function normalizeSlideTitleSize(value) {
   const raw = String(value || '').trim().toLowerCase();
@@ -107,6 +109,98 @@ function normalizeSlideTitlePosition(value) {
     value: ALLOWED_SLIDE_TITLE_POSITIONS.has(raw) ? raw : 'bottom-left',
     valid: ALLOWED_SLIDE_TITLE_POSITIONS.has(raw),
   };
+}
+
+function normalizeProductSlideLayout(value, strict = false) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) {
+    return { value: 2, valid: !strict };
+  }
+
+  if (parsed < MIN_PRODUCT_SLIDE_LAYOUT || parsed > MAX_PRODUCT_SLIDE_LAYOUT) {
+    return {
+      value: Math.min(MAX_PRODUCT_SLIDE_LAYOUT, Math.max(MIN_PRODUCT_SLIDE_LAYOUT, parsed)),
+      valid: !strict,
+    };
+  }
+
+  return { value: parsed, valid: true };
+}
+
+function normalizeSlideProductIds(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const seen = new Set();
+  const ids = [];
+  value.forEach((item) => {
+    const id = String(item || '').trim();
+    if (!id || seen.has(id)) {
+      return;
+    }
+    seen.add(id);
+    ids.push(id);
+  });
+  return ids;
+}
+
+function normalizeSlideCategoryCards(value) {
+  if (!Array.isArray(value)) {
+    return { cards: [], hasIncomplete: false, hasDuplicates: false };
+  }
+
+  const seen = new Set();
+  const cards = [];
+  let hasIncomplete = false;
+  let hasDuplicates = false;
+
+  value.forEach((item) => {
+    const categoryId = String(item?.categoryId || '').trim();
+    const imageUrl = String(item?.imageUrl || '').trim();
+
+    if (!categoryId && !imageUrl) {
+      return;
+    }
+    if (!categoryId || !imageUrl) {
+      hasIncomplete = true;
+      return;
+    }
+    if (seen.has(categoryId)) {
+      hasDuplicates = true;
+      return;
+    }
+
+    seen.add(categoryId);
+    cards.push({ categoryId, imageUrl });
+  });
+
+  return { cards, hasIncomplete, hasDuplicates };
+}
+
+function validateProductSlideContent(db, productIds, categoryCards, layout) {
+  const missingProductIds = productIds.filter((id) => !db.products.some((item) => item.id === id));
+  if (missingProductIds.length) {
+    return `Unknown productIds: ${missingProductIds.join(', ')}`;
+  }
+
+  const missingCategoryIds = categoryCards
+    .map((item) => item.categoryId)
+    .filter((id) => !db.categories.some((item) => item.id === id));
+  if (missingCategoryIds.length) {
+    return `Unknown categoryIds: ${missingCategoryIds.join(', ')}`;
+  }
+
+  const totalCards = productIds.length + categoryCards.length;
+  if (totalCards < 1) {
+    return 'Select at least 1 product or category for product slides';
+  }
+
+  if (totalCards > layout) {
+    return `Total selected products + categories cannot exceed layout (${layout})`;
+  }
+
+  return '';
 }
 
 function getAudienceEmails(db, audience) {
@@ -565,10 +659,12 @@ adminRouter.post('/slides', (req, res) => {
     ctaLink,
     topbarLinkColor,
     productIds,
+    categoryCards,
     layout,
     titleSize,
     titlePosition,
   } = req.body;
+  const hasLayout = Object.prototype.hasOwnProperty.call(req.body || {}, 'layout');
   const parsedTopbarColor = normalizeHexColor(topbarLinkColor);
   const parsedTitleSize = normalizeSlideTitleSize(titleSize);
   const parsedTitlePosition = normalizeSlideTitlePosition(titlePosition);
@@ -587,9 +683,18 @@ adminRouter.post('/slides', (req, res) => {
     });
   }
 
-  if (type === 'products') {
-    if (!Array.isArray(productIds) || productIds.length < 1) {
-      return res.status(400).json({ message: 'productIds array is required for product slides' });
+  const isProductSlide = type === 'products';
+  const layoutResult = normalizeProductSlideLayout(layout, isProductSlide && hasLayout);
+  if (isProductSlide && !layoutResult.valid) {
+    return res.status(400).json({ message: 'layout must be one of: 1, 2, 3 for product slides' });
+  }
+
+  if (isProductSlide) {
+    if (productIds !== undefined && !Array.isArray(productIds)) {
+      return res.status(400).json({ message: 'productIds must be an array for product slides' });
+    }
+    if (categoryCards !== undefined && !Array.isArray(categoryCards)) {
+      return res.status(400).json({ message: 'categoryCards must be an array for product slides' });
     }
   } else {
     if (!type || !url) {
@@ -599,6 +704,31 @@ adminRouter.post('/slides', (req, res) => {
 
   let slide;
   writeDb((db) => {
+    const normalizedProductIds = normalizeSlideProductIds(productIds);
+    const parsedCategoryCards = normalizeSlideCategoryCards(categoryCards);
+
+    if (isProductSlide && parsedCategoryCards.hasIncomplete) {
+      slide = { __error: 'Each category card requires categoryId and imageUrl' };
+      return;
+    }
+    if (isProductSlide && parsedCategoryCards.hasDuplicates) {
+      slide = { __error: 'Duplicate categories are not allowed in a product slide' };
+      return;
+    }
+
+    if (isProductSlide) {
+      const contentError = validateProductSlideContent(
+        db,
+        normalizedProductIds,
+        parsedCategoryCards.cards,
+        layoutResult.value
+      );
+      if (contentError) {
+        slide = { __error: contentError };
+        return;
+      }
+    }
+
     slide = {
       id: createId('slide'),
       title: title || '',
@@ -610,13 +740,18 @@ adminRouter.post('/slides', (req, res) => {
       topbarLinkColor: parsedTopbarColor.value,
       titleSize: parsedTitleSize.value,
       titlePosition: parsedTitlePosition.value,
-      productIds: type === 'products' ? productIds : [],
-      layout: type === 'products' ? (Number(layout) || 2) : 0,
+      productIds: isProductSlide ? normalizedProductIds : [],
+      categoryCards: isProductSlide ? parsedCategoryCards.cards : [],
+      layout: isProductSlide ? layoutResult.value : 0,
       order: db.slides.length + 1,
     };
 
     db.slides.push(slide);
   });
+
+  if (slide?.__error) {
+    return res.status(400).json({ message: slide.__error });
+  }
 
   return res.status(201).json({ slide });
 });
@@ -659,31 +794,82 @@ adminRouter.put('/slides/:id', (req, res) => {
     });
   }
 
+  const hasProductIds = Object.prototype.hasOwnProperty.call(payload, 'productIds');
+  const hasCategoryCards = Object.prototype.hasOwnProperty.call(payload, 'categoryCards');
+  const hasLayout = Object.prototype.hasOwnProperty.call(payload, 'layout');
+
+  if (hasProductIds && !Array.isArray(payload.productIds)) {
+    return res.status(400).json({ message: 'productIds must be an array' });
+  }
+  if (hasCategoryCards && !Array.isArray(payload.categoryCards)) {
+    return res.status(400).json({ message: 'categoryCards must be an array' });
+  }
+
   let slide;
+  let validationError = '';
   writeDb((db) => {
     slide = db.slides.find((item) => item.id === id);
     if (!slide) {
       return;
     }
 
+    const nextType = payload.type ?? slide.type;
+    const normalizedProductIds = normalizeSlideProductIds(hasProductIds ? payload.productIds : slide.productIds);
+    const parsedCategoryCards = normalizeSlideCategoryCards(hasCategoryCards ? payload.categoryCards : slide.categoryCards);
+    const layoutResult = normalizeProductSlideLayout(
+      hasLayout ? payload.layout : slide.layout,
+      hasLayout
+    );
+
+    if (nextType === 'products') {
+      if (!layoutResult.valid) {
+        validationError = 'layout must be one of: 1, 2, 3 for product slides';
+        return;
+      }
+
+      if (parsedCategoryCards.hasIncomplete) {
+        validationError = 'Each category card requires categoryId and imageUrl';
+        return;
+      }
+      if (parsedCategoryCards.hasDuplicates) {
+        validationError = 'Duplicate categories are not allowed in a product slide';
+        return;
+      }
+
+      const contentError = validateProductSlideContent(
+        db,
+        normalizedProductIds,
+        parsedCategoryCards.cards,
+        layoutResult.value
+      );
+      if (contentError) {
+        validationError = contentError;
+        return;
+      }
+    }
+
     Object.assign(slide, {
       title: payload.title ?? slide.title,
       subtitle: payload.subtitle ?? slide.subtitle,
-      type: payload.type ?? slide.type,
+      type: nextType,
       url: payload.url ?? slide.url,
       ctaLabel: payload.ctaLabel ?? slide.ctaLabel,
       ctaLink: payload.ctaLink ?? slide.ctaLink,
       topbarLinkColor: parsedTopbarColor ? parsedTopbarColor.value : (slide.topbarLinkColor || ''),
       titleSize: parsedTitleSize ? parsedTitleSize.value : (slide.titleSize || '72px'),
       titlePosition: parsedTitlePosition ? parsedTitlePosition.value : (slide.titlePosition || 'bottom-left'),
-      productIds: payload.productIds ?? slide.productIds ?? [],
-      layout: payload.layout !== undefined ? Number(payload.layout) : (slide.layout ?? 0),
+      productIds: nextType === 'products' ? normalizedProductIds : [],
+      categoryCards: nextType === 'products' ? parsedCategoryCards.cards : [],
+      layout: nextType === 'products' ? layoutResult.value : 0,
       order: payload.order !== undefined ? Number(payload.order) : slide.order,
     });
   });
 
   if (!slide) {
     return res.status(404).json({ message: 'Slide not found' });
+  }
+  if (validationError) {
+    return res.status(400).json({ message: validationError });
   }
 
   return res.json({ slide });

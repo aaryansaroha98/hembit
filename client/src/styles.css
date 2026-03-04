@@ -914,6 +914,11 @@ body.home-view .mega-menu {
   max-width: 1100px;
 }
 
+.hero-product-grid--1 {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 360px;
+}
+
 .hero-product-grid--2 {
   grid-template-columns: repeat(2, 1fr);
   max-width: 900px;
@@ -971,6 +976,17 @@ body.home-view .mega-menu {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #888;
+}
+
+.hero-product-card--category .hero-product-info {
+  gap: 0.3rem;
+}
+
+.hero-category-cta {
+  font-size: clamp(0.54rem, 0.8vw, 0.64rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b7280;
 }
 
 .hero-product-price {
@@ -3568,6 +3584,64 @@ textarea {
   margin-top: 0.4rem;
 }
 
+.admin-slide-category-manager {
+  margin-top: 0.7rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fafafa;
+  padding: 0.8rem;
+}
+
+.admin-slide-category-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.admin-slide-category-head .admin-image-uploader-label {
+  margin: 0;
+}
+
+.admin-slide-category-add {
+  height: 34px !important;
+  padding: 0 0.8rem !important;
+}
+
+.admin-slide-category-list {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.admin-slide-category-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.admin-slide-category-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-slide-category-actions input[type='file'] {
+  max-width: 240px;
+}
+
+.admin-slide-category-actions button {
+  height: 36px;
+}
+
+.admin-slide-category-note {
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
 .admin-product-picker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -4070,6 +4144,14 @@ textarea {
   .admin-form-grid,
   .inline-form {
     grid-template-columns: 1fr;
+  }
+
+  .admin-slide-category-head,
+  .admin-slide-category-row,
+  .admin-slide-category-actions {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .cart-wrap {
