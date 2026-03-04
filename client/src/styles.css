@@ -978,11 +978,12 @@ body.home-view .mega-menu {
   color: #888;
 }
 
-.hero-product-card--category .hero-product-info {
+.hero-product-card--category .hero-product-info,
+.hero-product-card--series .hero-product-info {
   gap: 0.3rem;
 }
 
-.hero-category-cta {
+.hero-card-cta {
   font-size: clamp(0.54rem, 0.8vw, 0.64rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;

@@ -38,6 +38,7 @@ publicRouter.get('/home', (req, res) => {
   const slides = [...db.slides].sort((a, b) => a.order - b.order).map((slide) => {
     if (slide.type === 'products' && Array.isArray(slide.productIds)) {
       const categoryCards = Array.isArray(slide.categoryCards) ? slide.categoryCards : [];
+      const seriesCards = Array.isArray(slide.seriesCards) ? slide.seriesCards : [];
       return {
         ...slide,
         products: slide.productIds
@@ -52,6 +53,23 @@ publicRouter.get('/home', (req, res) => {
               categoryName: category?.name || 'Category',
               categorySlug: category?.slug || card.categoryId,
               imageUrl: card.imageUrl || '',
+            };
+          })
+          .filter((card) => card.imageUrl),
+        seriesCards: seriesCards
+          .map((card) => {
+            const category = db.categories.find((item) =>
+              item.series.some((series) => series.id === card.seriesId)
+            );
+            const series = category?.series.find((item) => item.id === card.seriesId);
+            return {
+              seriesId: series?.id || card.seriesId,
+              seriesName: series?.name || 'Series',
+              seriesSlug: series?.slug || card.seriesId,
+              imageUrl: card.imageUrl || '',
+              categoryId: category?.id || '',
+              categoryName: category?.name || '',
+              categorySlug: category?.slug || '',
             };
           })
           .filter((card) => card.imageUrl),

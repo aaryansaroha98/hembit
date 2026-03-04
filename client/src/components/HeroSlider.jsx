@@ -343,6 +343,11 @@ export function HeroSlider({ slides, children }) {
                       id: `${categoryCard.categoryId || 'cat'}-${index}`,
                       categoryCard,
                     })),
+                    ...(slide.seriesCards || []).map((seriesCard, index) => ({
+                      kind: 'series',
+                      id: `${seriesCard.seriesId || 'series'}-${index}`,
+                      seriesCard,
+                    })),
                   ].map((item) => {
                     if (item.kind === 'product') {
                       const product = item.product;
@@ -383,7 +388,33 @@ export function HeroSlider({ slides, children }) {
                         </div>
                         <div className="hero-product-info">
                           <span className="hero-product-name">{categoryCard.categoryName || 'Category'}</span>
-                          <span className="hero-category-cta">Explore</span>
+                          <span className="hero-card-cta">Explore</span>
+                        </div>
+                      </Link>
+                    );
+
+                    const seriesCard = item.seriesCard;
+                    const query = new URLSearchParams();
+                    if (seriesCard?.categorySlug) {
+                      query.set('category', seriesCard.categorySlug);
+                    }
+                    if (seriesCard?.seriesSlug || seriesCard?.seriesId) {
+                      query.set('series', seriesCard.seriesSlug || seriesCard.seriesId);
+                    }
+                    const seriesLink = query.toString() ? `/shop?${query.toString()}` : '/shop';
+
+                    return (
+                      <Link
+                        to={seriesLink}
+                        className="hero-product-card hero-product-card--series"
+                        key={`series-${item.id}`}
+                      >
+                        <div className="hero-product-img">
+                          <img src={seriesCard.imageUrl} alt={seriesCard.seriesName || 'Series'} />
+                        </div>
+                        <div className="hero-product-info">
+                          <span className="hero-product-name">{seriesCard.seriesName || 'Series'}</span>
+                          <span className="hero-card-cta">Explore</span>
                         </div>
                       </Link>
                     );

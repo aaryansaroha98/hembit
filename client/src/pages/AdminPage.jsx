@@ -105,6 +105,17 @@ function normalizeSlideCategoryCardsForForm(value) {
   }));
 }
 
+function normalizeSlideSeriesCardsForForm(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.map((item) => ({
+    seriesId: String(item?.seriesId || '').trim(),
+    imageUrl: String(item?.imageUrl || '').trim(),
+  }));
+}
+
 function createInitialSlideForm() {
   return {
     title: '',
@@ -116,6 +127,7 @@ function createInitialSlideForm() {
     topbarLinkColor: '',
     productIds: [],
     categoryCards: [],
+    seriesCards: [],
     layout: 2,
     titleSize: DEFAULT_SLIDE_TITLE_SIZE,
     titlePosition: 'bottom-left',
@@ -169,6 +181,7 @@ export function AdminPage() {
   const [slideForm, setSlideForm] = useState(createInitialSlideForm);
   const [slideUploadState, setSlideUploadState] = useState({ loading: false, message: '' });
   const [slideCategoryUploadState, setSlideCategoryUploadState] = useState({ loadingIndex: -1, message: '' });
+  const [slideSeriesUploadState, setSlideSeriesUploadState] = useState({ loadingIndex: -1, message: '' });
   const [postForm, setPostForm] = useState({ title: '', excerpt: '', image: '', body: '' });
   const [editingProductId, setEditingProductId] = useState(null);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
@@ -236,12 +249,34 @@ export function AdminPage() {
     () => categories.find((item) => item.id === productForm.categoryId),
     [categories, productForm.categoryId]
   );
+  const allSeriesOptions = useMemo(() => {
+    return categories.flatMap((category) => {
+      return (category.series || []).map((series) => ({
+        seriesId: series.id,
+        categoryId: category.id,
+        categoryName: category.name,
+        categorySlug: category.slug,
+        seriesName: series.name,
+        seriesSlug: series.slug,
+      }));
+    });
+  }, [categories]);
+
   const slideLayout = normalizeProductSlideLayout(slideForm.layout);
   const slideCategoryCardRows = normalizeSlideCategoryCardsForForm(slideForm.categoryCards);
+  const slideSeriesCardRows = normalizeSlideSeriesCardsForForm(slideForm.seriesCards);
   const completedSlideCategoryCards = slideCategoryCardRows.filter((item) => item.categoryId && item.imageUrl);
-  const totalSlideCardsSelected = (slideForm.productIds?.length || 0) + completedSlideCategoryCards.length;
-  const remainingProductSlots = Math.max(0, slideLayout - completedSlideCategoryCards.length);
-  const canAddCategoryCard = (slideForm.productIds?.length || 0) + slideCategoryCardRows.length < slideLayout;
+  const completedSlideSeriesCards = slideSeriesCardRows.filter((item) => item.seriesId && item.imageUrl);
+  const totalSlideCardsSelected =
+    (slideForm.productIds?.length || 0) + completedSlideCategoryCards.length + completedSlideSeriesCards.length;
+  const remainingProductSlots = Math.max(
+    0,
+    slideLayout - completedSlideCategoryCards.length - completedSlideSeriesCards.length
+  );
+  const canAddCategoryCard =
+    (slideForm.productIds?.length || 0) + slideCategoryCardRows.length + slideSeriesCardRows.length < slideLayout;
+  const canAddSeriesCard =
+    (slideForm.productIds?.length || 0) + slideCategoryCardRows.length + slideSeriesCardRows.length < slideLayout;
 
   const uploadSlideFile = async (file) => {
     if (!file) {
@@ -295,6 +330,26 @@ export function AdminPage() {
       setSlideCategoryUploadState({ loadingIndex: -1, message: 'Category image uploaded' });
     } catch (error) {
       setSlideCategoryUploadState({ loadingIndex: -1, message: error.message });
+    }
+  };
+
+  const uploadSeriesCardImage = async (index, file) => {
+    if (!file) {
+      return;
+    }
+
+    setSlideSeriesUploadState({ loadingIndex: index, message: '' });
+    try {
+      const uploaded = await api.uploadFile(file, token);
+      setSlideForm((prev) => ({
+        ...prev,
+        seriesCards: (prev.seriesCards || []).map((item, cardIndex) =>
+          cardIndex === index ? { ...item, imageUrl: uploaded.url } : item
+        ),
+      }));
+      setSlideSeriesUploadState({ loadingIndex: -1, message: 'Series image uploaded' });
+    } catch (error) {
+      setSlideSeriesUploadState({ loadingIndex: -1, message: error.message });
     }
   };
 
@@ -885,9 +940,11 @@ export function AdminPage() {
                     layout: normalizeProductSlideLayout(prev.layout),
                     productIds: nextType === 'products' ? (prev.productIds || []) : [],
                     categoryCards: nextType === 'products' ? normalizeSlideCategoryCardsForForm(prev.categoryCards) : [],
+                    seriesCards: nextType === 'products' ? normalizeSlideSeriesCardsForForm(prev.seriesCards) : [],
                   }));
                   if (nextType !== 'products') {
                     setSlideCategoryUploadState({ loadingIndex: -1, message: '' });
+                    setSlideSeriesUploadState({ loadingIndex: -1, message: '' });
                   }
                 }}
               >
@@ -947,12 +1004,27 @@ export function AdminPage() {
                       setSlideForm((prev) => {
                         const nextProductIds = (prev.productIds || []).slice(0, nextLayout);
                         const remainingSlots = Math.max(0, nextLayout - nextProductIds.length);
-                        const nextCategoryCards = normalizeSlideCategoryCardsForForm(prev.categoryCards).slice(0, remainingSlots);
+                        const categoryRows = normalizeSlideCategoryCardsForForm(prev.categoryCards).map((item) => ({
+                          kind: 'category',
+                          ...item,
+                        }));
+                        const seriesRows = normalizeSlideSeriesCardsForForm(prev.seriesCards).map((item) => ({
+                          kind: 'series',
+                          ...item,
+                        }));
+                        const limitedRows = [...categoryRows, ...seriesRows].slice(0, remainingSlots);
+                        const nextCategoryCards = limitedRows
+                          .filter((item) => item.kind === 'category')
+                          .map(({ categoryId, imageUrl }) => ({ categoryId, imageUrl }));
+                        const nextSeriesCards = limitedRows
+                          .filter((item) => item.kind === 'series')
+                          .map(({ seriesId, imageUrl }) => ({ seriesId, imageUrl }));
                         return {
                           ...prev,
                           layout: nextLayout,
                           productIds: nextProductIds,
                           categoryCards: nextCategoryCards,
+                          seriesCards: nextSeriesCards,
                         };
                       });
                     }}
@@ -987,8 +1059,11 @@ export function AdminPage() {
                             setSlideForm((prev) => {
                               const completedCategoryCount = normalizeSlideCategoryCardsForForm(prev.categoryCards)
                                 .filter((item) => item.categoryId && item.imageUrl).length;
+                              const completedSeriesCount = normalizeSlideSeriesCardsForForm(prev.seriesCards)
+                                .filter((item) => item.seriesId && item.imageUrl).length;
                               const maxCards = normalizeProductSlideLayout(prev.layout);
-                              const currentlySelected = (prev.productIds || []).length + completedCategoryCount;
+                              const currentlySelected =
+                                (prev.productIds || []).length + completedCategoryCount + completedSeriesCount;
                               const ids = prev.productIds.includes(product.id)
                                 ? prev.productIds.filter((id) => id !== product.id)
                                 : currentlySelected < maxCards
@@ -1106,6 +1181,103 @@ export function AdminPage() {
               </div>
             )}
 
+            {slideForm.type === 'products' && (
+              <div className="admin-slide-category-manager">
+                <div className="admin-slide-category-head">
+                  <p className="admin-image-uploader-label">
+                    Series Cards ({completedSlideSeriesCards.length}/{slideLayout})
+                  </p>
+                  <button
+                    type="button"
+                    className="admin-slide-category-add"
+                    onClick={() => {
+                      setSlideForm((prev) => ({
+                        ...prev,
+                        seriesCards: [...normalizeSlideSeriesCardsForForm(prev.seriesCards), { seriesId: '', imageUrl: '' }],
+                      }));
+                    }}
+                    disabled={!canAddSeriesCard || !allSeriesOptions.length}
+                  >
+                    Add Series Card
+                  </button>
+                </div>
+
+                {!allSeriesOptions.length && (
+                  <p className="form-message">Add series first to use series cards in slides.</p>
+                )}
+
+                {slideSeriesCardRows.length > 0 && (
+                  <div className="admin-slide-category-list">
+                    {slideSeriesCardRows.map((card, index) => (
+                      <div className="admin-slide-category-row" key={`${card.seriesId || 'new-series'}-${index}`}>
+                        <select
+                          value={card.seriesId}
+                          onChange={(e) => {
+                            const nextSeriesId = e.target.value;
+                            setSlideForm((prev) => ({
+                              ...prev,
+                              seriesCards: normalizeSlideSeriesCardsForForm(prev.seriesCards).map((item, itemIndex) =>
+                                itemIndex === index ? { ...item, seriesId: nextSeriesId } : item
+                              ),
+                            }));
+                          }}
+                        >
+                          <option value="">Select Series</option>
+                          {allSeriesOptions.map((series) => (
+                            <option key={series.seriesId} value={series.seriesId}>
+                              {series.categoryName} / {series.seriesName}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          placeholder="Series Image URL"
+                          value={card.imageUrl}
+                          onChange={(e) => {
+                            const nextImageUrl = e.target.value;
+                            setSlideForm((prev) => ({
+                              ...prev,
+                              seriesCards: normalizeSlideSeriesCardsForForm(prev.seriesCards).map((item, itemIndex) =>
+                                itemIndex === index ? { ...item, imageUrl: nextImageUrl } : item
+                              ),
+                            }));
+                          }}
+                        />
+                        <div className="admin-slide-category-actions">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              uploadSeriesCardImage(index, file);
+                              e.target.value = '';
+                            }}
+                          />
+                          <button
+                            type="button"
+                            style={{ background: '#991b1b' }}
+                            onClick={() => {
+                              setSlideForm((prev) => ({
+                                ...prev,
+                                seriesCards: normalizeSlideSeriesCardsForForm(prev.seriesCards).filter(
+                                  (_item, itemIndex) => itemIndex !== index
+                                ),
+                              }));
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        {slideSeriesUploadState.loadingIndex === index && (
+                          <small className="admin-slide-category-note">Uploading image...</small>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {slideSeriesUploadState.message && <p className="form-message">{slideSeriesUploadState.message}</p>}
+              </div>
+            )}
+
             {slideForm.type !== 'products' && (
               <div className="admin-upload-row">
                 <input
@@ -1126,10 +1298,15 @@ export function AdminPage() {
                   let legacyModeUsed = false;
                   const layout = normalizeProductSlideLayout(slideForm.layout);
                   const categoryRows = normalizeSlideCategoryCardsForForm(slideForm.categoryCards);
+                  const seriesRows = normalizeSlideSeriesCardsForForm(slideForm.seriesCards);
                   const hasIncompleteCategoryCard = categoryRows.some((item) => {
                     return (item.categoryId && !item.imageUrl) || (!item.categoryId && item.imageUrl);
                   });
+                  const hasIncompleteSeriesCard = seriesRows.some((item) => {
+                    return (item.seriesId && !item.imageUrl) || (!item.seriesId && item.imageUrl);
+                  });
                   const preparedCategoryCards = categoryRows.filter((item) => item.categoryId && item.imageUrl);
+                  const preparedSeriesCards = seriesRows.filter((item) => item.seriesId && item.imageUrl);
                   const preparedProductIds = Array.isArray(slideForm.productIds)
                     ? [...new Set(slideForm.productIds.filter(Boolean))]
                     : [];
@@ -1138,15 +1315,20 @@ export function AdminPage() {
                     setMessage('Each category card must include both category and category image');
                     return;
                   }
+                  if (slideForm.type === 'products' && hasIncompleteSeriesCard) {
+                    setMessage('Each series card must include both series and series image');
+                    return;
+                  }
 
                   if (slideForm.type === 'products') {
-                    const totalCards = preparedProductIds.length + preparedCategoryCards.length;
+                    const totalCards =
+                      preparedProductIds.length + preparedCategoryCards.length + preparedSeriesCards.length;
                     if (totalCards < 1) {
-                      setMessage('Select at least 1 product or category for product slides');
+                      setMessage('Select at least 1 product, category, or series for product slides');
                       return;
                     }
                     if (totalCards > layout) {
-                      setMessage(`Total selected products + categories cannot exceed ${layout}`);
+                      setMessage(`Total selected products + categories + series cannot exceed ${layout}`);
                       return;
                     }
                   }
@@ -1157,11 +1339,13 @@ export function AdminPage() {
                       layout,
                       productIds: preparedProductIds,
                       categoryCards: preparedCategoryCards,
+                      seriesCards: preparedSeriesCards,
                     }
                     : {
                       ...slideForm,
                       productIds: [],
                       categoryCards: [],
+                      seriesCards: [],
                       layout: 0,
                     };
 
@@ -1194,6 +1378,7 @@ export function AdminPage() {
                   setEditingSlideId(null);
                   setSlideForm(createInitialSlideForm());
                   setSlideCategoryUploadState({ loadingIndex: -1, message: '' });
+                  setSlideSeriesUploadState({ loadingIndex: -1, message: '' });
                   loadAll();
                 } catch (error) {
                   setMessage(error.message);
@@ -1210,6 +1395,7 @@ export function AdminPage() {
                   setEditingSlideId(null);
                   setSlideForm(createInitialSlideForm());
                   setSlideCategoryUploadState({ loadingIndex: -1, message: '' });
+                  setSlideSeriesUploadState({ loadingIndex: -1, message: '' });
                 }}
               >
                 Cancel
@@ -1255,7 +1441,7 @@ export function AdminPage() {
                   <p>
                     {slide.type}
                     {slide.type === 'products'
-                      ? ` · ${normalizeProductSlideLayout(slide.layout)} slots · ${(slide.productIds || []).length} products · ${(slide.categoryCards || []).length} categories`
+                      ? ` · ${normalizeProductSlideLayout(slide.layout)} slots · ${(slide.productIds || []).length} products · ${(slide.categoryCards || []).length} categories · ${(slide.seriesCards || []).length} series`
                       : ''}
                     {` · ${normalizeSlideTitleSizeForForm(slide.titleSize)} · ${slide.titlePosition || 'bottom-left'}`}
                   </p>
@@ -1274,11 +1460,13 @@ export function AdminPage() {
                       topbarLinkColor: slide.topbarLinkColor || '',
                       productIds: slide.productIds || [],
                       categoryCards: normalizeSlideCategoryCardsForForm(slide.categoryCards),
+                      seriesCards: normalizeSlideSeriesCardsForForm(slide.seriesCards),
                       layout: normalizeProductSlideLayout(slide.layout || 2),
                       titleSize: normalizeSlideTitleSizeForForm(slide.titleSize),
                       titlePosition: slide.titlePosition || 'bottom-left',
                     });
                     setSlideCategoryUploadState({ loadingIndex: -1, message: '' });
+                    setSlideSeriesUploadState({ loadingIndex: -1, message: '' });
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 >

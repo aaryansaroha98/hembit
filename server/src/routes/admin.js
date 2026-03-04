@@ -178,7 +178,40 @@ function normalizeSlideCategoryCards(value) {
   return { cards, hasIncomplete, hasDuplicates };
 }
 
-function validateProductSlideContent(db, productIds, categoryCards, layout) {
+function normalizeSlideSeriesCards(value) {
+  if (!Array.isArray(value)) {
+    return { cards: [], hasIncomplete: false, hasDuplicates: false };
+  }
+
+  const seen = new Set();
+  const cards = [];
+  let hasIncomplete = false;
+  let hasDuplicates = false;
+
+  value.forEach((item) => {
+    const seriesId = String(item?.seriesId || '').trim();
+    const imageUrl = String(item?.imageUrl || '').trim();
+
+    if (!seriesId && !imageUrl) {
+      return;
+    }
+    if (!seriesId || !imageUrl) {
+      hasIncomplete = true;
+      return;
+    }
+    if (seen.has(seriesId)) {
+      hasDuplicates = true;
+      return;
+    }
+
+    seen.add(seriesId);
+    cards.push({ seriesId, imageUrl });
+  });
+
+  return { cards, hasIncomplete, hasDuplicates };
+}
+
+function validateProductSlideContent(db, productIds, categoryCards, seriesCards, layout) {
   const missingProductIds = productIds.filter((id) => !db.products.some((item) => item.id === id));
   if (missingProductIds.length) {
     return `Unknown productIds: ${missingProductIds.join(', ')}`;
@@ -191,13 +224,23 @@ function validateProductSlideContent(db, productIds, categoryCards, layout) {
     return `Unknown categoryIds: ${missingCategoryIds.join(', ')}`;
   }
 
-  const totalCards = productIds.length + categoryCards.length;
+  const allSeriesIds = new Set(
+    db.categories.flatMap((category) => category.series.map((item) => item.id))
+  );
+  const missingSeriesIds = seriesCards
+    .map((item) => item.seriesId)
+    .filter((id) => !allSeriesIds.has(id));
+  if (missingSeriesIds.length) {
+    return `Unknown seriesIds: ${missingSeriesIds.join(', ')}`;
+  }
+
+  const totalCards = productIds.length + categoryCards.length + seriesCards.length;
   if (totalCards < 1) {
-    return 'Select at least 1 product or category for product slides';
+    return 'Select at least 1 product, category, or series for product slides';
   }
 
   if (totalCards > layout) {
-    return `Total selected products + categories cannot exceed layout (${layout})`;
+    return `Total selected products + categories + series cannot exceed layout (${layout})`;
   }
 
   return '';
@@ -660,6 +703,7 @@ adminRouter.post('/slides', (req, res) => {
     topbarLinkColor,
     productIds,
     categoryCards,
+    seriesCards,
     layout,
     titleSize,
     titlePosition,
@@ -696,6 +740,9 @@ adminRouter.post('/slides', (req, res) => {
     if (categoryCards !== undefined && !Array.isArray(categoryCards)) {
       return res.status(400).json({ message: 'categoryCards must be an array for product slides' });
     }
+    if (seriesCards !== undefined && !Array.isArray(seriesCards)) {
+      return res.status(400).json({ message: 'seriesCards must be an array for product slides' });
+    }
   } else {
     if (!type || !url) {
       return res.status(400).json({ message: 'type and url are required' });
@@ -706,6 +753,7 @@ adminRouter.post('/slides', (req, res) => {
   writeDb((db) => {
     const normalizedProductIds = normalizeSlideProductIds(productIds);
     const parsedCategoryCards = normalizeSlideCategoryCards(categoryCards);
+    const parsedSeriesCards = normalizeSlideSeriesCards(seriesCards);
 
     if (isProductSlide && parsedCategoryCards.hasIncomplete) {
       slide = { __error: 'Each category card requires categoryId and imageUrl' };
@@ -715,12 +763,21 @@ adminRouter.post('/slides', (req, res) => {
       slide = { __error: 'Duplicate categories are not allowed in a product slide' };
       return;
     }
+    if (isProductSlide && parsedSeriesCards.hasIncomplete) {
+      slide = { __error: 'Each series card requires seriesId and imageUrl' };
+      return;
+    }
+    if (isProductSlide && parsedSeriesCards.hasDuplicates) {
+      slide = { __error: 'Duplicate series are not allowed in a product slide' };
+      return;
+    }
 
     if (isProductSlide) {
       const contentError = validateProductSlideContent(
         db,
         normalizedProductIds,
         parsedCategoryCards.cards,
+        parsedSeriesCards.cards,
         layoutResult.value
       );
       if (contentError) {
@@ -742,6 +799,7 @@ adminRouter.post('/slides', (req, res) => {
       titlePosition: parsedTitlePosition.value,
       productIds: isProductSlide ? normalizedProductIds : [],
       categoryCards: isProductSlide ? parsedCategoryCards.cards : [],
+      seriesCards: isProductSlide ? parsedSeriesCards.cards : [],
       layout: isProductSlide ? layoutResult.value : 0,
       order: db.slides.length + 1,
     };
@@ -796,6 +854,7 @@ adminRouter.put('/slides/:id', (req, res) => {
 
   const hasProductIds = Object.prototype.hasOwnProperty.call(payload, 'productIds');
   const hasCategoryCards = Object.prototype.hasOwnProperty.call(payload, 'categoryCards');
+  const hasSeriesCards = Object.prototype.hasOwnProperty.call(payload, 'seriesCards');
   const hasLayout = Object.prototype.hasOwnProperty.call(payload, 'layout');
 
   if (hasProductIds && !Array.isArray(payload.productIds)) {
@@ -803,6 +862,9 @@ adminRouter.put('/slides/:id', (req, res) => {
   }
   if (hasCategoryCards && !Array.isArray(payload.categoryCards)) {
     return res.status(400).json({ message: 'categoryCards must be an array' });
+  }
+  if (hasSeriesCards && !Array.isArray(payload.seriesCards)) {
+    return res.status(400).json({ message: 'seriesCards must be an array' });
   }
 
   let slide;
@@ -816,6 +878,7 @@ adminRouter.put('/slides/:id', (req, res) => {
     const nextType = payload.type ?? slide.type;
     const normalizedProductIds = normalizeSlideProductIds(hasProductIds ? payload.productIds : slide.productIds);
     const parsedCategoryCards = normalizeSlideCategoryCards(hasCategoryCards ? payload.categoryCards : slide.categoryCards);
+    const parsedSeriesCards = normalizeSlideSeriesCards(hasSeriesCards ? payload.seriesCards : slide.seriesCards);
     const layoutResult = normalizeProductSlideLayout(
       hasLayout ? payload.layout : slide.layout,
       hasLayout
@@ -835,11 +898,20 @@ adminRouter.put('/slides/:id', (req, res) => {
         validationError = 'Duplicate categories are not allowed in a product slide';
         return;
       }
+      if (parsedSeriesCards.hasIncomplete) {
+        validationError = 'Each series card requires seriesId and imageUrl';
+        return;
+      }
+      if (parsedSeriesCards.hasDuplicates) {
+        validationError = 'Duplicate series are not allowed in a product slide';
+        return;
+      }
 
       const contentError = validateProductSlideContent(
         db,
         normalizedProductIds,
         parsedCategoryCards.cards,
+        parsedSeriesCards.cards,
         layoutResult.value
       );
       if (contentError) {
@@ -860,6 +932,7 @@ adminRouter.put('/slides/:id', (req, res) => {
       titlePosition: parsedTitlePosition ? parsedTitlePosition.value : (slide.titlePosition || 'bottom-left'),
       productIds: nextType === 'products' ? normalizedProductIds : [],
       categoryCards: nextType === 'products' ? parsedCategoryCards.cards : [],
+      seriesCards: nextType === 'products' ? parsedSeriesCards.cards : [],
       layout: nextType === 'products' ? layoutResult.value : 0,
       order: payload.order !== undefined ? Number(payload.order) : slide.order,
     });
