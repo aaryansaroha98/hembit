@@ -407,14 +407,14 @@ export function HeroSlider({ slides, children }) {
           <article className={panelClass(i)} key={slide.__panelKey || slide.id} style={{ zIndex: i + 1 }}>
             {slide.type === 'products' ? (
               /* ─── Product Grid Panel ─── */
-              <div className="hero-product-panel">
+              <div
+                className="hero-product-panel"
+                style={{ '--hero-overlay-text-color': textColor || undefined }}
+              >
                 {hasOverlay(slide) && (
                   <div
                     className={`hero-product-header${i === activeIndex ? ' hero-overlay--visible' : ''}`}
-                    style={{
-                      '--hero-product-title-size': `${productTitleSizePx}px`,
-                      '--hero-overlay-text-color': textColor || undefined,
-                    }}
+                    style={{ '--hero-product-title-size': `${productTitleSizePx}px` }}
                   >
                     {slide.subtitle && <p className="hero-overline">{slide.subtitle}</p>}
                     {slide.title && <h2>{slide.title}</h2>}
