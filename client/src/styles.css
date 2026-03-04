@@ -928,6 +928,11 @@ body.home-view .mega-menu {
   grid-template-columns: repeat(3, 1fr);
 }
 
+.hero-product-grid.hero-product-grid--single-mobile {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 360px;
+}
+
 .hero-product-card {
   display: flex;
   flex-direction: column;

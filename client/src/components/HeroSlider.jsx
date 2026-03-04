@@ -5,6 +5,7 @@ const TRANSITION_DURATION = 400;
 const COOLDOWN = TRANSITION_DURATION + 60;
 const WHEEL_THRESHOLD = 30;
 const TOUCH_THRESHOLD = 40;
+const MOBILE_PANEL_BREAKPOINT = 768;
 const HEX_COLOR_REGEX = /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 const LEGACY_TITLE_SIZE_TO_PX = {
   small: 48,
@@ -68,14 +69,83 @@ function getSlideTitlePosition(slide) {
   return ALLOWED_TITLE_POSITIONS.has(value) ? value : 'bottom-left';
 }
 
+function getProductSlideCards(slide) {
+  return [
+    ...(slide.products || []).map((product) => ({
+      kind: 'product',
+      id: `product-${product.id}`,
+      product,
+    })),
+    ...(slide.categoryCards || []).map((categoryCard, index) => ({
+      kind: 'category',
+      id: `category-${categoryCard?.categoryId || index}`,
+      categoryCard,
+    })),
+    ...(slide.seriesCards || []).map((seriesCard, index) => ({
+      kind: 'series',
+      id: `series-${seriesCard?.seriesId || index}`,
+      seriesCard,
+    })),
+  ];
+}
+
 export function HeroSlider({ slides, children }) {
   const orderedSlides = useMemo(() => [...slides].sort((a, b) => a.order - b.order), [slides]);
-  const totalPanels = orderedSlides.length + (children ? 1 : 0);
+  const [isMobileViewport, setIsMobileViewport] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return window.matchMedia(`(max-width: ${MOBILE_PANEL_BREAKPOINT}px)`).matches;
+  });
+  const panelSlides = useMemo(() => {
+    return orderedSlides.flatMap((slide) => {
+      const basePanel = {
+        ...slide,
+        __panelKey: slide.id,
+        __mobileCard: null,
+      };
+
+      if (!isMobileViewport || slide.type !== 'products') {
+        return [basePanel];
+      }
+
+      const cards = getProductSlideCards(slide);
+      if (!cards.length) {
+        return [basePanel];
+      }
+
+      return cards.map((card, cardIndex) => ({
+        ...slide,
+        __panelKey: `${slide.id}-mobile-${cardIndex}`,
+        __mobileCard: card,
+      }));
+    });
+  }, [orderedSlides, isMobileViewport]);
+  const totalPanels = panelSlides.length + (children ? 1 : 0);
   const [activeIndex, setActiveIndex] = useState(0);
   const animatingRef = useRef(false);
   const wheelAccRef = useRef(0);
   const wheelTimerRef = useRef(null);
   const touchStartRef = useRef({ y: 0, x: 0 });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia(`(max-width: ${MOBILE_PANEL_BREAKPOINT}px)`);
+    const onChange = (event) => setIsMobileViewport(event.matches);
+
+    setIsMobileViewport(mediaQuery.matches);
+    mediaQuery.addEventListener('change', onChange);
+
+    return () => mediaQuery.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
+    const maxIndex = Math.max(0, totalPanels - 1);
+    setActiveIndex((prev) => Math.min(prev, maxIndex));
+  }, [totalPanels]);
 
   const hasOverlay = useCallback((slide) => {
     return !!(slide.title || slide.subtitle || slide.ctaLabel);
@@ -181,15 +251,15 @@ export function HeroSlider({ slides, children }) {
     };
   }, [step, goTo, totalPanels]);
 
-  if (!orderedSlides.length) return null;
+  if (!panelSlides.length) return null;
 
   const panelClass = (index) => {
     if (index <= activeIndex) return 'hero-panel hero-panel--visible';
     return 'hero-panel hero-panel--below';
   };
 
-  const isProductSlide = orderedSlides[activeIndex]?.type === 'products';
-  const isLastPanel = activeIndex === orderedSlides.length && children;
+  const isProductSlide = panelSlides[activeIndex]?.type === 'products';
+  const isLastPanel = activeIndex === panelSlides.length && children;
   const sliderRef = useRef(null);
   const brightnessCache = useRef({});   // url → 'light' | 'dark'
   const [heroTheme, setHeroTheme] = useState('dark');
@@ -233,7 +303,7 @@ export function HeroSlider({ slides, children }) {
       return;
     }
 
-    const slide = orderedSlides[activeIndex];
+    const slide = panelSlides[activeIndex];
     if (!slide?.url) { setHeroTheme('dark'); return; }
 
     // If already cached, apply immediately
@@ -265,7 +335,7 @@ export function HeroSlider({ slides, children }) {
       };
       tryFrame();
     }
-  }, [activeIndex, isProductSlide, isLastPanel, orderedSlides, analyseBrightness]);
+  }, [activeIndex, isProductSlide, isLastPanel, panelSlides, analyseBrightness]);
 
   // Sync theme attribute to body
   useEffect(() => {
@@ -275,7 +345,7 @@ export function HeroSlider({ slides, children }) {
 
   // Optional per-slide topbar link color from admin
   useEffect(() => {
-    const activeSlide = orderedSlides[activeIndex];
+    const activeSlide = panelSlides[activeIndex];
     const rawColor = String(activeSlide?.topbarLinkColor || '').trim();
     const normalized = rawColor.startsWith('#') ? rawColor : `#${rawColor}`;
     const styleTargets = [document.documentElement.style, document.body.style];
@@ -298,7 +368,7 @@ export function HeroSlider({ slides, children }) {
         style.removeProperty('--hero-topbar-link-hover-color');
       });
     };
-  }, [activeIndex, orderedSlides]);
+  }, [activeIndex, panelSlides]);
 
   return (
     <section className="hero-slider" ref={sliderRef}>
@@ -316,13 +386,15 @@ export function HeroSlider({ slides, children }) {
       </div>
 
       {/* Image / video / product slides */}
-      {orderedSlides.map((slide, i) => {
+      {panelSlides.map((slide, i) => {
         const titleSizePx = getSlideTitleSizePx(slide);
         const productTitleSizePx = Math.max(MIN_TITLE_SIZE_PX, Math.round(titleSizePx * 0.5));
         const titlePosition = getSlideTitlePosition(slide);
+        const cardsToRender = slide.__mobileCard ? [slide.__mobileCard] : getProductSlideCards(slide);
+        const productGridClass = `hero-product-grid hero-product-grid--${slide.layout || 2}${slide.__mobileCard ? ' hero-product-grid--single-mobile' : ''}`;
 
         return (
-          <article className={panelClass(i)} key={slide.id} style={{ zIndex: i + 1 }}>
+          <article className={panelClass(i)} key={slide.__panelKey || slide.id} style={{ zIndex: i + 1 }}>
             {slide.type === 'products' ? (
               /* ─── Product Grid Panel ─── */
               <div className="hero-product-panel">
@@ -335,20 +407,8 @@ export function HeroSlider({ slides, children }) {
                     {slide.title && <h2>{slide.title}</h2>}
                   </div>
                 )}
-                <div className={`hero-product-grid hero-product-grid--${slide.layout || 2}`}>
-                  {[
-                    ...(slide.products || []).map((product) => ({ kind: 'product', id: product.id, product })),
-                    ...(slide.categoryCards || []).map((categoryCard, index) => ({
-                      kind: 'category',
-                      id: `${categoryCard.categoryId || 'cat'}-${index}`,
-                      categoryCard,
-                    })),
-                    ...(slide.seriesCards || []).map((seriesCard, index) => ({
-                      kind: 'series',
-                      id: `${seriesCard.seriesId || 'series'}-${index}`,
-                      seriesCard,
-                    })),
-                  ].map((item) => {
+                <div className={productGridClass}>
+                  {cardsToRender.map((item) => {
                     if (item.kind === 'product') {
                       const product = item.product;
                       const linkSlug = product.slug || product.id;
@@ -468,7 +528,7 @@ export function HeroSlider({ slides, children }) {
 
       {/* Footer panel (last slide) */}
       {children && (
-        <div className={panelClass(orderedSlides.length)} style={{ zIndex: orderedSlides.length + 1 }}>
+        <div className={panelClass(panelSlides.length)} style={{ zIndex: panelSlides.length + 1 }}>
           {children}
         </div>
       )}
