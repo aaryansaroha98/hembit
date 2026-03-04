@@ -1929,6 +1929,7 @@ textarea {
   font-size: 0.94rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  text-align: center;
 }
 
 .blog-card p {
