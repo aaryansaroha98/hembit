@@ -623,6 +623,13 @@ body.home-view .mega-menu {
   color: var(--text);
 }
 
+.mega-column .mega-view-all {
+  margin-top: 0.45rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #111;
+}
+
 /* ─── Full-screen mobile overlay ─── */
 .mob-overlay {
   display: none;

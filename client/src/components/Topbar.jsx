@@ -113,7 +113,7 @@ export function Topbar() {
         {groups.map((category) => (
           <div className="mega-column" key={category.id}>
             <h4>{category.name.toUpperCase()}</h4>
-            {category.series.map((series) => (
+            {(category.series || []).map((series) => (
               <button
                 key={series.id}
                 type="button"
@@ -125,6 +125,16 @@ export function Topbar() {
                 {series.name}
               </button>
             ))}
+            <button
+              type="button"
+              className="mega-view-all"
+              onClick={() => {
+                navigate(`/shop?category=${category.slug}`);
+                setOpenMenu('');
+              }}
+            >
+              VIEW ALL
+            </button>
           </div>
         ))}
       </div>
