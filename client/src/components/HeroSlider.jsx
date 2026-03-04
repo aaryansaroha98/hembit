@@ -372,6 +372,9 @@ export function HeroSlider({ slides, children }) {
                     }
 
                     const categoryCard = item.categoryCard;
+                    if (!categoryCard || !categoryCard.imageUrl) {
+                      return null;
+                    }
                     const categorySlug = categoryCard?.categorySlug || categoryCard?.categoryId;
                     const categoryLink = categorySlug
                       ? `/shop?category=${encodeURIComponent(categorySlug)}`
@@ -394,6 +397,9 @@ export function HeroSlider({ slides, children }) {
                     );
 
                     const seriesCard = item.seriesCard;
+                    if (!seriesCard || !seriesCard.imageUrl) {
+                      return null;
+                    }
                     const query = new URLSearchParams();
                     if (seriesCard?.categorySlug) {
                       query.set('category', seriesCard.categorySlug);

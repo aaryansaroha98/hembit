@@ -15,7 +15,8 @@ function formatCurrency(amount, currency = 'INR') {
 
 function withDerivedProduct(db, product) {
   const category = db.categories.find((cat) => cat.id === product.categoryId);
-  const series = category?.series.find((ser) => ser.id === product.seriesId);
+  const categorySeries = Array.isArray(category?.series) ? category.series : [];
+  const series = categorySeries.find((ser) => ser.id === product.seriesId);
   const isAvailable = product.isAvailable !== false;
   const unavailableButtonText =
     typeof product.unavailableButtonText === 'string' && product.unavailableButtonText.trim()
@@ -46,27 +47,34 @@ publicRouter.get('/home', (req, res) => {
           .filter(Boolean)
           .map((p) => withDerivedProduct(db, p)),
         categoryCards: categoryCards
-          .map((card) => {
-            const category = db.categories.find((item) => item.id === card.categoryId);
+          .map((rawCard) => {
+            const card = rawCard && typeof rawCard === 'object' ? rawCard : {};
+            const categoryId = String(card.categoryId || '').trim();
+            const imageUrl = String(card.imageUrl || '').trim();
+            const category = db.categories.find((item) => item.id === categoryId);
             return {
-              categoryId: category?.id || card.categoryId,
+              categoryId: category?.id || categoryId,
               categoryName: category?.name || 'Category',
-              categorySlug: category?.slug || card.categoryId,
-              imageUrl: card.imageUrl || '',
+              categorySlug: category?.slug || categoryId,
+              imageUrl,
             };
           })
           .filter((card) => card.imageUrl),
         seriesCards: seriesCards
-          .map((card) => {
+          .map((rawCard) => {
+            const card = rawCard && typeof rawCard === 'object' ? rawCard : {};
+            const seriesId = String(card.seriesId || '').trim();
+            const imageUrl = String(card.imageUrl || '').trim();
             const category = db.categories.find((item) =>
-              item.series.some((series) => series.id === card.seriesId)
+              (Array.isArray(item.series) ? item.series : []).some((series) => series.id === seriesId)
             );
-            const series = category?.series.find((item) => item.id === card.seriesId);
+            const categorySeries = Array.isArray(category?.series) ? category.series : [];
+            const series = categorySeries.find((item) => item.id === seriesId);
             return {
-              seriesId: series?.id || card.seriesId,
+              seriesId: series?.id || seriesId,
               seriesName: series?.name || 'Series',
-              seriesSlug: series?.slug || card.seriesId,
-              imageUrl: card.imageUrl || '',
+              seriesSlug: series?.slug || seriesId,
+              imageUrl,
               categoryId: category?.id || '',
               categoryName: category?.name || '',
               categorySlug: category?.slug || '',
@@ -100,7 +108,7 @@ publicRouter.get('/navigation', (req, res) => {
     id: category.id,
     name: category.name,
     slug: category.slug,
-    series: category.series,
+    series: Array.isArray(category.series) ? category.series : [],
   }));
 
   res.json({
@@ -129,7 +137,8 @@ publicRouter.get('/shop', (req, res) => {
     const seriesSlug = String(series);
     const categoryMap = new Map();
     db.categories.forEach((cat) => {
-      cat.series.forEach((ser) => categoryMap.set(ser.slug, ser.id));
+      const categorySeries = Array.isArray(cat.series) ? cat.series : [];
+      categorySeries.forEach((ser) => categoryMap.set(ser.slug, ser.id));
     });
     const matchedSeriesId = categoryMap.get(seriesSlug) || seriesSlug;
     result = result.filter((item) => item.seriesId === matchedSeriesId);
