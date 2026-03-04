@@ -701,6 +701,7 @@ adminRouter.post('/slides', (req, res) => {
     ctaLabel,
     ctaLink,
     topbarLinkColor,
+    fontColor,
     productIds,
     categoryCards,
     seriesCards,
@@ -710,11 +711,15 @@ adminRouter.post('/slides', (req, res) => {
   } = req.body;
   const hasLayout = Object.prototype.hasOwnProperty.call(req.body || {}, 'layout');
   const parsedTopbarColor = normalizeHexColor(topbarLinkColor);
+  const parsedFontColor = normalizeHexColor(fontColor);
   const parsedTitleSize = normalizeSlideTitleSize(titleSize);
   const parsedTitlePosition = normalizeSlideTitlePosition(titlePosition);
 
   if (!parsedTopbarColor.valid) {
     return res.status(400).json({ message: 'topbarLinkColor must be a valid hex color' });
+  }
+  if (!parsedFontColor.valid) {
+    return res.status(400).json({ message: 'fontColor must be a valid hex color' });
   }
   if (!parsedTitleSize.valid) {
     return res.status(400).json({
@@ -795,6 +800,7 @@ adminRouter.post('/slides', (req, res) => {
       ctaLabel: ctaLabel || '',
       ctaLink: ctaLink || '',
       topbarLinkColor: parsedTopbarColor.value,
+      fontColor: parsedFontColor.value,
       titleSize: parsedTitleSize.value,
       titlePosition: parsedTitlePosition.value,
       productIds: isProductSlide ? normalizedProductIds : [],
@@ -832,14 +838,19 @@ adminRouter.put('/slides/:id', (req, res) => {
   const id = req.params.id;
   const payload = req.body || {};
   const hasTopbarColor = Object.prototype.hasOwnProperty.call(payload, 'topbarLinkColor');
+  const hasFontColor = Object.prototype.hasOwnProperty.call(payload, 'fontColor');
   const hasTitleSize = Object.prototype.hasOwnProperty.call(payload, 'titleSize');
   const hasTitlePosition = Object.prototype.hasOwnProperty.call(payload, 'titlePosition');
   const parsedTopbarColor = hasTopbarColor ? normalizeHexColor(payload.topbarLinkColor) : null;
+  const parsedFontColor = hasFontColor ? normalizeHexColor(payload.fontColor) : null;
   const parsedTitleSize = hasTitleSize ? normalizeSlideTitleSize(payload.titleSize) : null;
   const parsedTitlePosition = hasTitlePosition ? normalizeSlideTitlePosition(payload.titlePosition) : null;
 
   if (parsedTopbarColor && !parsedTopbarColor.valid) {
     return res.status(400).json({ message: 'topbarLinkColor must be a valid hex color' });
+  }
+  if (parsedFontColor && !parsedFontColor.valid) {
+    return res.status(400).json({ message: 'fontColor must be a valid hex color' });
   }
   if (parsedTitleSize && !parsedTitleSize.valid) {
     return res.status(400).json({
@@ -928,6 +939,7 @@ adminRouter.put('/slides/:id', (req, res) => {
       ctaLabel: payload.ctaLabel ?? slide.ctaLabel,
       ctaLink: payload.ctaLink ?? slide.ctaLink,
       topbarLinkColor: parsedTopbarColor ? parsedTopbarColor.value : (slide.topbarLinkColor || ''),
+      fontColor: parsedFontColor ? parsedFontColor.value : (slide.fontColor || ''),
       titleSize: parsedTitleSize ? parsedTitleSize.value : (slide.titleSize || '72px'),
       titlePosition: parsedTitlePosition ? parsedTitlePosition.value : (slide.titlePosition || 'bottom-left'),
       productIds: nextType === 'products' ? normalizedProductIds : [],

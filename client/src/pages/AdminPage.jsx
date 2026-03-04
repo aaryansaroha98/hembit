@@ -125,6 +125,7 @@ function createInitialSlideForm() {
     ctaLabel: '',
     ctaLink: '',
     topbarLinkColor: '',
+    fontColor: '',
     productIds: [],
     categoryCards: [],
     seriesCards: [],
@@ -974,6 +975,28 @@ export function AdminPage() {
                   Reset Color
                 </button>
               </div>
+              <input
+                type="text"
+                placeholder="Text Color (hex, optional)"
+                value={slideForm.fontColor}
+                onChange={(e) => setSlideForm((prev) => ({ ...prev, fontColor: e.target.value }))}
+              />
+              <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+                <input
+                  type="color"
+                  value={HEX_COLOR_PATTERN.test(slideForm.fontColor) ? slideForm.fontColor : '#FFFFFF'}
+                  onChange={(e) => setSlideForm((prev) => ({ ...prev, fontColor: e.target.value }))}
+                  aria-label="Pick slide text color"
+                  style={{ width: 42, height: 38, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
+                />
+                <button
+                  type="button"
+                  style={{ background: '#666', padding: '0.45rem 0.75rem' }}
+                  onClick={() => setSlideForm((prev) => ({ ...prev, fontColor: '' }))}
+                >
+                  Reset Text Color
+                </button>
+              </div>
 
               {slideForm.type !== 'products' && (
                 <>
@@ -1458,6 +1481,7 @@ export function AdminPage() {
                       ctaLabel: slide.ctaLabel || '',
                       ctaLink: slide.ctaLink || '',
                       topbarLinkColor: slide.topbarLinkColor || '',
+                      fontColor: slide.fontColor || '',
                       productIds: slide.productIds || [],
                       categoryCards: normalizeSlideCategoryCardsForForm(slide.categoryCards),
                       seriesCards: normalizeSlideSeriesCardsForForm(slide.seriesCards),

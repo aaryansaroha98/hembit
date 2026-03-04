@@ -69,6 +69,15 @@ function getSlideTitlePosition(slide) {
   return ALLOWED_TITLE_POSITIONS.has(value) ? value : 'bottom-left';
 }
 
+function getSlideTextColor(slide) {
+  const raw = String(slide?.fontColor || '').trim();
+  if (!raw) {
+    return '';
+  }
+  const normalized = raw.startsWith('#') ? raw : `#${raw}`;
+  return HEX_COLOR_REGEX.test(normalized) ? normalized.toUpperCase() : '';
+}
+
 function getProductSlideCards(slide) {
   return [
     ...(slide.products || []).map((product) => ({
@@ -390,6 +399,7 @@ export function HeroSlider({ slides, children }) {
         const titleSizePx = getSlideTitleSizePx(slide);
         const productTitleSizePx = Math.max(MIN_TITLE_SIZE_PX, Math.round(titleSizePx * 0.5));
         const titlePosition = getSlideTitlePosition(slide);
+        const textColor = getSlideTextColor(slide);
         const cardsToRender = slide.__mobileCard ? [slide.__mobileCard] : getProductSlideCards(slide);
         const productGridClass = `hero-product-grid hero-product-grid--${slide.layout || 2}${slide.__mobileCard ? ' hero-product-grid--single-mobile' : ''}`;
 
@@ -401,7 +411,10 @@ export function HeroSlider({ slides, children }) {
                 {hasOverlay(slide) && (
                   <div
                     className={`hero-product-header${i === activeIndex ? ' hero-overlay--visible' : ''}`}
-                    style={{ '--hero-product-title-size': `${productTitleSizePx}px` }}
+                    style={{
+                      '--hero-product-title-size': `${productTitleSizePx}px`,
+                      '--hero-overlay-text-color': textColor || undefined,
+                    }}
                   >
                     {slide.subtitle && <p className="hero-overline">{slide.subtitle}</p>}
                     {slide.title && <h2>{slide.title}</h2>}
@@ -511,7 +524,10 @@ export function HeroSlider({ slides, children }) {
                 {hasOverlay(slide) && (
                   <div
                     className={`hero-overlay hero-overlay--pos-${titlePosition}${i === activeIndex ? ' hero-overlay--visible' : ''}`}
-                    style={{ '--hero-title-size': `${titleSizePx}px` }}
+                    style={{
+                      '--hero-title-size': `${titleSizePx}px`,
+                      '--hero-overlay-text-color': textColor || undefined,
+                    }}
                   >
                     {slide.subtitle && <p className="hero-overline">{slide.subtitle}</p>}
                     {slide.title && <h1>{slide.title}</h1>}
