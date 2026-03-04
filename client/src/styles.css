@@ -1001,6 +1001,15 @@ body.home-view .mega-menu {
   gap: 0.3rem;
 }
 
+.hero-product-card--series .hero-product-img img {
+  object-fit: contain;
+  background: #fff;
+}
+
+.hero-product-card--series:hover .hero-product-img img {
+  transform: none;
+}
+
 .hero-card-cta {
   font-size: clamp(0.54rem, 0.8vw, 0.64rem);
   letter-spacing: 0.12em;
