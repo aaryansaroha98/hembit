@@ -33,6 +33,30 @@ function withDerivedProduct(db, product) {
   };
 }
 
+function findCategoryBySeriesId(db, seriesId) {
+  if (!seriesId) return null;
+  return db.categories.find((category) => {
+    const categorySeries = Array.isArray(category.series) ? category.series : [];
+    return categorySeries.some((series) => series.id === seriesId);
+  }) || null;
+}
+
+function findCategoryCoverImage(db, categoryId) {
+  if (!categoryId) return '';
+  const match = db.products.find((product) => {
+    return product.categoryId === categoryId && Array.isArray(product.images) && product.images[0];
+  });
+  return match?.images?.[0] || '';
+}
+
+function findSeriesCoverImage(db, seriesId) {
+  if (!seriesId) return '';
+  const match = db.products.find((product) => {
+    return product.seriesId === seriesId && Array.isArray(product.images) && product.images[0];
+  });
+  return match?.images?.[0] || '';
+}
+
 publicRouter.get('/home', (req, res) => {
   const db = readDb();
 
@@ -56,31 +80,29 @@ publicRouter.get('/home', (req, res) => {
               categoryId: category?.id || categoryId,
               categoryName: category?.name || 'Category',
               categorySlug: category?.slug || categoryId,
-              imageUrl,
+              imageUrl: imageUrl || findCategoryCoverImage(db, category?.id || categoryId),
             };
           })
-          .filter((card) => card.imageUrl),
+          .filter((card) => card.categoryId),
         seriesCards: seriesCards
           .map((rawCard) => {
             const card = rawCard && typeof rawCard === 'object' ? rawCard : {};
             const seriesId = String(card.seriesId || '').trim();
             const imageUrl = String(card.imageUrl || '').trim();
-            const category = db.categories.find((item) =>
-              (Array.isArray(item.series) ? item.series : []).some((series) => series.id === seriesId)
-            );
+            const category = findCategoryBySeriesId(db, seriesId);
             const categorySeries = Array.isArray(category?.series) ? category.series : [];
             const series = categorySeries.find((item) => item.id === seriesId);
             return {
               seriesId: series?.id || seriesId,
               seriesName: series?.name || 'Series',
               seriesSlug: series?.slug || seriesId,
-              imageUrl,
+              imageUrl: imageUrl || findSeriesCoverImage(db, series?.id || seriesId),
               categoryId: category?.id || '',
               categoryName: category?.name || '',
               categorySlug: category?.slug || '',
             };
           })
-          .filter((card) => card.imageUrl),
+          .filter((card) => card.seriesId),
       };
     }
     return slide;

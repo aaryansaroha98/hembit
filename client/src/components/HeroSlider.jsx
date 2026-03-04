@@ -371,33 +371,39 @@ export function HeroSlider({ slides, children }) {
                       );
                     }
 
-                    const categoryCard = item.categoryCard;
-                    if (!categoryCard || !categoryCard.imageUrl) {
-                      return null;
-                    }
-                    const categorySlug = categoryCard?.categorySlug || categoryCard?.categoryId;
-                    const categoryLink = categorySlug
-                      ? `/shop?category=${encodeURIComponent(categorySlug)}`
-                      : '/shop';
+                    if (item.kind === 'category') {
+                      const categoryCard = item.categoryCard;
+                      if (!categoryCard) {
+                        return null;
+                      }
+                      const categorySlug = categoryCard?.categorySlug || categoryCard?.categoryId;
+                      const categoryLink = categorySlug
+                        ? `/shop?category=${encodeURIComponent(categorySlug)}`
+                        : '/shop';
 
-                    return (
-                      <Link
-                        to={categoryLink}
-                        className="hero-product-card hero-product-card--category"
-                        key={`category-${item.id}`}
-                      >
-                        <div className="hero-product-img">
-                          <img src={categoryCard.imageUrl} alt={categoryCard.categoryName || 'Category'} />
-                        </div>
-                        <div className="hero-product-info">
-                          <span className="hero-product-name">{categoryCard.categoryName || 'Category'}</span>
-                          <span className="hero-card-cta">Explore</span>
-                        </div>
-                      </Link>
-                    );
+                      return (
+                        <Link
+                          to={categoryLink}
+                          className="hero-product-card hero-product-card--category"
+                          key={`category-${item.id}`}
+                        >
+                          <div className="hero-product-img">
+                            {categoryCard.imageUrl ? (
+                              <img src={categoryCard.imageUrl} alt={categoryCard.categoryName || 'Category'} />
+                            ) : (
+                              <div className="hero-product-img-fallback">{categoryCard.categoryName || 'Category'}</div>
+                            )}
+                          </div>
+                          <div className="hero-product-info">
+                            <span className="hero-product-name">{categoryCard.categoryName || 'Category'}</span>
+                            <span className="hero-card-cta">Explore</span>
+                          </div>
+                        </Link>
+                      );
+                    }
 
                     const seriesCard = item.seriesCard;
-                    if (!seriesCard || !seriesCard.imageUrl) {
+                    if (!seriesCard) {
                       return null;
                     }
                     const query = new URLSearchParams();
@@ -416,7 +422,11 @@ export function HeroSlider({ slides, children }) {
                         key={`series-${item.id}`}
                       >
                         <div className="hero-product-img">
-                          <img src={seriesCard.imageUrl} alt={seriesCard.seriesName || 'Series'} />
+                          {seriesCard.imageUrl ? (
+                            <img src={seriesCard.imageUrl} alt={seriesCard.seriesName || 'Series'} />
+                          ) : (
+                            <div className="hero-product-img-fallback">{seriesCard.seriesName || 'Series'}</div>
+                          )}
                         </div>
                         <div className="hero-product-info">
                           <span className="hero-product-name">{seriesCard.seriesName || 'Series'}</span>
