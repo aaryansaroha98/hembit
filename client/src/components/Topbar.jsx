@@ -114,6 +114,31 @@ export function Topbar() {
           <div className="mega-column" key={category.id}>
             <h4>{category.name.toUpperCase()}</h4>
             {(category.series || []).map((series) => (
+  const renderMenu = () => {
+    if (!openMenu) return null;
+
+    const groups =
+      openMenu === 'HB PRODUCTIONS' ? [] : openMenu === 'MEN' ? menuData.men : menuData.highlights;
+
+    if (openMenu === 'HB PRODUCTIONS') {
+      return (
+        <div className="mega-menu" onMouseLeave={() => setOpenMenu('')}>
+          <div className="mega-column">
+            <h4>HB PRODUCTIONS</h4>
+            <button type="button" onClick={() => navigate('/hb-productions')}>
+              View All Stories
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="mega-menu" onMouseLeave={() => setOpenMenu('')}>
+        {groups.map((category) => (
+          <div className="mega-column" key={category.id}>
+            <h4>{category.name.toUpperCase()}</h4>
+            {(category.series || []).map((series) => (
               <button
                 key={series.id}
                 type="button"
@@ -140,44 +165,6 @@ export function Topbar() {
       </div>
     );
   };
-
-  /* Mobile sub-menu categories for a given section */
-  const mobGroups = mobSection === 'MEN' ? menuData.men : mobSection === 'HIGHLIGHTS' ? menuData.highlights : [];
-
-  return (
-    <header
-      className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}${openMenu ? ' dropdown-open' : ''}`}
-      onMouseLeave={() => setOpenMenu('')}
-    >
-      <div className="topbar">
-        <button
-          className="menu-toggle"
-          type="button"
-          onClick={() => (mobileOpen ? closeMobile() : setMobileOpen(true))}
-          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-        >
-          <span className={`menu-toggle-icon${mobileOpen ? ' is-open' : ''}`} aria-hidden="true" />
-        </button>
-
-        <nav className="topbar-left">
-          {['HIGHLIGHTS', 'MEN', 'HB PRODUCTIONS'].map((item) => (
-            <button
-              key={item}
-              type="button"
-              className="nav-trigger"
-              onMouseEnter={() => setOpenMenu(item)}
-              onClick={() => setOpenMenu(item)}
-            >
-              {item}
-            </button>
-          ))}
-        </nav>
-
-        <Link to="/" className="brand-mark">
-          HEMBIT
-        </Link>
-
-        <button type="button" className="mobile-search" onClick={openSearchOverlay} aria-label="Open search">
           <SearchIcon />
         </button>
 
