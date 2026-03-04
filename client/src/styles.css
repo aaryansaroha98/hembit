@@ -604,18 +604,21 @@ body.home-view .mega-menu {
 
 .mega-column h4 {
   margin: 0 0 0.85rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .mega-column button {
   display: block;
   border: 0;
   background: transparent;
-  padding: 0.28rem 0;
+  padding: 0.2rem 0;
   color: var(--text-soft);
-  font-size: 0.84rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  line-height: 1.35;
   cursor: pointer;
 }
 
@@ -624,10 +627,11 @@ body.home-view .mega-menu {
 }
 
 .mega-column .mega-view-all {
-  margin-top: 0.45rem;
+  margin-top: 0.4rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: #111;
+  font-size: 0.68rem;
 }
 
 /* ─── Full-screen mobile overlay ─── */
