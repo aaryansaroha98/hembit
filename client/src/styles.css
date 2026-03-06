@@ -272,13 +272,19 @@ body.home-view .site-footer--home {
   z-index: 60;
   background: transparent;
   border-bottom: none;
-  transition: background-color var(--t-med) var(--ease), border-color var(--t-med) var(--ease);
+  transition: transform 280ms var(--ease), background-color var(--t-med) var(--ease),
+    border-color var(--t-med) var(--ease);
+  will-change: transform;
 }
 
 .topbar-wrap-home {
   position: fixed;
   left: 0;
   right: 0;
+}
+
+.topbar-wrap-hidden {
+  transform: translateY(calc(-100% - 2px));
 }
 
 .topbar-wrap-overlay {
@@ -639,7 +645,7 @@ body.hb-story-view .site-footer .newsletter-form button:hover {
 
 body.home-view .mega-menu {
   background: #fff;
-  border-top: 1px solid var(--line);
+  border-top: 0;
   border-bottom: 1px solid var(--line);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
   display: flex;
@@ -656,7 +662,7 @@ body.home-view .mega-menu {
   top: 100%;
   z-index: 59;
   background: #fff;
-  border-top: 1px solid var(--line);
+  border-top: 0;
   border-bottom: 1px solid var(--line);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
   display: flex;
