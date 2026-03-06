@@ -75,7 +75,6 @@ export function HBProductionsPage() {
       <div className="hb-list-shell">
         <header className="hb-list-head">
           <h1>HB PRODUCTIONS</h1>
-          <p>Editorial stories in a cleaner, classic frame.</p>
         </header>
 
         <div className="hb-list-grid">
