@@ -18,6 +18,15 @@ function resolveStoryImageSrc(rawUrl) {
 
   try {
     const parsed = new URL(withProtocol, window.location.origin);
+
+    // If admin saved a localhost upload URL, rewrite it to current API origin for other devices.
+    if (
+      (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') &&
+      parsed.pathname.startsWith('/uploads/')
+    ) {
+      return `${API_ORIGIN}${parsed.pathname}${parsed.search || ''}`;
+    }
+
     if (
       parsed.protocol === 'http:' &&
       window.location.protocol === 'https:' &&
@@ -79,6 +88,8 @@ export function HBProductionStoryPage() {
   const storyImages = useMemo(() => {
     return story ? getPostImages(story).map((img) => resolveStoryImageSrc(img)).filter(Boolean) : [];
   }, [story]);
+  const coverImage = storyImages[0] || '';
+  const galleryImages = storyImages.slice(1);
 
   if (status === 'loading') {
     return (
@@ -121,23 +132,42 @@ export function HBProductionStoryPage() {
           {story.excerpt && <h2>{story.excerpt}</h2>}
         </header>
 
-        {storyImages.length > 0 && (
+        {coverImage && (
           <div className="hb-story-gallery">
-            {storyImages.map((src, index) => (
-              <figure className="hb-story-figure" key={`${src}-${index}`}>
-                {!failedImages[`${src}-${index}`] ? (
-                  <img
-                    src={src}
-                    alt={`${story.title} ${index + 1}`}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    referrerPolicy="no-referrer"
-                    onError={() => setFailedImages((prev) => ({ ...prev, [`${src}-${index}`]: true }))}
-                  />
-                ) : (
-                  <div className="hb-story-image-fallback">Image unavailable</div>
-                )}
-              </figure>
-            ))}
+            <figure className="hb-story-figure hb-story-figure--main" key={`${coverImage}-0`}>
+              {!failedImages[`${coverImage}-0`] ? (
+                <img
+                  src={coverImage}
+                  alt={`${story.title} 1`}
+                  loading="eager"
+                  onError={() => setFailedImages((prev) => ({ ...prev, [`${coverImage}-0`]: true }))}
+                />
+              ) : (
+                <div className="hb-story-image-fallback">Image unavailable</div>
+              )}
+            </figure>
+
+            {galleryImages.length > 0 && (
+              <div className="hb-story-gallery-strip" aria-label="Story gallery">
+                {galleryImages.map((src, index) => {
+                  const imageKey = `${src}-${index + 1}`;
+                  return (
+                    <figure className="hb-story-figure hb-story-figure--strip" key={imageKey}>
+                      {!failedImages[imageKey] ? (
+                        <img
+                          src={src}
+                          alt={`${story.title} ${index + 2}`}
+                          loading="lazy"
+                          onError={() => setFailedImages((prev) => ({ ...prev, [imageKey]: true }))}
+                        />
+                      ) : (
+                        <div className="hb-story-image-fallback">Image unavailable</div>
+                      )}
+                    </figure>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

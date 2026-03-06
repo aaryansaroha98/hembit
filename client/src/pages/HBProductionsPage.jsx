@@ -18,6 +18,15 @@ function resolveStoryImageSrc(rawUrl) {
 
   try {
     const parsed = new URL(withProtocol, window.location.origin);
+
+    // If admin saved a localhost upload URL, rewrite it to current API origin for other devices.
+    if (
+      (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') &&
+      parsed.pathname.startsWith('/uploads/')
+    ) {
+      return `${API_ORIGIN}${parsed.pathname}${parsed.search || ''}`;
+    }
+
     if (
       parsed.protocol === 'http:' &&
       window.location.protocol === 'https:' &&
@@ -81,7 +90,6 @@ export function HBProductionsPage() {
                       src={cover}
                       alt={post.title}
                       loading="lazy"
-                      referrerPolicy="no-referrer"
                       onError={() => setFailedImages((prev) => ({ ...prev, [post.id]: true }))}
                     />
                   ) : (

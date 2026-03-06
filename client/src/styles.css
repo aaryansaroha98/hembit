@@ -340,36 +340,6 @@ body.home-view .topbar-wrap.dropdown-open .mobile-search:hover {
   color: #555;
 }
 
-body.hb-view .topbar-wrap {
-  background: #000;
-}
-
-body.hb-view .topbar-wrap .topbar-left button,
-body.hb-view .topbar-wrap .topbar-right a,
-body.hb-view .topbar-wrap .topbar-right button,
-body.hb-view .topbar-wrap .menu-toggle,
-body.hb-view .topbar-wrap .mobile-search,
-body.hb-view .topbar-wrap .brand-mark {
-  color: #fff;
-}
-
-body.hb-view .topbar-wrap .topbar-left button:hover,
-body.hb-view .topbar-wrap .topbar-right a:hover,
-body.hb-view .topbar-wrap .topbar-right button:hover,
-body.hb-view .topbar-wrap .menu-toggle:hover,
-body.hb-view .topbar-wrap .mobile-search:hover {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-body.hb-view .topbar-wrap.dropdown-open .topbar-left button,
-body.hb-view .topbar-wrap.dropdown-open .topbar-right a,
-body.hb-view .topbar-wrap.dropdown-open .topbar-right button,
-body.hb-view .topbar-wrap.dropdown-open .menu-toggle,
-body.hb-view .topbar-wrap.dropdown-open .mobile-search,
-body.hb-view .topbar-wrap.dropdown-open .brand-mark {
-  color: #111;
-}
-
 .topbar {
   width: min(var(--max-width), 100% - 2.6rem);
   height: 80px;
@@ -1974,8 +1944,8 @@ textarea {
 /* HB productions - classic listing and detail */
 .hb-list-page,
 .hb-story-page {
-  background: #000;
-  color: #fff;
+  background: #fff;
+  color: #111;
   min-height: calc(100vh - 80px);
 }
 
@@ -1983,7 +1953,7 @@ textarea {
 .hb-story-shell {
   width: min(1480px, 100% - 2.6rem);
   margin: 0 auto;
-  padding: 2.2rem 0 5.2rem;
+  padding: 1.4rem 0 3rem;
 }
 
 .hb-list-head {
@@ -2000,10 +1970,10 @@ textarea {
 }
 
 .hb-list-head p {
-  margin: 0.7rem 0 0;
-  color: rgba(255, 255, 255, 0.72);
+  margin: 0.6rem 0 0;
+  color: #6c6c6c;
   font-size: 0.76rem;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
@@ -2016,15 +1986,15 @@ textarea {
 .hb-story-card {
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: #000;
+  border: 1px solid var(--line);
+  background: #fff;
 }
 
 .hb-story-media {
   display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
-  background: #070707;
+  background: #f5f5f5;
   overflow: hidden;
 }
 
@@ -2047,7 +2017,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.56);
+  color: #888;
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2072,7 +2042,7 @@ textarea {
 
 .hb-story-copy p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: #666;
   font-size: 0.71rem;
   line-height: 1.58;
   letter-spacing: 0.02em;
@@ -2084,16 +2054,16 @@ textarea {
   align-items: center;
   justify-content: center;
   height: 36px;
-  border: 1px solid #fff;
-  color: #fff;
+  border: 1px solid #111;
+  color: #111;
   font-size: 0.66rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
 .hb-story-explore:hover {
-  background: #fff;
-  color: #000;
+  background: #111;
+  color: #fff;
 }
 
 .hb-story-head {
@@ -2106,7 +2076,7 @@ textarea {
   font-size: 0.68rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
+  color: #666;
 }
 
 .hb-story-head h1 {
@@ -2118,86 +2088,118 @@ textarea {
 }
 
 .hb-story-head h2 {
-  margin: 0.9rem auto 0;
+  margin: 0.65rem auto 0;
   max-width: 760px;
-  color: rgba(255, 255, 255, 0.78);
+  color: #444;
   font-size: 0.78rem;
-  line-height: 1.7;
-  letter-spacing: 0.06em;
+  line-height: 1.62;
+  letter-spacing: 0.05em;
   font-weight: 400;
   text-transform: uppercase;
 }
 
 .hb-story-gallery {
   display: grid;
-  gap: 1.15rem;
+  gap: 0.8rem;
 }
 
 .hb-story-figure {
   margin: 0;
-  background: #050505;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #f5f5f5;
+  border: 1px solid var(--line);
+}
+
+.hb-story-figure--main {
+  width: 100%;
 }
 
 .hb-story-figure img {
   width: 100%;
-  max-height: 78vh;
-  object-fit: cover;
+  max-height: min(72vh, 760px);
+  object-fit: contain;
   display: block;
+  margin: 0 auto;
+}
+
+.hb-story-gallery-strip {
+  display: flex;
+  gap: 0.8rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.2rem;
+}
+
+.hb-story-gallery-strip::-webkit-scrollbar {
+  height: 6px;
+}
+
+.hb-story-gallery-strip::-webkit-scrollbar-thumb {
+  background: #cfcfcf;
+}
+
+.hb-story-figure--strip {
+  flex: 0 0 clamp(260px, 38vw, 560px);
+  scroll-snap-align: start;
+}
+
+.hb-story-figure--strip img {
+  max-height: min(56vh, 520px);
+  object-fit: cover;
 }
 
 .hb-story-image-fallback {
-  height: 48vh;
+  height: 320px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.62);
+  color: #888;
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .hb-story-body {
-  max-width: 980px;
-  margin: 2.5rem auto 0;
+  max-width: 900px;
+  margin: 1.25rem auto 0;
 }
 
 .hb-story-body p {
-  margin: 0 0 1.08rem;
-  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 0.72rem;
+  color: #262626;
   font-size: 0.82rem;
-  line-height: 1.9;
+  line-height: 1.72;
   letter-spacing: 0.02em;
 }
 
 .hb-story-actions {
   display: flex;
   justify-content: center;
-  margin-top: 2rem;
+  margin-top: 1.25rem;
 }
 
 .hb-story-back {
   height: 37px;
   padding: 0 1.2rem;
-  border: 1px solid #fff;
+  border: 1px solid #111;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: #111;
   font-size: 0.66rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .hb-story-back:hover {
-  background: #fff;
-  color: #000;
+  background: #111;
+  color: #fff;
 }
 
 .hb-story-status {
-  margin: 2.4rem 0;
+  margin: 1.5rem 0;
   text-align: center;
-  color: rgba(255, 255, 255, 0.82);
+  color: #444;
   font-size: 0.78rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -4582,7 +4584,7 @@ textarea {
   .hb-list-shell,
   .hb-story-shell {
     width: calc(100% - 1.6rem);
-    padding: 1.6rem 0 3rem;
+    padding: 1rem 0 2rem;
   }
 
   .hb-list-head h1 {
@@ -4601,6 +4603,14 @@ textarea {
   .hb-story-head h2,
   .hb-story-body p {
     font-size: 0.74rem;
+  }
+
+  .hb-story-figure img {
+    max-height: 56vh;
+  }
+
+  .hb-story-figure--strip {
+    flex-basis: min(84vw, 460px);
   }
 
   .auth-shell-luxe {
