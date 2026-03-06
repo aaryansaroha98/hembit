@@ -90,10 +90,6 @@ export function HBProductionStoryPage() {
   }, [story]);
   const coverImage = storyImages[0] || '';
   const galleryImages = storyImages.slice(1);
-  const repeatedGalleryImages = useMemo(() => {
-    if (galleryImages.length <= 1) return galleryImages;
-    return [...galleryImages, ...galleryImages];
-  }, [galleryImages]);
   const galleryPosition = story?.galleryPosition === 'below_text' ? 'below_text' : 'above_text';
 
   if (status === 'loading') {
@@ -156,8 +152,8 @@ export function HBProductionStoryPage() {
 
         {galleryImages.length > 0 && galleryPosition === 'above_text' && (
           <div className="hb-story-gallery-strip" aria-label="Story gallery">
-            <div className={`hb-story-gallery-track${galleryImages.length > 1 ? ' is-looping' : ''}`}>
-              {repeatedGalleryImages.map((src, index) => {
+            <div className="hb-story-gallery-track">
+              {galleryImages.map((src, index) => {
                 const imageKey = `${src}-${index + 1}`;
                 return (
                   <figure className="hb-story-figure hb-story-figure--strip" key={imageKey}>
@@ -190,8 +186,8 @@ export function HBProductionStoryPage() {
 
         {galleryImages.length > 0 && galleryPosition === 'below_text' && (
           <div className="hb-story-gallery-strip" aria-label="Story gallery">
-            <div className={`hb-story-gallery-track${galleryImages.length > 1 ? ' is-looping' : ''}`}>
-              {repeatedGalleryImages.map((src, index) => {
+            <div className="hb-story-gallery-track">
+              {galleryImages.map((src, index) => {
                 const imageKey = `${src}-${index + 1}`;
                 return (
                   <figure className="hb-story-figure hb-story-figure--strip" key={imageKey}>

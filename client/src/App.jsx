@@ -64,13 +64,16 @@ function ScrollToTop() {
 function MainLayout({ children }) {
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const isHbProductionRoute = location.pathname.startsWith('/hb-productions');
 
   useEffect(() => {
     document.body.classList.toggle('home-view', isHome);
+    document.body.classList.toggle('hb-view', isHbProductionRoute);
     return () => {
       document.body.classList.remove('home-view');
+      document.body.classList.remove('hb-view');
     };
-  }, [isHome]);
+  }, [isHome, isHbProductionRoute]);
 
   return (
     <div className={`app-shell${isHome ? ' app-shell-home' : ''}`}>
