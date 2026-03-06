@@ -1903,7 +1903,7 @@ textarea {
 
 /* Services page */
 .services-client-page {
-  background: #fff;
+  background: #e7e7e7;
   min-height: calc(100vh - 80px);
   padding: 2.7rem 0 5rem;
 }
@@ -2353,7 +2353,6 @@ textarea {
 
 /* Cart */
 .cart-wrap {
-  background: #fff;
   width: min(960px, 100% - 2.6rem);
   margin: 2.5rem auto 0;
 }
