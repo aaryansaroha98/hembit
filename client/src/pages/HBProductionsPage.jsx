@@ -46,22 +46,29 @@ export function HBProductionsPage() {
       <div className="content-page-inner">
         <h1>HB PRODUCTIONS</h1>
         <div className="blog-grid" style={{ marginTop: '3rem' }}>
-          {posts.map((post) => (
-            <article key={post.id} id={post.id} className="blog-card">
-              {post.image && !failedImages[post.id] && (
-                <img
-                  src={resolveStoryImageSrc(post.image)}
-                  alt={post.title}
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                  onError={() => setFailedImages((prev) => ({ ...prev, [post.id]: true }))}
-                />
-              )}
-              <h3>{post.title}</h3>
-              <p>{post.excerpt}</p>
-              <small>{post.body}</small>
-            </article>
-          ))}
+          {posts.map((post) => {
+            const postImages = Array.isArray(post.images) && post.images.length
+              ? post.images
+              : (post.image ? [post.image] : []);
+            const coverImage = postImages[0] || '';
+
+            return (
+              <article key={post.id} id={post.id} className="blog-card">
+                {coverImage && !failedImages[post.id] && (
+                  <img
+                    src={resolveStoryImageSrc(coverImage)}
+                    alt={post.title}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    onError={() => setFailedImages((prev) => ({ ...prev, [post.id]: true }))}
+                  />
+                )}
+                <h3>{post.title}</h3>
+                <p>{post.excerpt}</p>
+                <small>{post.body}</small>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

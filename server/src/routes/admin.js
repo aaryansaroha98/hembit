@@ -263,6 +263,37 @@ function getAudienceEmails(db, audience) {
   return [];
 }
 
+function normalizeHbImages(images, image) {
+  const seen = new Set();
+  const list = [];
+
+  const pushUrl = (value) => {
+    const url = String(value || '').trim();
+    if (!url || seen.has(url)) {
+      return;
+    }
+    seen.add(url);
+    list.push(url);
+  };
+
+  if (Array.isArray(images)) {
+    images.forEach(pushUrl);
+  }
+
+  pushUrl(image);
+
+  return list;
+}
+
+function normalizeHbPost(post) {
+  const normalizedImages = normalizeHbImages(post?.images, post?.image);
+  return {
+    ...post,
+    image: normalizedImages[0] || '',
+    images: normalizedImages,
+  };
+}
+
 adminRouter.use(requireAuth, requireAdmin);
 
 adminRouter.post('/media/upload', async (req, res) => {
@@ -1058,14 +1089,16 @@ adminRouter.delete('/settings/logo-video', (_req, res) => {
 
 adminRouter.get('/hb-productions', (_req, res) => {
   const db = readDb();
-  res.json({ posts: db.hbProductions });
+  res.json({ posts: db.hbProductions.map(normalizeHbPost) });
 });
 
 adminRouter.post('/hb-productions', (req, res) => {
-  const { title, excerpt, image, body } = req.body;
+  const { title, excerpt, image, images, body } = req.body;
   if (!title || !body) {
     return res.status(400).json({ message: 'title and body are required' });
   }
+
+  const normalizedImages = normalizeHbImages(images, image);
 
   let post;
   writeDb((db) => {
@@ -1073,14 +1106,15 @@ adminRouter.post('/hb-productions', (req, res) => {
       id: createId('blog'),
       title,
       excerpt: excerpt || '',
-      image: image || '',
+      image: normalizedImages[0] || '',
+      images: normalizedImages,
       body,
       createdAt: new Date().toISOString(),
     };
     db.hbProductions.unshift(post);
   });
 
-  return res.status(201).json({ post });
+  return res.status(201).json({ post: normalizeHbPost(post) });
 });
 
 adminRouter.delete('/hb-productions/:id', (req, res) => {
@@ -1095,7 +1129,9 @@ adminRouter.delete('/hb-productions/:id', (req, res) => {
 
 adminRouter.put('/hb-productions/:id', (req, res) => {
   const id = req.params.id;
-  const { title, excerpt, image, body } = req.body;
+  const { title, excerpt, image, images, body } = req.body;
+  const hasImage = Object.prototype.hasOwnProperty.call(req.body, 'image');
+  const hasImages = Object.prototype.hasOwnProperty.call(req.body, 'images');
 
   let post;
   writeDb((db) => {
@@ -1104,15 +1140,23 @@ adminRouter.put('/hb-productions/:id', (req, res) => {
 
     post.title = title ?? post.title;
     post.excerpt = excerpt ?? post.excerpt;
-    post.image = image ?? post.image;
     post.body = body ?? post.body;
+
+    if (hasImage || hasImages) {
+      const nextImages = normalizeHbImages(
+        hasImages ? images : post.images,
+        hasImage ? image : post.image
+      );
+      post.images = nextImages;
+      post.image = nextImages[0] || '';
+    }
   });
 
   if (!post) {
     return res.status(404).json({ message: 'Post not found' });
   }
 
-  return res.json({ post });
+  return res.json({ post: normalizeHbPost(post) });
 });
 
 adminRouter.get('/orders', (_req, res) => {

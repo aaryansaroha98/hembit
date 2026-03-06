@@ -35,7 +35,7 @@ export function Topbar() {
   const [openMenu, setOpenMenu] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
   /* Mobile sub-navigation: which top-level section is drilled into */
-  const [mobSection, setMobSection] = useState(null); // 'HIGHLIGHTS' | 'MEN' | null
+  const [mobSection, setMobSection] = useState(null); // 'HIGHLIGHTS' | 'MEN' | 'HB PRODUCTIONS' | null
   /* Which category accordion is expanded inside a section */
   const [mobExpanded, setMobExpanded] = useState(null);
   /* Search overlay */
@@ -167,6 +167,7 @@ export function Topbar() {
 
   /* Mobile sub-menu categories for a given section */
   const mobGroups = mobSection === 'MEN' ? menuData.men : mobSection === 'HIGHLIGHTS' ? menuData.highlights : [];
+  const isHbMobileSection = mobSection === 'HB PRODUCTIONS';
 
   return (
     <header
@@ -250,15 +251,7 @@ export function Topbar() {
             <div className="mob-primary">
               <button type="button" onClick={() => setMobSection('HIGHLIGHTS')}>HIGHLIGHTS</button>
               <button type="button" onClick={() => setMobSection('MEN')}>MEN</button>
-              <button
-                type="button"
-                onClick={() => {
-                  closeMobile();
-                  navigate('/hb-productions');
-                }}
-              >
-                HB PRODUCTIONS
-              </button>
+              <button type="button" onClick={() => setMobSection('HB PRODUCTIONS')}>HB PRODUCTIONS</button>
             </div>
             <div className="mob-secondary">
               <Link to="/services" onClick={closeMobile}>SERVICES</Link>
@@ -277,46 +270,75 @@ export function Topbar() {
               <span>{mobSection}</span>
             </button>
 
-            <div className="mob-categories">
-              {mobGroups.map((cat) => (
-                <div key={cat.id} className="mob-cat">
+            {isHbMobileSection ? (
+              <div className="mob-categories">
+                <div className="mob-cat-items">
+                  {hbStories.map((story) => (
+                    <button
+                      key={story.id}
+                      type="button"
+                      onClick={() => {
+                        closeMobile();
+                        navigate(`/hb-productions#${story.id}`);
+                      }}
+                    >
+                      {String(story.title || 'Untitled Story').toUpperCase()}
+                    </button>
+                  ))}
                   <button
                     type="button"
-                    className={`mob-cat-toggle${mobExpanded === cat.id ? ' mob-cat-toggle--open' : ''}`}
-                    onClick={() => setMobExpanded(mobExpanded === cat.id ? null : cat.id)}
+                    className="mob-view-all"
+                    onClick={() => {
+                      closeMobile();
+                      navigate('/hb-productions');
+                    }}
                   >
-                    <span>{cat.name.toUpperCase()}</span>
-                    <ChevronDown open={mobExpanded === cat.id} />
+                    VIEW ALL
                   </button>
-                  {mobExpanded === cat.id && (
-                    <div className="mob-cat-items">
-                      {cat.series.map((s) => (
+                </div>
+              </div>
+            ) : (
+              <div className="mob-categories">
+                {mobGroups.map((cat) => (
+                  <div key={cat.id} className="mob-cat">
+                    <button
+                      type="button"
+                      className={`mob-cat-toggle${mobExpanded === cat.id ? ' mob-cat-toggle--open' : ''}`}
+                      onClick={() => setMobExpanded(mobExpanded === cat.id ? null : cat.id)}
+                    >
+                      <span>{cat.name.toUpperCase()}</span>
+                      <ChevronDown open={mobExpanded === cat.id} />
+                    </button>
+                    {mobExpanded === cat.id && (
+                      <div className="mob-cat-items">
+                        {cat.series.map((s) => (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => {
+                              closeMobile();
+                              navigate(`/shop?category=${cat.slug}&series=${s.slug}`);
+                            }}
+                          >
+                            {s.name.toUpperCase()}
+                          </button>
+                        ))}
                         <button
-                          key={s.id}
                           type="button"
+                          className="mob-view-all"
                           onClick={() => {
                             closeMobile();
-                            navigate(`/shop?category=${cat.slug}&series=${s.slug}`);
+                            navigate(`/shop?category=${cat.slug}`);
                           }}
                         >
-                          {s.name.toUpperCase()}
+                          VIEW ALL
                         </button>
-                      ))}
-                      <button
-                        type="button"
-                        className="mob-view-all"
-                        onClick={() => {
-                          closeMobile();
-                          navigate(`/shop?category=${cat.slug}`);
-                        }}
-                      >
-                        VIEW ALL
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

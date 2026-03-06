@@ -135,6 +135,38 @@ function createInitialSlideForm() {
   };
 }
 
+function normalizePostImages(images, image) {
+  const seen = new Set();
+  const list = [];
+
+  const pushUrl = (value) => {
+    const url = String(value || '').trim();
+    if (!url || seen.has(url)) {
+      return;
+    }
+    seen.add(url);
+    list.push(url);
+  };
+
+  if (Array.isArray(images)) {
+    images.forEach(pushUrl);
+  }
+
+  pushUrl(image);
+
+  return list;
+}
+
+function createInitialPostForm() {
+  return {
+    title: '',
+    excerpt: '',
+    image: '',
+    images: [],
+    body: '',
+  };
+}
+
 export function AdminPage() {
   const { token, signout } = useAuth();
   const [activeTab, setActiveTab] = useState('Dashboard');
@@ -183,7 +215,8 @@ export function AdminPage() {
   const [slideUploadState, setSlideUploadState] = useState({ loading: false, message: '' });
   const [slideCategoryUploadState, setSlideCategoryUploadState] = useState({ loadingIndex: -1, message: '' });
   const [slideSeriesUploadState, setSlideSeriesUploadState] = useState({ loadingIndex: -1, message: '' });
-  const [postForm, setPostForm] = useState({ title: '', excerpt: '', image: '', body: '' });
+  const [postForm, setPostForm] = useState(createInitialPostForm);
+  const [postImageUploading, setPostImageUploading] = useState(false);
   const [editingProductId, setEditingProductId] = useState(null);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [editingSeries, setEditingSeries] = useState(null);
@@ -205,6 +238,7 @@ export function AdminPage() {
   const [logoVideo, setLogoVideo] = useState('');
   const [logoUploading, setLogoUploading] = useState(false);
   const logoFileRef = useRef(null);
+  const postImageInputRef = useRef(null);
 
   const loadAll = async () => {
     const [dash, prod, cat, sl, hb, cnt, sett, usersData, ord, news, recipients] = await Promise.all([
@@ -278,6 +312,7 @@ export function AdminPage() {
     (slideForm.productIds?.length || 0) + slideCategoryCardRows.length + slideSeriesCardRows.length < slideLayout;
   const canAddSeriesCard =
     (slideForm.productIds?.length || 0) + slideCategoryCardRows.length + slideSeriesCardRows.length < slideLayout;
+  const postFormImages = normalizePostImages(postForm.images, postForm.image);
 
   const uploadSlideFile = async (file) => {
     if (!file) {
@@ -352,6 +387,32 @@ export function AdminPage() {
     } catch (error) {
       setSlideSeriesUploadState({ loadingIndex: -1, message: error.message });
     }
+  };
+
+  const uploadPostImages = async (files) => {
+    const imageFiles = Array.from(files || []).filter((file) => file.type.startsWith('image/'));
+    if (!imageFiles.length) {
+      setMessage('Please select image files for story gallery');
+      return;
+    }
+
+    setPostImageUploading(true);
+    try {
+      const uploaded = await Promise.all(imageFiles.map((file) => api.uploadFile(file, token)));
+      const uploadedUrls = uploaded.map((item) => item.url).filter(Boolean);
+      setPostForm((prev) => {
+        const merged = normalizePostImages([...(prev.images || []), ...uploadedUrls], prev.image);
+        return {
+          ...prev,
+          image: merged[0] || '',
+          images: merged,
+        };
+      });
+      setMessage('Story image(s) uploaded');
+    } catch (error) {
+      setMessage(error.message);
+    }
+    setPostImageUploading(false);
   };
 
   return (
@@ -1524,10 +1585,120 @@ export function AdminPage() {
               onChange={(e) => setPostForm((prev) => ({ ...prev, excerpt: e.target.value }))}
             />
             <input
-              placeholder="Image URL"
+              placeholder="Cover Image URL (optional)"
               value={postForm.image}
-              onChange={(e) => setPostForm((prev) => ({ ...prev, image: e.target.value }))}
+              onChange={(e) =>
+                setPostForm((prev) => {
+                  const manualUrl = e.target.value;
+                  const merged = normalizePostImages(prev.images, manualUrl);
+                  return {
+                    ...prev,
+                    image: manualUrl,
+                    images: merged,
+                  };
+                })
+              }
             />
+            <div className="admin-image-uploader">
+              <p className="admin-image-uploader-label">Story Images (Add Multiple)</p>
+              <div
+                className="admin-image-dropzone"
+                onClick={() => postImageInputRef.current?.click()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.add('dragover');
+                }}
+                onDragLeave={(e) => e.currentTarget.classList.remove('dragover')}
+                onDrop={async (e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove('dragover');
+                  await uploadPostImages(e.dataTransfer.files);
+                }}
+              >
+                <input
+                  ref={postImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  style={{ display: 'none' }}
+                  onChange={async (e) => {
+                    await uploadPostImages(e.target.files);
+                    e.target.value = '';
+                  }}
+                />
+                {postImageUploading ? (
+                  <span className="admin-image-dropzone-text">Uploading...</span>
+                ) : (
+                  <span className="admin-image-dropzone-text">+ Click or drag story images here</span>
+                )}
+              </div>
+              {postFormImages.length > 0 && (
+                <div className="admin-image-preview-grid">
+                  {postFormImages.map((url, idx) => (
+                    <div className="admin-image-preview" key={`${url}-${idx}`}>
+                      <img src={url} alt={`Story ${idx + 1}`} />
+                      <div className="admin-image-preview-actions">
+                        {idx > 0 && (
+                          <button
+                            type="button"
+                            title="Move left"
+                            onClick={() =>
+                              setPostForm((prev) => {
+                                const nextImages = [...normalizePostImages(prev.images, prev.image)];
+                                [nextImages[idx - 1], nextImages[idx]] = [nextImages[idx], nextImages[idx - 1]];
+                                return {
+                                  ...prev,
+                                  image: nextImages[0] || '',
+                                  images: nextImages,
+                                };
+                              })
+                            }
+                          >
+                            {'<'}
+                          </button>
+                        )}
+                        {idx < postFormImages.length - 1 && (
+                          <button
+                            type="button"
+                            title="Move right"
+                            onClick={() =>
+                              setPostForm((prev) => {
+                                const nextImages = [...normalizePostImages(prev.images, prev.image)];
+                                [nextImages[idx], nextImages[idx + 1]] = [nextImages[idx + 1], nextImages[idx]];
+                                return {
+                                  ...prev,
+                                  image: nextImages[0] || '',
+                                  images: nextImages,
+                                };
+                              })
+                            }
+                          >
+                            {'>'}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          title="Remove image"
+                          onClick={() =>
+                            setPostForm((prev) => {
+                              const nextImages = normalizePostImages(prev.images, prev.image).filter((_, i) => i !== idx);
+                              return {
+                                ...prev,
+                                image: nextImages[0] || '',
+                                images: nextImages,
+                              };
+                            })
+                          }
+                        >
+                          X
+                        </button>
+                      </div>
+                      {idx === 0 && <span className="admin-image-badge">Cover</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <textarea
               placeholder="Body"
               value={postForm.body}
@@ -1537,15 +1708,21 @@ export function AdminPage() {
               type="button"
               onClick={async () => {
                 try {
+                  const preparedImages = normalizePostImages(postForm.images, postForm.image);
+                  const payload = {
+                    ...postForm,
+                    image: preparedImages[0] || '',
+                    images: preparedImages,
+                  };
                   if (editingPostId) {
-                    await api.put(`/admin/hb-productions/${editingPostId}`, postForm, token);
+                    await api.put(`/admin/hb-productions/${editingPostId}`, payload, token);
                     setMessage('Blog post updated');
                     setEditingPostId(null);
                   } else {
-                    await api.post('/admin/hb-productions', postForm, token);
+                    await api.post('/admin/hb-productions', payload, token);
                     setMessage('Blog post added');
                   }
-                  setPostForm({ title: '', excerpt: '', image: '', body: '' });
+                  setPostForm(createInitialPostForm());
                   loadAll();
                 } catch (err) {
                   setMessage(err.message);
@@ -1560,7 +1737,7 @@ export function AdminPage() {
                 style={{ marginLeft: 8, background: '#666' }}
                 onClick={() => {
                   setEditingPostId(null);
-                  setPostForm({ title: '', excerpt: '', image: '', body: '' });
+                  setPostForm(createInitialPostForm());
                 }}
               >
                 Cancel
@@ -1576,11 +1753,13 @@ export function AdminPage() {
                   <button
                     type="button"
                     onClick={() => {
+                      const postImages = normalizePostImages(post.images, post.image);
                       setEditingPostId(post.id);
                       setPostForm({
                         title: post.title || '',
                         excerpt: post.excerpt || '',
-                        image: post.image || '',
+                        image: postImages[0] || '',
+                        images: postImages,
                         body: post.body || '',
                       });
                       window.scrollTo({ top: 0, behavior: 'smooth' });

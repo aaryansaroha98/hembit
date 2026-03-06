@@ -57,6 +57,30 @@ function findSeriesCoverImage(db, seriesId) {
   return match?.images?.[0] || '';
 }
 
+function normalizeHbPost(post) {
+  const seen = new Set();
+  const images = [];
+  const pushUrl = (value) => {
+    const url = String(value || '').trim();
+    if (!url || seen.has(url)) {
+      return;
+    }
+    seen.add(url);
+    images.push(url);
+  };
+
+  if (Array.isArray(post?.images)) {
+    post.images.forEach(pushUrl);
+  }
+  pushUrl(post?.image);
+
+  return {
+    ...post,
+    image: images[0] || '',
+    images,
+  };
+}
+
 publicRouter.get('/home', (req, res) => {
   const db = readDb();
 
@@ -213,7 +237,7 @@ publicRouter.get('/settings', (_req, res) => {
 
 publicRouter.get('/hb-productions', (req, res) => {
   const db = readDb();
-  res.json({ posts: db.hbProductions });
+  res.json({ posts: db.hbProductions.map(normalizeHbPost) });
 });
 
 publicRouter.post('/newsletter/subscribe', (req, res) => {
