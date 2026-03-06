@@ -16,6 +16,7 @@ import { AccountPage } from './pages/AccountPage';
 import { OrderTrackingPage } from './pages/OrderTrackingPage';
 import { CartPage } from './pages/CartPage';
 import { HBProductionsPage } from './pages/HBProductionsPage';
+import { HBProductionStoryPage } from './pages/HBProductionStoryPage';
 import { AdminPage } from './pages/AdminPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 
@@ -63,11 +64,16 @@ function ScrollToTop() {
 function MainLayout({ children }) {
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const isHbProductionRoute = location.pathname.startsWith('/hb-productions');
 
   useEffect(() => {
     document.body.classList.toggle('home-view', isHome);
-    return () => document.body.classList.remove('home-view');
-  }, [isHome]);
+    document.body.classList.toggle('hb-view', isHbProductionRoute);
+    return () => {
+      document.body.classList.remove('home-view');
+      document.body.classList.remove('hb-view');
+    };
+  }, [isHome, isHbProductionRoute]);
 
   return (
     <div className={`app-shell${isHome ? ' app-shell-home' : ''}`}>
@@ -171,6 +177,14 @@ export default function App() {
           element={
             <MainLayout>
               <HBProductionsPage />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/hb-productions/:storyId"
+          element={
+            <MainLayout>
+              <HBProductionStoryPage />
             </MainLayout>
           }
         />

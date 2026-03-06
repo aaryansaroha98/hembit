@@ -110,7 +110,7 @@ export function Topbar() {
                 key={story.id}
                 type="button"
                 onClick={() => {
-                  navigate(`/hb-productions#${story.id}`);
+                  navigate(`/hb-productions/${encodeURIComponent(story.id)}`);
                   setOpenMenu('');
                 }}
               >
@@ -279,7 +279,7 @@ export function Topbar() {
                       type="button"
                       onClick={() => {
                         closeMobile();
-                        navigate(`/hb-productions#${story.id}`);
+                        navigate(`/hb-productions/${encodeURIComponent(story.id)}`);
                       }}
                     >
                       {String(story.title || 'Untitled Story').toUpperCase()}
