@@ -34,6 +34,7 @@ export function Topbar() {
   const [hbStories, setHbStories] = useState([]);
   const [openMenu, setOpenMenu] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [hideOnScroll, setHideOnScroll] = useState(false);
   /* Mobile sub-navigation: which top-level section is drilled into */
   const [mobSection, setMobSection] = useState(null); // 'HIGHLIGHTS' | 'MEN' | 'HB PRODUCTIONS' | null
   /* Which category accordion is expanded inside a section */
@@ -42,6 +43,7 @@ export function Topbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef(null);
+  const lastScrollYRef = useRef(0);
   const { isAuthenticated } = useAuth();
   const { items } = useCart();
   const location = useLocation();
@@ -60,6 +62,52 @@ export function Topbar() {
     closeMobile();
     closeSearch();
   }, [location.pathname]);
+
+  useEffect(() => {
+    lastScrollYRef.current = window.scrollY || 0;
+    setHideOnScroll(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const isMobileViewport = () => window.matchMedia('(max-width: 900px)').matches;
+    const lockVisible = mobileOpen || !!openMenu || searchOpen;
+
+    if (isMobileViewport() || lockVisible) {
+      lastScrollYRef.current = window.scrollY || 0;
+      setHideOnScroll(false);
+      return undefined;
+    }
+
+    let ticking = false;
+    const minDelta = 6;
+    const hideAfterY = 90;
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+
+      window.requestAnimationFrame(() => {
+        const currentY = Math.max(window.scrollY || 0, 0);
+        const delta = currentY - lastScrollYRef.current;
+
+        if (currentY <= 8) {
+          setHideOnScroll(false);
+        } else if (Math.abs(delta) >= minDelta) {
+          if (delta > 0 && currentY > hideAfterY) {
+            setHideOnScroll(true);
+          } else if (delta < 0) {
+            setHideOnScroll(false);
+          }
+        }
+
+        lastScrollYRef.current = currentY;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [mobileOpen, openMenu, searchOpen]);
 
   const closeMobile = () => {
     setMobileOpen(false);
@@ -171,7 +219,7 @@ export function Topbar() {
 
   return (
     <header
-      className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}${openMenu ? ' dropdown-open' : ''}`}
+      className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}${openMenu ? ' dropdown-open' : ''}${hideOnScroll ? ' topbar-wrap-hidden' : ''}`}
       onMouseLeave={() => setOpenMenu('')}
     >
       <div className="topbar">

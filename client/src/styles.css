@@ -272,7 +272,9 @@ body.home-view .site-footer--home {
   z-index: 60;
   background: transparent;
   border-bottom: none;
-  transition: background-color var(--t-med) var(--ease), border-color var(--t-med) var(--ease);
+  transition: transform 280ms var(--ease), background-color var(--t-med) var(--ease),
+    border-color var(--t-med) var(--ease);
+  will-change: transform;
 }
 
 .topbar-wrap-home {
@@ -288,6 +290,10 @@ body.home-view .site-footer--home {
 
 .topbar-wrap.dropdown-open {
   background: #fff;
+}
+
+.topbar-wrap-hidden {
+  transform: translateY(calc(-100% - 2px));
 }
 
 .topbar-wrap-home .topbar-left button,
@@ -349,8 +355,12 @@ body.hb-story-view {
 }
 
 body.hb-story-view .topbar-wrap {
-  background: #000;
+  background: transparent;
   border-bottom-color: transparent;
+}
+
+body.hb-story-view .topbar-wrap.dropdown-open {
+  background: #000;
 }
 
 body.hb-story-view .topbar-wrap .topbar-left button,
@@ -4567,6 +4577,10 @@ textarea {
   /* Hide hamburger lines when overlay is open (X is in the overlay) */
   .topbar-wrap-mobile-open .menu-toggle {
     visibility: hidden;
+  }
+
+  .topbar-wrap-hidden {
+    transform: none;
   }
 
   .section-pad,
