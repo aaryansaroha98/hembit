@@ -31,6 +31,7 @@ function ChevronDown({ open }) {
 
 export function Topbar() {
   const [menuData, setMenuData] = useState({ highlights: [], men: [] });
+  const [hbStories, setHbStories] = useState([]);
   const [openMenu, setOpenMenu] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
   /* Mobile sub-navigation: which top-level section is drilled into */
@@ -48,6 +49,10 @@ export function Topbar() {
 
   useEffect(() => {
     api.get('/public/navigation').then(setMenuData).catch(() => {});
+    api
+      .get('/public/hb-productions')
+      .then((response) => setHbStories(Array.isArray(response?.posts) ? response.posts : []))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -100,7 +105,25 @@ export function Topbar() {
         <div className="mega-menu" onMouseLeave={() => setOpenMenu('')}>
           <div className="mega-column">
             <h4>HB PRODUCTIONS</h4>
-            <button type="button" onClick={() => navigate('/hb-productions')}>
+            {hbStories.map((story) => (
+              <button
+                key={story.id}
+                type="button"
+                onClick={() => {
+                  navigate(`/hb-productions#${story.id}`);
+                  setOpenMenu('');
+                }}
+              >
+                {story.title}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                navigate('/hb-productions');
+                setOpenMenu('');
+              }}
+            >
               View All Stories
             </button>
           </div>

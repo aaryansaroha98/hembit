@@ -14,7 +14,7 @@ export function HBProductionsPage() {
         <h1>HB PRODUCTIONS</h1>
         <div className="blog-grid" style={{ marginTop: '3rem' }}>
           {posts.map((post) => (
-            <article key={post.id} className="blog-card">
+            <article key={post.id} id={post.id} className="blog-card">
               {post.image && <img src={post.image} alt={post.title} />}
               <h3>{post.title}</h3>
               <p>{post.excerpt}</p>
