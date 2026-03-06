@@ -64,16 +64,19 @@ function ScrollToTop() {
 function MainLayout({ children }) {
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const isHbProductionsRoute = /^\/hb-productions(?:\/[^/]+)?$/.test(location.pathname);
   const isHbStoryRoute = /^\/hb-productions\/[^/]+$/.test(location.pathname);
 
   useEffect(() => {
     document.body.classList.toggle('home-view', isHome);
+    document.body.classList.toggle('hb-productions-view', isHbProductionsRoute);
     document.body.classList.toggle('hb-story-view', isHbStoryRoute);
     return () => {
       document.body.classList.remove('home-view');
+      document.body.classList.remove('hb-productions-view');
       document.body.classList.remove('hb-story-view');
     };
-  }, [isHome, isHbStoryRoute]);
+  }, [isHome, isHbProductionsRoute, isHbStoryRoute]);
 
   return (
     <div className={`app-shell${isHome ? ' app-shell-home' : ''}`}>

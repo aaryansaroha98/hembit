@@ -286,6 +286,10 @@ body.home-view .site-footer--home {
   border-bottom-color: transparent;
 }
 
+.topbar-wrap.dropdown-open {
+  background: #fff;
+}
+
 .topbar-wrap-home .topbar-left button,
 .topbar-wrap-home .topbar-right a,
 .topbar-wrap-home .topbar-right button,
@@ -340,15 +344,23 @@ body.home-view .topbar-wrap.dropdown-open .mobile-search:hover {
   color: #555;
 }
 
+body.hb-productions-view,
 body.hb-story-view {
   background: #000;
 }
 
+body.hb-productions-view .topbar-wrap,
 body.hb-story-view .topbar-wrap {
   background: #000;
   border-bottom-color: transparent;
 }
 
+body.hb-productions-view .topbar-wrap .topbar-left button,
+body.hb-productions-view .topbar-wrap .topbar-right a,
+body.hb-productions-view .topbar-wrap .topbar-right button,
+body.hb-productions-view .topbar-wrap .menu-toggle,
+body.hb-productions-view .topbar-wrap .mobile-search,
+body.hb-productions-view .topbar-wrap .brand-mark,
 body.hb-story-view .topbar-wrap .topbar-left button,
 body.hb-story-view .topbar-wrap .topbar-right a,
 body.hb-story-view .topbar-wrap .topbar-right button,
@@ -358,6 +370,11 @@ body.hb-story-view .topbar-wrap .brand-mark {
   color: #fff;
 }
 
+body.hb-productions-view .topbar-wrap .topbar-left button:hover,
+body.hb-productions-view .topbar-wrap .topbar-right a:hover,
+body.hb-productions-view .topbar-wrap .topbar-right button:hover,
+body.hb-productions-view .topbar-wrap .menu-toggle:hover,
+body.hb-productions-view .topbar-wrap .mobile-search:hover,
 body.hb-story-view .topbar-wrap .topbar-left button:hover,
 body.hb-story-view .topbar-wrap .topbar-right a:hover,
 body.hb-story-view .topbar-wrap .topbar-right button:hover,
@@ -366,6 +383,7 @@ body.hb-story-view .topbar-wrap .mobile-search:hover {
   color: rgba(255, 255, 255, 0.72);
 }
 
+body.hb-productions-view .mega-menu,
 body.hb-story-view .mega-menu {
   background: #000;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
@@ -373,17 +391,23 @@ body.hb-story-view .mega-menu {
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
+body.hb-productions-view .mega-column h4,
+body.hb-productions-view .mega-column button,
+body.hb-productions-view .mega-column .mega-view-all,
 body.hb-story-view .mega-column h4,
 body.hb-story-view .mega-column button,
 body.hb-story-view .mega-column .mega-view-all {
   color: #fff;
 }
 
+body.hb-productions-view .mega-column button:hover,
+body.hb-productions-view .mega-column .mega-view-all:hover,
 body.hb-story-view .mega-column button:hover,
 body.hb-story-view .mega-column .mega-view-all:hover {
   color: rgba(255, 255, 255, 0.72);
 }
 
+body.hb-productions-view .menu-backdrop,
 body.hb-story-view .menu-backdrop {
   background: rgba(0, 0, 0, 0.5);
 }
