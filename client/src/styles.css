@@ -340,30 +340,52 @@ body.home-view .topbar-wrap.dropdown-open .mobile-search:hover {
   color: #555;
 }
 
-body.hb-view {
+body.hb-story-view {
   background: #000;
 }
 
-body.hb-view .topbar-wrap {
+body.hb-story-view .topbar-wrap {
   background: #000;
   border-bottom-color: transparent;
 }
 
-body.hb-view .topbar-wrap .topbar-left button,
-body.hb-view .topbar-wrap .topbar-right a,
-body.hb-view .topbar-wrap .topbar-right button,
-body.hb-view .topbar-wrap .menu-toggle,
-body.hb-view .topbar-wrap .mobile-search,
-body.hb-view .topbar-wrap .brand-mark {
+body.hb-story-view .topbar-wrap .topbar-left button,
+body.hb-story-view .topbar-wrap .topbar-right a,
+body.hb-story-view .topbar-wrap .topbar-right button,
+body.hb-story-view .topbar-wrap .menu-toggle,
+body.hb-story-view .topbar-wrap .mobile-search,
+body.hb-story-view .topbar-wrap .brand-mark {
   color: #fff;
 }
 
-body.hb-view .topbar-wrap .topbar-left button:hover,
-body.hb-view .topbar-wrap .topbar-right a:hover,
-body.hb-view .topbar-wrap .topbar-right button:hover,
-body.hb-view .topbar-wrap .menu-toggle:hover,
-body.hb-view .topbar-wrap .mobile-search:hover {
+body.hb-story-view .topbar-wrap .topbar-left button:hover,
+body.hb-story-view .topbar-wrap .topbar-right a:hover,
+body.hb-story-view .topbar-wrap .topbar-right button:hover,
+body.hb-story-view .topbar-wrap .menu-toggle:hover,
+body.hb-story-view .topbar-wrap .mobile-search:hover {
   color: rgba(255, 255, 255, 0.72);
+}
+
+body.hb-story-view .mega-menu {
+  background: #000;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+body.hb-story-view .mega-column h4,
+body.hb-story-view .mega-column button,
+body.hb-story-view .mega-column .mega-view-all {
+  color: #fff;
+}
+
+body.hb-story-view .mega-column button:hover,
+body.hb-story-view .mega-column .mega-view-all:hover {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+body.hb-story-view .menu-backdrop {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .topbar {
@@ -1974,8 +1996,8 @@ textarea {
 }
 
 .hb-list-page {
-  background: #000;
-  color: #fff;
+  background: #fff;
+  color: #111;
 }
 
 .hb-story-page {
@@ -2099,6 +2121,45 @@ textarea {
 .hb-story-explore:hover {
   background: #fff;
   color: #000;
+}
+
+.hb-list-page .hb-story-card {
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.hb-list-page .hb-story-media {
+  aspect-ratio: auto;
+  max-height: none;
+  background: #fff;
+}
+
+.hb-list-page .hb-story-media img {
+  height: auto;
+  object-fit: contain;
+  transform: none;
+}
+
+.hb-list-page .hb-story-card:hover .hb-story-media img {
+  transform: none;
+}
+
+.hb-list-page .hb-story-media-fallback {
+  color: #777;
+}
+
+.hb-list-page .hb-story-copy p {
+  color: #666;
+}
+
+.hb-list-page .hb-story-explore {
+  border: 1px solid #111;
+  color: #111;
+}
+
+.hb-list-page .hb-story-explore:hover {
+  background: #111;
+  color: #fff;
 }
 
 .hb-story-head {
@@ -4639,9 +4700,9 @@ textarea {
     gap: 1.15rem;
   }
 
-  .hb-story-media {
-    aspect-ratio: 16 / 10;
-    max-height: 220px;
+  .hb-list-page .hb-story-media {
+    aspect-ratio: auto;
+    max-height: none;
   }
 
   .hb-story-copy h2 {
