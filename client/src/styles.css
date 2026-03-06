@@ -2095,6 +2095,7 @@ textarea {
   text-transform: uppercase;
   font-weight: 500;
   line-height: 1.35;
+  text-align: center;
 }
 
 .hb-story-copy p {
@@ -2201,8 +2202,8 @@ textarea {
 
 .hb-story-figure {
   margin: 0;
-  background: #090909;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  border: 0;
 }
 
 .hb-story-figure--main {
@@ -2264,12 +2265,13 @@ textarea {
 }
 
 .hb-story-body {
-  max-width: 900px;
-  margin: 1.25rem auto 0;
+  max-width: 780px;
+  margin: 1.8rem auto 0;
+  text-align: center;
 }
 
 .hb-story-body p {
-  margin: 0 0 0.72rem;
+  margin: 0 auto 0.72rem;
   color: rgba(255, 255, 255, 0.88);
   font-size: 0.82rem;
   line-height: 1.72;
