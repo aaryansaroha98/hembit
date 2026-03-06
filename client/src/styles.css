@@ -1897,9 +1897,13 @@ textarea {
 
 /* Services page */
 .services-client-page {
-  background: #e7e7e7;
+  background: #fff;
   min-height: calc(100vh - 80px);
   padding: 2.7rem 0 5rem;
+}
+
+.cart-page {
+  background: #fff;
 }
 
 .services-client-inner {
