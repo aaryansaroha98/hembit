@@ -118,13 +118,14 @@ export function Topbar() {
               </button>
             ))}
             <button
+              className="mega-view-all"
               type="button"
               onClick={() => {
                 navigate('/hb-productions');
                 setOpenMenu('');
               }}
             >
-              View All Stories
+              VIEW ALL
             </button>
           </div>
         </div>
