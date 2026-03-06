@@ -34,7 +34,6 @@ export function Topbar() {
   const [hbStories, setHbStories] = useState([]);
   const [openMenu, setOpenMenu] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [topbarHidden, setTopbarHidden] = useState(false);
   /* Mobile sub-navigation: which top-level section is drilled into */
   const [mobSection, setMobSection] = useState(null); // 'HIGHLIGHTS' | 'MEN' | 'HB PRODUCTIONS' | null
   /* Which category accordion is expanded inside a section */
@@ -43,7 +42,6 @@ export function Topbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef(null);
-  const lastScrollYRef = useRef(0);
   const { isAuthenticated } = useAuth();
   const { items } = useCart();
   const location = useLocation();
@@ -61,44 +59,7 @@ export function Topbar() {
     setOpenMenu('');
     closeMobile();
     closeSearch();
-    setTopbarHidden(false);
-    lastScrollYRef.current = window.scrollY || 0;
   }, [location.pathname]);
-
-  useEffect(() => {
-    const threshold = 8;
-    const revealAtTop = 84;
-
-    const onScroll = () => {
-      const y = window.scrollY || window.pageYOffset || 0;
-
-      if (openMenu || mobileOpen || searchOpen) {
-        setTopbarHidden(false);
-        lastScrollYRef.current = y;
-        return;
-      }
-
-      const delta = y - lastScrollYRef.current;
-      if (Math.abs(delta) < threshold) {
-        return;
-      }
-
-      if (y <= revealAtTop) {
-        setTopbarHidden(false);
-      } else if (delta > 0) {
-        setTopbarHidden(true);
-      } else {
-        setTopbarHidden(false);
-      }
-
-      lastScrollYRef.current = y;
-    };
-
-    lastScrollYRef.current = window.scrollY || 0;
-    window.addEventListener('scroll', onScroll, { passive: true });
-
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [openMenu, mobileOpen, searchOpen, location.pathname]);
 
   const closeMobile = () => {
     setMobileOpen(false);
@@ -210,7 +171,7 @@ export function Topbar() {
 
   return (
     <header
-      className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}${openMenu ? ' dropdown-open' : ''}${topbarHidden ? ' topbar-wrap-hidden' : ''}`}
+      className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}${openMenu ? ' dropdown-open' : ''}`}
       onMouseLeave={() => setOpenMenu('')}
     >
       <div className="topbar">
