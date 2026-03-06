@@ -78,6 +78,7 @@ function normalizeHbPost(post) {
     ...post,
     image: images[0] || '',
     images,
+    galleryPosition: String(post?.galleryPosition || '').toLowerCase() === 'below_text' ? 'below_text' : 'above_text',
   };
 }
 

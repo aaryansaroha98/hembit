@@ -90,6 +90,11 @@ export function HBProductionStoryPage() {
   }, [story]);
   const coverImage = storyImages[0] || '';
   const galleryImages = storyImages.slice(1);
+  const repeatedGalleryImages = useMemo(() => {
+    if (galleryImages.length <= 1) return galleryImages;
+    return [...galleryImages, ...galleryImages];
+  }, [galleryImages]);
+  const galleryPosition = story?.galleryPosition === 'below_text' ? 'below_text' : 'above_text';
 
   if (status === 'loading') {
     return (
@@ -146,28 +151,30 @@ export function HBProductionStoryPage() {
                 <div className="hb-story-image-fallback">Image unavailable</div>
               )}
             </figure>
+          </div>
+        )}
 
-            {galleryImages.length > 0 && (
-              <div className="hb-story-gallery-strip" aria-label="Story gallery">
-                {galleryImages.map((src, index) => {
-                  const imageKey = `${src}-${index + 1}`;
-                  return (
-                    <figure className="hb-story-figure hb-story-figure--strip" key={imageKey}>
-                      {!failedImages[imageKey] ? (
-                        <img
-                          src={src}
-                          alt={`${story.title} ${index + 2}`}
-                          loading="lazy"
-                          onError={() => setFailedImages((prev) => ({ ...prev, [imageKey]: true }))}
-                        />
-                      ) : (
-                        <div className="hb-story-image-fallback">Image unavailable</div>
-                      )}
-                    </figure>
-                  );
-                })}
-              </div>
-            )}
+        {galleryImages.length > 0 && galleryPosition === 'above_text' && (
+          <div className="hb-story-gallery-strip" aria-label="Story gallery">
+            <div className={`hb-story-gallery-track${galleryImages.length > 1 ? ' is-looping' : ''}`}>
+              {repeatedGalleryImages.map((src, index) => {
+                const imageKey = `${src}-${index + 1}`;
+                return (
+                  <figure className="hb-story-figure hb-story-figure--strip" key={imageKey}>
+                    {!failedImages[src] ? (
+                      <img
+                        src={src}
+                        alt={`${story.title} ${index + 2}`}
+                        loading="lazy"
+                        onError={() => setFailedImages((prev) => ({ ...prev, [src]: true }))}
+                      />
+                    ) : (
+                      <div className="hb-story-image-fallback">Image unavailable</div>
+                    )}
+                  </figure>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -180,6 +187,30 @@ export function HBProductionStoryPage() {
               <p key={`${index}-${paragraph.slice(0, 24)}`}>{paragraph}</p>
             ))}
         </article>
+
+        {galleryImages.length > 0 && galleryPosition === 'below_text' && (
+          <div className="hb-story-gallery-strip" aria-label="Story gallery">
+            <div className={`hb-story-gallery-track${galleryImages.length > 1 ? ' is-looping' : ''}`}>
+              {repeatedGalleryImages.map((src, index) => {
+                const imageKey = `${src}-${index + 1}`;
+                return (
+                  <figure className="hb-story-figure hb-story-figure--strip" key={imageKey}>
+                    {!failedImages[src] ? (
+                      <img
+                        src={src}
+                        alt={`${story.title} ${index + 2}`}
+                        loading="lazy"
+                        onError={() => setFailedImages((prev) => ({ ...prev, [src]: true }))}
+                      />
+                    ) : (
+                      <div className="hb-story-image-fallback">Image unavailable</div>
+                    )}
+                  </figure>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="hb-story-actions">
           <Link className="hb-story-back" to="/hb-productions">BACK TO STORIES</Link>

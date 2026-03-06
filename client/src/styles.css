@@ -1944,9 +1944,17 @@ textarea {
 /* HB productions - classic listing and detail */
 .hb-list-page,
 .hb-story-page {
+  min-height: calc(100vh - 80px);
+}
+
+.hb-list-page {
   background: #fff;
   color: #111;
-  min-height: calc(100vh - 80px);
+}
+
+.hb-story-page {
+  background: #000;
+  color: #fff;
 }
 
 .hb-list-shell,
@@ -2076,7 +2084,7 @@ textarea {
   font-size: 0.68rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #666;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .hb-story-head h1 {
@@ -2090,7 +2098,7 @@ textarea {
 .hb-story-head h2 {
   margin: 0.65rem auto 0;
   max-width: 760px;
-  color: #444;
+  color: rgba(255, 255, 255, 0.82);
   font-size: 0.78rem;
   line-height: 1.62;
   letter-spacing: 0.05em;
@@ -2105,8 +2113,8 @@ textarea {
 
 .hb-story-figure {
   margin: 0;
-  background: #f5f5f5;
-  border: 1px solid var(--line);
+  background: #090909;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .hb-story-figure--main {
@@ -2122,25 +2130,41 @@ textarea {
 }
 
 .hb-story-gallery-strip {
-  display: flex;
-  gap: 0.8rem;
-  overflow-x: auto;
+  width: 100%;
+  overflow: hidden;
   overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
-  padding-bottom: 0.2rem;
+  margin-top: 0.8rem;
+}
+
+.hb-story-gallery-track {
+  width: max-content;
+  display: flex;
+}
+
+.hb-story-gallery-track.is-looping {
+  animation: hbStoryMarquee 42s linear infinite;
+}
+
+@keyframes hbStoryMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .hb-story-gallery-strip::-webkit-scrollbar {
-  height: 6px;
+  display: none;
 }
 
-.hb-story-gallery-strip::-webkit-scrollbar-thumb {
-  background: #cfcfcf;
+.hb-story-gallery-strip {
+  scrollbar-width: none;
 }
 
 .hb-story-figure--strip {
   flex: 0 0 clamp(260px, 38vw, 560px);
-  scroll-snap-align: start;
+  margin-right: 0.8rem;
 }
 
 .hb-story-figure--strip img {
@@ -2153,7 +2177,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #888;
+  color: rgba(255, 255, 255, 0.72);
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2166,7 +2190,7 @@ textarea {
 
 .hb-story-body p {
   margin: 0 0 0.72rem;
-  color: #262626;
+  color: rgba(255, 255, 255, 0.88);
   font-size: 0.82rem;
   line-height: 1.72;
   letter-spacing: 0.02em;
@@ -2181,25 +2205,25 @@ textarea {
 .hb-story-back {
   height: 37px;
   padding: 0 1.2rem;
-  border: 1px solid #111;
+  border: 1px solid #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #111;
+  color: #fff;
   font-size: 0.66rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .hb-story-back:hover {
-  background: #111;
-  color: #fff;
+  background: #fff;
+  color: #000;
 }
 
 .hb-story-status {
   margin: 1.5rem 0;
   text-align: center;
-  color: #444;
+  color: rgba(255, 255, 255, 0.82);
   font-size: 0.78rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;

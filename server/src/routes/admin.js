@@ -285,12 +285,18 @@ function normalizeHbImages(images, image) {
   return list;
 }
 
+function normalizeHbGalleryPosition(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  return raw === 'below_text' ? 'below_text' : 'above_text';
+}
+
 function normalizeHbPost(post) {
   const normalizedImages = normalizeHbImages(post?.images, post?.image);
   return {
     ...post,
     image: normalizedImages[0] || '',
     images: normalizedImages,
+    galleryPosition: normalizeHbGalleryPosition(post?.galleryPosition),
   };
 }
 
@@ -1093,12 +1099,13 @@ adminRouter.get('/hb-productions', (_req, res) => {
 });
 
 adminRouter.post('/hb-productions', (req, res) => {
-  const { title, excerpt, image, images, body } = req.body;
+  const { title, excerpt, image, images, body, galleryPosition } = req.body;
   if (!title || !body) {
     return res.status(400).json({ message: 'title and body are required' });
   }
 
   const normalizedImages = normalizeHbImages(images, image);
+  const normalizedGalleryPosition = normalizeHbGalleryPosition(galleryPosition);
 
   let post;
   writeDb((db) => {
@@ -1108,6 +1115,7 @@ adminRouter.post('/hb-productions', (req, res) => {
       excerpt: excerpt || '',
       image: normalizedImages[0] || '',
       images: normalizedImages,
+      galleryPosition: normalizedGalleryPosition,
       body,
       createdAt: new Date().toISOString(),
     };
@@ -1129,9 +1137,10 @@ adminRouter.delete('/hb-productions/:id', (req, res) => {
 
 adminRouter.put('/hb-productions/:id', (req, res) => {
   const id = req.params.id;
-  const { title, excerpt, image, images, body } = req.body;
+  const { title, excerpt, image, images, body, galleryPosition } = req.body;
   const hasImage = Object.prototype.hasOwnProperty.call(req.body, 'image');
   const hasImages = Object.prototype.hasOwnProperty.call(req.body, 'images');
+  const hasGalleryPosition = Object.prototype.hasOwnProperty.call(req.body, 'galleryPosition');
 
   let post;
   writeDb((db) => {
@@ -1141,6 +1150,9 @@ adminRouter.put('/hb-productions/:id', (req, res) => {
     post.title = title ?? post.title;
     post.excerpt = excerpt ?? post.excerpt;
     post.body = body ?? post.body;
+    if (hasGalleryPosition) {
+      post.galleryPosition = normalizeHbGalleryPosition(galleryPosition);
+    }
 
     if (hasImage || hasImages) {
       const nextImages = normalizeHbImages(

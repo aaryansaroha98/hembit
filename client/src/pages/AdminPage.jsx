@@ -163,6 +163,7 @@ function createInitialPostForm() {
     excerpt: '',
     image: '',
     images: [],
+    galleryPosition: 'above_text',
     body: '',
   };
 }
@@ -1584,6 +1585,13 @@ export function AdminPage() {
               value={postForm.excerpt}
               onChange={(e) => setPostForm((prev) => ({ ...prev, excerpt: e.target.value }))}
             />
+            <select
+              value={postForm.galleryPosition}
+              onChange={(e) => setPostForm((prev) => ({ ...prev, galleryPosition: e.target.value }))}
+            >
+              <option value="above_text">Other Images Above Text</option>
+              <option value="below_text">Other Images Below Text</option>
+            </select>
             <input
               placeholder="Cover Image URL (optional)"
               value={postForm.image}
@@ -1760,6 +1768,7 @@ export function AdminPage() {
                         excerpt: post.excerpt || '',
                         image: postImages[0] || '',
                         images: postImages,
+                        galleryPosition: post.galleryPosition === 'below_text' ? 'below_text' : 'above_text',
                         body: post.body || '',
                       });
                       window.scrollTo({ top: 0, behavior: 'smooth' });
