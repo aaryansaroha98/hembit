@@ -272,19 +272,13 @@ body.home-view .site-footer--home {
   z-index: 60;
   background: transparent;
   border-bottom: none;
-  transition: transform 280ms var(--ease), background-color var(--t-med) var(--ease),
-    border-color var(--t-med) var(--ease);
-  will-change: transform;
+  transition: background-color var(--t-med) var(--ease), border-color var(--t-med) var(--ease);
 }
 
 .topbar-wrap-home {
   position: fixed;
   left: 0;
   right: 0;
-}
-
-.topbar-wrap-hidden {
-  transform: translateY(calc(-100% - 2px));
 }
 
 .topbar-wrap-overlay {
