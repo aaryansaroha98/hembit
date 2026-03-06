@@ -1,62 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
-
-function resolveStoryImageSrc(rawUrl) {
-  const value = String(rawUrl || '').trim();
-  if (!value) return '';
-
-  if (value.startsWith('/uploads/') || value.startsWith('uploads/')) {
-    const normalizedPath = value.startsWith('/') ? value : `/${value}`;
-    return `${API_ORIGIN}${normalizedPath}`;
-  }
-
-  const withProtocol = value.startsWith('//') ? `https:${value}` : value;
-
-  try {
-    const parsed = new URL(withProtocol, window.location.origin);
-
-    // If admin saved a localhost upload URL, rewrite it to current API origin for other devices.
-    if (
-      (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') &&
-      parsed.pathname.startsWith('/uploads/')
-    ) {
-      return `${API_ORIGIN}${parsed.pathname}${parsed.search || ''}`;
-    }
-
-    if (
-      parsed.protocol === 'http:' &&
-      window.location.protocol === 'https:' &&
-      parsed.hostname !== 'localhost' &&
-      parsed.hostname !== '127.0.0.1'
-    ) {
-      parsed.protocol = 'https:';
-    }
-    return encodeURI(parsed.toString());
-  } catch {
-    return '';
-  }
-}
-
-function getPostImages(post) {
-  const seen = new Set();
-  const list = [];
-  const pushUrl = (value) => {
-    const url = String(value || '').trim();
-    if (!url || seen.has(url)) return;
-    seen.add(url);
-    list.push(url);
-  };
-
-  if (Array.isArray(post?.images)) {
-    post.images.forEach(pushUrl);
-  }
-  pushUrl(post?.image);
-  return list;
-}
+import { getPostImages, resolveStoryImageSrc } from '../utils/hbMedia';
 
 export function HBProductionsPage() {
   const [posts, setPosts] = useState([]);
