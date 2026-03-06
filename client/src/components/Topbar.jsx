@@ -223,7 +223,15 @@ export function Topbar() {
         <button
           className="menu-toggle"
           type="button"
-          onClick={() => (mobileOpen ? closeMobile() : setMobileOpen(true))}
+          onClick={() => {
+            if (mobileOpen) {
+              closeMobile();
+              return;
+            }
+            setMobSection(null);
+            setMobExpanded(null);
+            setMobileOpen(true);
+          }}
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
         >
           <span className={`menu-toggle-icon${mobileOpen ? ' is-open' : ''}`} aria-hidden="true" />
