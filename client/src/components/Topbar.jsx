@@ -66,6 +66,12 @@ export function Topbar() {
   }, [location.pathname]);
 
   useEffect(() => {
+    if (mobileOpen || openMenu || searchOpen) {
+      setTopbarHidden(false);
+    }
+  }, [mobileOpen, openMenu, searchOpen]);
+
+  useEffect(() => {
     const threshold = 8;
     const revealAtTop = 84;
 
@@ -210,7 +216,7 @@ export function Topbar() {
 
   return (
     <header
-      className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}${openMenu ? ' dropdown-open' : ''}${topbarHidden ? ' topbar-wrap-hidden' : ''}`}
+      className={`topbar-wrap${isHome ? ' topbar-wrap-home' : ''}${useOverlayHeader ? ' topbar-wrap-overlay' : ''}${mobileOpen ? ' topbar-wrap-mobile-open' : ''}${openMenu ? ' dropdown-open' : ''}${topbarHidden && !mobileOpen && !openMenu && !searchOpen ? ' topbar-wrap-hidden' : ''}`}
       onMouseLeave={() => setOpenMenu('')}
     >
       <div className="topbar">
