@@ -57,7 +57,7 @@ export function ServicesPage() {
   ];
 
   return (
-    <section className="services-client-page">
+    <section className="content-page services-client-page">
       <div className="services-client-inner">
         <h1>{(content?.title || 'Client Service').toUpperCase()}</h1>
 

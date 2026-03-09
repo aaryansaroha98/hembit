@@ -1905,13 +1905,13 @@ textarea {
 
 /* Services page */
 .services-client-page {
-  background: #fff;
+  /* Inherit background from content-page */
   min-height: calc(100vh - 80px);
   padding: 2.7rem 0 5rem;
 }
 
 .cart-page {
-  background: #fff;
+  /* Inherit background from content-page */
 }
 
 .services-client-inner {
@@ -4829,11 +4829,6 @@ textarea {
 
   .admin-block {
     padding: 1.2rem 1rem;
-  }
-
-  .services-client-page {
-    min-height: calc(100vh - 70px);
-    padding: 2.1rem 0 3.4rem;
   }
 
   .services-client-inner {
