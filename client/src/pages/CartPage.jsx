@@ -13,7 +13,7 @@ export function CartPage() {
   const { items, removeItem, updateQty, totals } = useCart();
 
   return (
-  <div className="content-page cart-page">
+    <div className="content-page cart-page">
       <div className="content-page-inner">
         <h1>CART</h1>
       </div>
@@ -75,6 +75,6 @@ export function CartPage() {
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }
