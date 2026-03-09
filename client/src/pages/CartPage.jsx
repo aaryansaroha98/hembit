@@ -75,6 +75,6 @@ export function CartPage() {
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }
