@@ -36,7 +36,6 @@ export function Footer() {
             </nav>
 
             <nav className="footer-links footer-col footer-links-legal">
-              <Link to="/sitemap">SITE DIRECTORY</Link>
               <Link to="/privacy-policy">PRIVACY NOTICE</Link>
               <Link to="/terms-of-use">TERMS OF USE</Link>
             </nav>
@@ -86,7 +85,6 @@ export function Footer() {
           </nav>
 
           <nav className="footer-links footer-col footer-links-legal">
-            <Link to="/sitemap">SITE DIRECTORY</Link>
             <Link to="/privacy-policy">PRIVACY NOTICE</Link>
             <Link to="/terms-of-use">TERMS OF USE</Link>
           </nav>
