@@ -20,6 +20,12 @@
   </url>
 
   <url>
+    <loc>https://www.hembit.in/signin</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
     <loc>https://www.hembit.in/account</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
