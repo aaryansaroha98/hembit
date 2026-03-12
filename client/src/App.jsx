@@ -19,6 +19,7 @@ import { HBProductionsPage } from './pages/HBProductionsPage';
 import { HBProductionStoryPage } from './pages/HBProductionStoryPage';
 import { AdminPage } from './pages/AdminPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
+import { SitemapPage } from './pages/SitemapPage';
 
 function RouteLoadingWrapper({ children }) {
   const location = useLocation();
@@ -240,6 +241,14 @@ export default function App() {
             <AdminRoute>
               <AdminPage />
             </AdminRoute>
+          }
+        />
+        <Route
+          path="/sitemap"
+          element={
+            <MainLayout>
+              <SitemapPage />
+            </MainLayout>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

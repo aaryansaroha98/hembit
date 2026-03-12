@@ -1,3 +1,9 @@
 User-agent: *
 Allow: /
-Sitemap: https://yourdomain.com/sitemap.xml
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /order-confirmed/
+Disallow: /order-tracking
+
+Sitemap: https://www.hembit.in/sitemap.xml
