@@ -90,8 +90,60 @@ authRouter.post('/signup/start', async (req, res) => {
 
   await sendEmail({
     to: email,
-    subject: 'HEMBIT verification code',
-    html: `<p>Your HEMBIT OTP is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
+    subject: 'HEMBIT — Your Verification Code',
+    html: `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;max-width:600px;width:100%;">
+        <!-- Header -->
+        <tr>
+          <td style="background:#111;padding:28px 32px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;letter-spacing:0.18em;font-weight:600;">HEMBIT</h1>
+          </td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px 32px 16px;text-align:center;">
+            <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#888;">Email Verification</p>
+            <h2 style="margin:0 0 24px;font-size:20px;font-weight:600;color:#111;letter-spacing:0.04em;">Verify Your Account</h2>
+            <p style="margin:0 0 28px;font-size:14px;line-height:1.7;color:#555;">Welcome to HEMBIT. To complete your registration, please use the verification code below. This code will expire in <strong>10 minutes</strong>.</p>
+          </td>
+        </tr>
+        <!-- OTP Box -->
+        <tr>
+          <td style="padding:0 32px 32px;text-align:center;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;border:1px solid #eee;border-radius:8px;">
+              <tr>
+                <td style="padding:28px 20px;text-align:center;">
+                  <p style="margin:0 0 10px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#888;">Your Verification Code</p>
+                  <p style="margin:0;font-size:36px;font-weight:700;letter-spacing:0.3em;color:#111;font-family:'Courier New',monospace;">${otp}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Note -->
+        <tr>
+          <td style="padding:0 32px 32px;text-align:center;">
+            <p style="margin:0;font-size:12px;line-height:1.6;color:#999;">If you did not create an account with HEMBIT, please disregard this email. Your security is important to us.</p>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background:#111;padding:24px 32px;text-align:center;">
+            <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.1em;color:rgba(255,255,255,0.5);text-transform:uppercase;">The House of</p>
+            <p style="margin:0;font-size:16px;letter-spacing:0.18em;color:#fff;font-weight:600;">HEMBIT</p>
+            <p style="margin:12px 0 0;font-size:11px;color:rgba(255,255,255,0.35);">hembit.in</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
   });
 
   return res.json({ message: 'OTP sent to your email' });
@@ -140,6 +192,74 @@ authRouter.post('/signup/verify', (req, res) => {
   });
 
   const token = createToken(user);
+
+  /* Send welcome email (async, don't block response) */
+  sendEmail({
+    to: user.email,
+    subject: 'Welcome to HEMBIT — Your Journey Begins',
+    html: `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;max-width:600px;width:100%;">
+        <!-- Header -->
+        <tr>
+          <td style="background:#111;padding:36px 32px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:26px;letter-spacing:0.22em;font-weight:600;">HEMBIT</h1>
+            <p style="margin:8px 0 0;font-size:11px;letter-spacing:0.14em;color:rgba(255,255,255,0.5);text-transform:uppercase;">Elevate Your Style</p>
+          </td>
+        </tr>
+        <!-- Welcome Section -->
+        <tr>
+          <td style="padding:40px 40px 20px;text-align:center;">
+            <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#b8860b;">Welcome</p>
+            <h2 style="margin:0 0 20px;font-size:24px;font-weight:600;color:#111;letter-spacing:0.06em;">Dear ${user.name},</h2>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.8;color:#555;">Welcome to <strong style="color:#111;">HEMBIT</strong> — where craftsmanship meets contemporary design. We are delighted to have you join our community of individuals who appreciate the finer details in fashion.</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.8;color:#555;">Every piece in our collection is thoughtfully curated to ensure uncompromising quality and timeless elegance. From carefully selected fabrics to precision tailoring, each garment tells a story of dedication and artistry.</p>
+          </td>
+        </tr>
+        <!-- Divider -->
+        <tr>
+          <td style="padding:0 40px;">
+            <hr style="border:0;border-top:1px solid #eee;margin:0;">
+          </td>
+        </tr>
+        <!-- Promise Section -->
+        <tr>
+          <td style="padding:24px 40px 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:12px 0;text-align:center;">
+                  <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#888;">Our Promise</p>
+                  <p style="margin:0;font-size:13px;line-height:1.7;color:#555;">Premium materials · Artisan craftsmanship · Timeless design</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- CTA -->
+        <tr>
+          <td style="padding:0 40px 36px;text-align:center;">
+            <a href="https://hembit.in" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 40px;font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;border-radius:0;">Start Exploring</a>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background:#111;padding:28px 32px;text-align:center;">
+            <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.1em;color:rgba(255,255,255,0.5);text-transform:uppercase;">Thank you for choosing</p>
+            <p style="margin:0;font-size:16px;letter-spacing:0.18em;color:#fff;font-weight:600;">HEMBIT</p>
+            <p style="margin:14px 0 0;font-size:11px;color:rgba(255,255,255,0.35);">hembit.in</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+  }).catch(() => { /* silent */ });
+
   return res.json({
     token,
     user: {
@@ -235,8 +355,60 @@ authRouter.post('/password-reset/start', async (req, res) => {
 
   await sendEmail({
     to: email,
-    subject: 'HEMBIT password reset code',
-    html: `<p>Your password reset OTP is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
+    subject: 'HEMBIT — Password Reset Code',
+    html: `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;max-width:600px;width:100%;">
+        <!-- Header -->
+        <tr>
+          <td style="background:#111;padding:28px 32px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;letter-spacing:0.18em;font-weight:600;">HEMBIT</h1>
+          </td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px 32px 16px;text-align:center;">
+            <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#888;">Account Security</p>
+            <h2 style="margin:0 0 24px;font-size:20px;font-weight:600;color:#111;letter-spacing:0.04em;">Password Reset Request</h2>
+            <p style="margin:0 0 28px;font-size:14px;line-height:1.7;color:#555;">We received a request to reset the password for your HEMBIT account. Use the code below to proceed. This code will expire in <strong>10 minutes</strong>.</p>
+          </td>
+        </tr>
+        <!-- OTP Box -->
+        <tr>
+          <td style="padding:0 32px 32px;text-align:center;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;border:1px solid #eee;border-radius:8px;">
+              <tr>
+                <td style="padding:28px 20px;text-align:center;">
+                  <p style="margin:0 0 10px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#888;">Your Reset Code</p>
+                  <p style="margin:0;font-size:36px;font-weight:700;letter-spacing:0.3em;color:#111;font-family:'Courier New',monospace;">${otp}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Note -->
+        <tr>
+          <td style="padding:0 32px 32px;text-align:center;">
+            <p style="margin:0;font-size:12px;line-height:1.6;color:#999;">If you did not request a password reset, you can safely ignore this email. Your account remains secure.</p>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background:#111;padding:24px 32px;text-align:center;">
+            <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.1em;color:rgba(255,255,255,0.5);text-transform:uppercase;">The House of</p>
+            <p style="margin:0;font-size:16px;letter-spacing:0.18em;color:#fff;font-weight:600;">HEMBIT</p>
+            <p style="margin:12px 0 0;font-size:11px;color:rgba(255,255,255,0.35);">hembit.in</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
   });
 
   return res.json({ message: 'Password reset OTP sent to email' });

@@ -186,6 +186,8 @@ export function AdminPage() {
     },
   });
   const [orders, setOrders] = useState([]);
+  const [orderFilter, setOrderFilter] = useState('All');
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [userList, setUserList] = useState([]);
   const [newsletter, setNewsletter] = useState({ subscribers: [], mails: [] });
   const [mailRecipients, setMailRecipients] = useState({
@@ -2014,62 +2016,196 @@ export function AdminPage() {
           </div>
         )}
 
-        {activeTab === 'Orders' && (
-          <div className="admin-block">
-            <h2>Order Management</h2>
-            {!orders.length && <p>No orders yet.</p>}
-            {orders.map((order) => (
-              <article key={order.id} className="admin-order-card">
-                <div className="admin-order-top">
-                  <div>
-                    <strong>{order.orderNumber || order.id}</strong>
-                    <p>{order.customer?.name} · {order.customer?.email}</p>
-                    <p>{new Date(order.createdAt).toLocaleDateString()} · ₹{Number(order.total).toLocaleString('en-IN')}</p>
-                  </div>
-                  <div className="admin-order-items">
-                    {(order.items || []).map((item, idx) => (
-                      <span key={idx}>{item.name} x{item.quantity}</span>
-                    ))}
-                  </div>
-                </div>
-                <div className="admin-order-bottom">
-                  <select
-                    value={order.status}
-                    onChange={async (e) => {
-                      try {
-                        await api.put(`/admin/orders/${order.id}/status`, { status: e.target.value }, token);
-                        setMessage(`Order ${order.orderNumber || order.id} → ${e.target.value}`);
-                        loadAll();
-                      } catch (err) {
-                        setMessage(err.message);
-                      }
-                    }}
-                  >
-                    <option>Pending Confirmation</option>
-                    <option>Confirmed</option>
-                    <option>Packed</option>
-                    <option>Shipped</option>
-                    <option>Out for Delivery</option>
-                    <option>Delivered</option>
-                  </select>
+        {activeTab === 'Orders' && (() => {
+          const ORDER_STATUSES = ['All', 'Pending Confirmation', 'Confirmed', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered'];
+          const filteredOrders = orderFilter === 'All' ? orders : orders.filter((o) => o.status === orderFilter);
+          const statusCounts = orders.reduce((acc, o) => { acc[o.status] = (acc[o.status] || 0) + 1; return acc; }, {});
+
+          return (
+            <div className="admin-block">
+              <h2>Order Management</h2>
+
+              {/* ── Filter Bar ── */}
+              <div className="admin-order-filters">
+                {ORDER_STATUSES.map((status) => (
                   <button
+                    key={status}
                     type="button"
-                    onClick={async () => {
-                      try {
-                        const result = await api.post(`/admin/orders/${order.id}/send-status-email`, {}, token);
-                        setMessage(result.message);
-                      } catch (err) {
-                        setMessage(err.message);
-                      }
-                    }}
+                    className={`admin-order-filter-btn${orderFilter === status ? ' active' : ''}`}
+                    onClick={() => setOrderFilter(status)}
                   >
-                    Send Status Email
+                    {status}
+                    <span className="admin-order-filter-count">
+                      {status === 'All' ? orders.length : (statusCounts[status] || 0)}
+                    </span>
                   </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+                ))}
+              </div>
+
+              {!filteredOrders.length && <p style={{ marginTop: '1rem', color: '#6b7280' }}>No orders found.</p>}
+
+              {filteredOrders.map((order) => {
+                const isExpanded = expandedOrderId === order.id;
+                const addr = order.address || {};
+                const statusColorMap = {
+                  'Pending Confirmation': '#b45309',
+                  'Confirmed': '#1d4ed8',
+                  'Packed': '#7c3aed',
+                  'Shipped': '#0369a1',
+                  'Out for Delivery': '#c2410c',
+                  'Delivered': '#15803d',
+                };
+                const badgeColor = statusColorMap[order.status] || '#555';
+
+                return (
+                  <article key={order.id} className={`admin-order-card${isExpanded ? ' expanded' : ''}`}>
+                    {/* ── Summary Row (always visible) ── */}
+                    <div
+                      className="admin-order-summary"
+                      onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                    >
+                      <div className="admin-order-summary-left">
+                        <strong>{order.orderNumber || order.id}</strong>
+                        <p>{order.customer?.name || 'Unknown'} · {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      </div>
+                      <div className="admin-order-summary-right">
+                        <span className="admin-order-total">₹{Number(order.total).toLocaleString('en-IN')}</span>
+                        <span className="admin-order-status-badge" style={{ background: badgeColor }}>{order.status}</span>
+                      </div>
+                      <span className="admin-order-chevron">{isExpanded ? '▲' : '▼'}</span>
+                    </div>
+
+                    {/* ── Expanded Detail Panel ── */}
+                    {isExpanded && (
+                      <div className="admin-order-detail">
+                        <div className="admin-order-detail-grid">
+                          {/* Customer Info */}
+                          <div className="admin-order-detail-section">
+                            <h4>Customer</h4>
+                            <p><strong>Name:</strong> {order.customer?.name || '-'}</p>
+                            <p><strong>Email:</strong> {order.customer?.email || '-'}</p>
+                            <p><strong>User ID:</strong> {order.userId || '-'}</p>
+                          </div>
+
+                          {/* Shipping Address */}
+                          <div className="admin-order-detail-section">
+                            <h4>Shipping Address</h4>
+                            {addr.line1 ? (
+                              <>
+                                <p>{addr.line1}</p>
+                                {addr.line2 && <p>{addr.line2}</p>}
+                                <p>{addr.city}, {addr.state} {addr.postalCode}</p>
+                                <p>{addr.country}</p>
+                              </>
+                            ) : (
+                              <p style={{ color: '#9ca3af' }}>No address provided</p>
+                            )}
+                          </div>
+
+                          {/* Payment Info */}
+                          <div className="admin-order-detail-section">
+                            <h4>Payment</h4>
+                            <p><strong>Method:</strong> {order.paymentMethod || '-'}</p>
+                            <p><strong>Status:</strong> {order.paymentStatus || '-'}</p>
+                            {order.paymentId && <p><strong>Payment ID:</strong> {order.paymentId}</p>}
+                          </div>
+                        </div>
+
+                        {/* Products Table */}
+                        <div className="admin-order-detail-section">
+                          <h4>Products</h4>
+                          <table className="admin-order-products-table">
+                            <thead>
+                              <tr>
+                                <th>Image</th>
+                                <th>Product</th>
+                                <th>Size</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(order.items || []).map((item, idx) => (
+                                <tr key={idx}>
+                                  <td>
+                                    {item.image
+                                      ? <img src={item.image} alt={item.name} className="admin-order-product-img" />
+                                      : <span className="admin-order-no-img">—</span>
+                                    }
+                                  </td>
+                                  <td>{item.name}</td>
+                                  <td>{item.size || '-'}</td>
+                                  <td>{item.quantity}</td>
+                                  <td>₹{Number(item.price).toLocaleString('en-IN')}</td>
+                                  <td>₹{Number(item.lineTotal || item.price * item.quantity).toLocaleString('en-IN')}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Timeline */}
+                        {order.timeline && order.timeline.length > 0 && (
+                          <div className="admin-order-detail-section">
+                            <h4>Timeline</h4>
+                            <div className="admin-order-timeline">
+                              {order.timeline.map((entry, idx) => (
+                                <div key={idx} className="admin-order-timeline-entry">
+                                  <span className="admin-order-timeline-dot" />
+                                  <div>
+                                    <strong>{entry.status}</strong>
+                                    <p>{new Date(entry.at).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="admin-order-actions">
+                          <select
+                            value={order.status}
+                            onChange={async (e) => {
+                              try {
+                                await api.put(`/admin/orders/${order.id}/status`, { status: e.target.value }, token);
+                                setMessage(`Order ${order.orderNumber || order.id} → ${e.target.value}`);
+                                loadAll();
+                              } catch (err) {
+                                setMessage(err.message);
+                              }
+                            }}
+                          >
+                            <option>Pending Confirmation</option>
+                            <option>Confirmed</option>
+                            <option>Packed</option>
+                            <option>Shipped</option>
+                            <option>Out for Delivery</option>
+                            <option>Delivered</option>
+                          </select>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                const result = await api.post(`/admin/orders/${order.id}/send-status-email`, {}, token);
+                                setMessage(result.message);
+                              } catch (err) {
+                                setMessage(err.message);
+                              }
+                            }}
+                          >
+                            Send Status Email
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {activeTab === 'Users' && (
           <div className="admin-block">
