@@ -238,6 +238,8 @@ export function AdminPage() {
     subject: '',
     body: '',
   });
+  const [mailSelectedEmails, setMailSelectedEmails] = useState([]);
+  const [mailUserSearch, setMailUserSearch] = useState('');
   const [logoVideo, setLogoVideo] = useState('');
   const [logoUploading, setLogoUploading] = useState(false);
   const logoFileRef = useRef(null);
@@ -2311,66 +2313,207 @@ export function AdminPage() {
           </div>
         )}
 
-        {activeTab === 'Users & Subscribers Mail' && (
-          <div className="admin-block">
-            <h2>Send Mail to Users and Newsletter Subscribers</h2>
-            <p>
-              Users: {mailRecipients.counts.users} | Newsletter Subscribers: {mailRecipients.counts.subscribers} | Unique
-              Total: {mailRecipients.counts.both}
-            </p>
-            <div className="admin-form-grid">
-              <select
-                value={mailForm.audience}
-                onChange={(e) => setMailForm((prev) => ({ ...prev, audience: e.target.value }))}
-              >
-                <option value="both">Users + Newsletter Subscribers</option>
-                <option value="users">Users only</option>
-                <option value="subscribers">Newsletter subscribers only</option>
-              </select>
-              <input
-                placeholder="Subject"
-                value={mailForm.subject}
-                onChange={(e) => setMailForm((prev) => ({ ...prev, subject: e.target.value }))}
-              />
-              <input
-                disabled
-                value={`Recipients: ${mailRecipients.counts[mailForm.audience] || 0}`}
-                readOnly
-              />
+        {activeTab === 'Users & Subscribers Mail' && (() => {
+          const audienceModes = [
+            { key: 'both', label: 'All Users + Subscribers', icon: '👥' },
+            { key: 'users', label: 'Users Only', icon: '👤' },
+            { key: 'subscribers', label: 'Subscribers Only', icon: '📧' },
+            { key: 'selected', label: 'Select Individual', icon: '🎯' },
+          ];
+
+          const allRecipientsList = [
+            ...(userList || []).map((u) => ({ name: u.name, email: u.email, source: 'user' })),
+            ...(newsletter.subscribers || []).filter((s) => !(userList || []).some((u) => u.email?.toLowerCase() === s.email?.toLowerCase())).map((s) => ({ name: s.email, email: s.email, source: 'subscriber' })),
+          ];
+
+          const searchLower = mailUserSearch.toLowerCase();
+          const filteredRecipients = searchLower
+            ? allRecipientsList.filter((r) => r.name?.toLowerCase().includes(searchLower) || r.email?.toLowerCase().includes(searchLower))
+            : allRecipientsList;
+
+          const recipientCount = mailForm.audience === 'selected'
+            ? mailSelectedEmails.length
+            : (mailRecipients.counts[mailForm.audience] || 0);
+
+          const mailSending = false;
+
+          return (
+            <div className="admin-block">
+              <h2>Email Communications</h2>
+              <p className="admin-mail-subtitle">Send branded emails to your users and newsletter subscribers</p>
+
+              {/* ── Audience Mode Tabs ── */}
+              <div className="admin-mail-audience-tabs">
+                {audienceModes.map((mode) => (
+                  <button
+                    key={mode.key}
+                    type="button"
+                    className={`admin-mail-audience-tab${mailForm.audience === mode.key ? ' active' : ''}`}
+                    onClick={() => {
+                      setMailForm((prev) => ({ ...prev, audience: mode.key }));
+                      if (mode.key !== 'selected') setMailSelectedEmails([]);
+                    }}
+                  >
+                    <span className="admin-mail-tab-icon">{mode.icon}</span>
+                    <span>{mode.label}</span>
+                    {mode.key !== 'selected' && (
+                      <span className="admin-mail-tab-count">{mailRecipients.counts[mode.key] || 0}</span>
+                    )}
+                    {mode.key === 'selected' && mailSelectedEmails.length > 0 && (
+                      <span className="admin-mail-tab-count">{mailSelectedEmails.length}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* ── User Picker (only for 'selected' audience) ── */}
+              {mailForm.audience === 'selected' && (
+                <div className="admin-mail-user-picker">
+                  <div className="admin-mail-picker-header">
+                    <h4>Select Recipients</h4>
+                    <div className="admin-mail-picker-actions">
+                      <button
+                        type="button"
+                        className="admin-mail-picker-action-btn"
+                        onClick={() => setMailSelectedEmails(allRecipientsList.map((r) => r.email))}
+                      >
+                        Select All
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-mail-picker-action-btn"
+                        onClick={() => setMailSelectedEmails([])}
+                      >
+                        Clear
+                      </button>
+                      {mailSelectedEmails.length > 0 && (
+                        <span className="admin-mail-selected-badge">
+                          {mailSelectedEmails.length} selected
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    className="admin-mail-search"
+                    placeholder="Search by name or email..."
+                    value={mailUserSearch}
+                    onChange={(e) => setMailUserSearch(e.target.value)}
+                  />
+                  <div className="admin-mail-user-list">
+                    {filteredRecipients.map((recipient) => {
+                      const isSelected = mailSelectedEmails.includes(recipient.email);
+                      return (
+                        <label
+                          key={recipient.email}
+                          className={`admin-mail-user-row${isSelected ? ' selected' : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {
+                              setMailSelectedEmails((prev) =>
+                                isSelected
+                                  ? prev.filter((e) => e !== recipient.email)
+                                  : [...prev, recipient.email]
+                              );
+                            }}
+                          />
+                          <div className="admin-mail-user-info">
+                            <strong>{recipient.name || 'Unnamed'}</strong>
+                            <span>{recipient.email}</span>
+                          </div>
+                          <span className={`admin-mail-source-tag ${recipient.source}`}>
+                            {recipient.source === 'user' ? 'User' : 'Subscriber'}
+                          </span>
+                        </label>
+                      );
+                    })}
+                    {filteredRecipients.length === 0 && (
+                      <p className="admin-mail-no-results">No recipients match your search</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Compose Section ── */}
+              <div className="admin-mail-compose">
+                <div className="admin-mail-compose-header">
+                  <h4>Compose Email</h4>
+                  <span className="admin-mail-recipient-count">
+                    {recipientCount} {recipientCount === 1 ? 'recipient' : 'recipients'}
+                  </span>
+                </div>
+                <input
+                  className="admin-mail-input"
+                  placeholder="Email Subject"
+                  value={mailForm.subject}
+                  onChange={(e) => setMailForm((prev) => ({ ...prev, subject: e.target.value }))}
+                />
+                <textarea
+                  className="admin-mail-textarea"
+                  placeholder="Write your message here... (HTML or plain text supported)"
+                  value={mailForm.body}
+                  onChange={(e) => setMailForm((prev) => ({ ...prev, body: e.target.value }))}
+                  rows={6}
+                />
+                <div className="admin-mail-compose-footer">
+                  <button
+                    type="button"
+                    className="admin-mail-send-btn"
+                    disabled={!mailForm.subject || !mailForm.body || recipientCount === 0}
+                    onClick={async () => {
+                      try {
+                        const payload = { ...mailForm };
+                        if (mailForm.audience === 'selected') {
+                          payload.emails = mailSelectedEmails;
+                        }
+                        const result = await api.post('/admin/mail/send', payload, token);
+                        setMessage(result.message);
+                        setMailForm((prev) => ({ ...prev, subject: '', body: '' }));
+                        setMailSelectedEmails([]);
+                        loadAll();
+                      } catch (error) {
+                        setMessage(error.message);
+                      }
+                    }}
+                  >
+                    Send Email →
+                  </button>
+                </div>
+              </div>
+
+              {/* ── Mail Logs ── */}
+              <div className="admin-mail-logs">
+                <h4>Mail History</h4>
+                {(!newsletter.mails || newsletter.mails.length === 0) && (
+                  <p style={{ color: '#9ca3af', fontSize: '0.75rem' }}>No emails sent yet.</p>
+                )}
+                {(newsletter.mails || []).map((mail) => {
+                  const allSent = (mail.failedCount ?? 0) === 0;
+                  return (
+                    <article key={mail.id} className="admin-mail-log-card">
+                      <div className="admin-mail-log-top">
+                        <strong>{mail.subject}</strong>
+                        <span className={`admin-mail-log-status ${allSent ? 'success' : 'partial'}`}>
+                          {allSent ? '✓ Sent' : '⚠ Partial'}
+                        </span>
+                      </div>
+                      <div className="admin-mail-log-meta">
+                        <span>Audience: {mail.audience || 'subscribers'}</span>
+                        <span>•</span>
+                        <span>{mail.sentCount ?? mail.recipientCount}/{mail.recipientCount} delivered</span>
+                        {(mail.failedCount ?? 0) > 0 && (
+                          <><span>•</span><span className="admin-mail-log-failed">{mail.failedCount} failed</span></>
+                        )}
+                      </div>
+                      <p className="admin-mail-log-date">{new Date(mail.sentAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    </article>
+                  );
+                })}
+              </div>
             </div>
-            <textarea
-              placeholder="Message (HTML/plain text)"
-              value={mailForm.body}
-              onChange={(e) => setMailForm((prev) => ({ ...prev, body: e.target.value }))}
-            />
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  const result = await api.post('/admin/mail/send', mailForm, token);
-                  setMessage(result.message);
-                  setMailForm((prev) => ({ ...prev, subject: '', body: '' }));
-                  loadAll();
-                } catch (error) {
-                  setMessage(error.message);
-                }
-              }}
-            >
-              Send Mail
-            </button>
-            <h3>Recent Mail Logs</h3>
-            {newsletter.mails.map((mail) => (
-              <article key={mail.id} className="admin-list-item stacked">
-                <strong>{mail.subject}</strong>
-                <p>Audience: {mail.audience || 'subscribers'}</p>
-                <p>
-                  Sent: {mail.sentCount ?? mail.recipientCount}/{mail.recipientCount} | Failed: {mail.failedCount ?? 0}
-                </p>
-                <p>{new Date(mail.sentAt).toLocaleString()}</p>
-              </article>
-            ))}
-          </div>
-        )}
+          );
+        })()}
       </main>
     </section>
   );

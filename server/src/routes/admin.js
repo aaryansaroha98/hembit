@@ -1391,17 +1391,28 @@ adminRouter.get('/mail/recipients', (_req, res) => {
 });
 
 adminRouter.post('/mail/send', async (req, res) => {
-  const { subject, body, audience = 'both' } = req.body;
+  const { subject, body, audience = 'both', emails } = req.body;
 
   if (!subject || !body) {
     return res.status(400).json({ message: 'subject and body are required' });
   }
-  if (!['users', 'subscribers', 'both'].includes(audience)) {
-    return res.status(400).json({ message: 'audience must be users, subscribers, or both' });
+  if (!['users', 'subscribers', 'both', 'selected'].includes(audience)) {
+    return res.status(400).json({ message: 'audience must be users, subscribers, both, or selected' });
   }
 
-  const db = readDb();
-  const recipients = getAudienceEmails(db, audience);
+  let recipients;
+  if (audience === 'selected') {
+    if (!Array.isArray(emails) || emails.length === 0) {
+      return res.status(400).json({ message: 'emails array is required when audience is selected' });
+    }
+    recipients = emails.map((e) => String(e || '').trim().toLowerCase()).filter(Boolean);
+    if (!recipients.length) {
+      return res.status(400).json({ message: 'No valid email addresses provided' });
+    }
+  } else {
+    const db = readDb();
+    recipients = getAudienceEmails(db, audience);
+  }
 
   if (!recipients.length) {
     return res.status(400).json({ message: `No recipients found for audience: ${audience}` });
@@ -1425,7 +1436,7 @@ adminRouter.post('/mail/send', async (req, res) => {
       id: createId('mail'),
       subject,
       body,
-      audience,
+      audience: audience === 'selected' ? `selected (${recipients.length})` : audience,
       recipientCount: recipients.length,
       sentCount: recipients.length - failures.length,
       failedCount: failures.length,
