@@ -11,20 +11,44 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadsDir = path.resolve(__dirname, './data/uploads');
 
-export function createServer() {
-  const app = express();
+function buildAllowedOrigins() {
   const defaultOrigins = ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'];
   const envOrigins = String(process.env.FRONTEND_URL || '')
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
-  const allowedOrigins = Array.from(new Set([...defaultOrigins, ...envOrigins]));
+
+  const origins = new Set();
+  const hostnames = new Set();
+
+  for (const origin of [...defaultOrigins, ...envOrigins]) {
+    const trimmed = origin.replace(/\/+$/, '');
+    origins.add(trimmed);
+    try {
+      const url = new URL(trimmed);
+      hostnames.add(url.hostname.replace(/^www\./, ''));
+    } catch {
+      /* ignore malformed origin */
+    }
+  }
+
+  return { origins, hostnames };
+}
+
+export function createServer() {
+  const app = express();
+  const { origins: allowedOrigins, hostnames: allowedHostnames } = buildAllowedOrigins();
 
   app.use(
     cors({
       origin(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-          return callback(null, true);
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.has(origin.replace(/\/+$/, ''))) return callback(null, true);
+        try {
+          const hostname = new URL(origin).hostname.replace(/^www\./, '');
+          if (allowedHostnames.has(hostname)) return callback(null, true);
+        } catch {
+          /* ignore malformed origin */
         }
         return callback(new Error(`CORS blocked for origin: ${origin}`));
       },

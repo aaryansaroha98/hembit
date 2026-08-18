@@ -32,24 +32,34 @@ export function LoadingScreen({ onFinished, waitForBackend = false }) {
     if (!waitForBackend) return;
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const MAX_BACKEND_WAIT_MS = 20000;
+    const startedAt = Date.now();
     let cancelled = false;
 
     let firstAttempt = true;
+    const finish = () => {
+      backendReady.current = true;
+      tryFade();
+    };
+
     const ping = async () => {
       while (!cancelled) {
         try {
           const res = await fetch(`${API_URL}/health`, { method: 'GET' });
           if (res.ok) {
-            backendReady.current = true;
-            tryFade();
+            finish();
             return;
           }
         } catch {
-          /* server still waking up */
+          /* server still waking up or unreachable */
         }
         if (firstAttempt) {
           firstAttempt = false;
           if (!cancelled) setIsColdStart(true);
+        }
+        if (Date.now() - startedAt >= MAX_BACKEND_WAIT_MS) {
+          finish();
+          return;
         }
         await new Promise((r) => setTimeout(r, BACKEND_RETRY_MS));
       }
