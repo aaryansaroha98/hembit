@@ -20,15 +20,27 @@
   </url>
 
   <url>
-    <loc>https://www.hembit.in/signin</loc>
+    <loc>https://www.hembit.in/founder-story</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
   </url>
 
   <url>
-    <loc>https://www.hembit.in/account</loc>
-    <priority>0.7</priority>
+    <loc>https://www.hembit.in/services</loc>
+    <priority>0.6</priority>
     <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.hembit.in/hb-productions</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.hembit.in/product/patandar-ox1-69a40580</loc>
+    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
   </url>
 
   <url>

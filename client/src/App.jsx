@@ -19,6 +19,41 @@ import { HBProductionsPage } from './pages/HBProductionsPage';
 import { HBProductionStoryPage } from './pages/HBProductionStoryPage';
 import { AdminPage } from './pages/AdminPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
+import { Seo } from './components/Seo';
+
+function RouteSeo() {
+  const { pathname } = useLocation();
+  const contentRoute = pathname === '/our-story' || pathname === '/founder-story' || pathname === '/privacy-policy' || pathname === '/terms-of-use';
+  if (contentRoute) return null;
+
+  const privateRoute = /^\/(account|checkout|admin|order-confirmed)(\/|$)/.test(pathname);
+  const metadata = pathname === '/'
+    ? {
+        title: 'HEMBIT | Modern Clothing with Intention',
+        description: 'Discover HEMBIT: modern clothing with a focused design language, expressive silhouettes, and quality rooted in intention.',
+      }
+    : pathname === '/shop'
+      ? {
+          title: 'Shop Modern Clothing | HEMBIT',
+          description: 'Shop HEMBIT clothing across curated collections designed for expressive, considered everyday style.',
+        }
+      : pathname === '/services'
+        ? {
+            title: 'HEMBIT Services | Support and Customer Care',
+            description: 'Find HEMBIT customer support, order assistance, and service information for your shopping experience.',
+          }
+        : pathname === '/hb-productions'
+          ? {
+              title: 'HB Productions | HEMBIT Stories and Editorial',
+              description: 'Explore HB Productions, HEMBIT editorial stories about style, ideas, and the work behind the brand.',
+            }
+          : {
+              title: 'HEMBIT | Modern Clothing',
+              description: 'HEMBIT creates modern clothing with a focused design language rooted in quality and intention.',
+            };
+
+  return <Seo {...metadata} path={pathname} noindex={privateRoute} />;
+}
 
 function RouteLoadingWrapper({ children }) {
   const location = useLocation();
@@ -90,6 +125,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <RouteSeo />
       <RouteLoadingWrapper>
         <Routes>
         <Route

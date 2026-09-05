@@ -5,5 +5,11 @@ Disallow: /account
 Disallow: /checkout
 Disallow: /order-confirmed/
 Disallow: /order-tracking
+Disallow: /signin
+Disallow: /signup
+Disallow: /cart
+Disallow: /*?search=
+Disallow: /*?category=
+Disallow: /*?series=
 
 Sitemap: https://www.hembit.in/sitemap.xml
