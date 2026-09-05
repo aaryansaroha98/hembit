@@ -103,7 +103,7 @@ export function FounderStoryPage() {
         type="profile"
         schema={founderSchema}
       />
-      <ContentLayout eyebrow="FOUNDER STORY" title="Jaswinder Saroha and Aaryan Saroha">
+      <ContentLayout eyebrow="FOUNDER STORY" title="Jaswinder Saroha & Aaryan Saroha">
         <p className="content-page-lead">
           Two brothers. Distinct disciplines. One shared ambition to build something enduring.
         </p>

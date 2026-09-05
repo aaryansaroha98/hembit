@@ -1884,7 +1884,7 @@ textarea {
   text-align: center;
   font-size: 1.66rem;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-transform: none;
   font-weight: 500;
 }
 
