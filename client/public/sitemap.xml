@@ -3,54 +3,63 @@
 
   <url>
     <loc>https://www.hembit.in/</loc>
+    <lastmod>2026-09-05</lastmod>
     <priority>1.0</priority>
     <changefreq>daily</changefreq>
   </url>
 
   <url>
     <loc>https://www.hembit.in/shop</loc>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
   </url>
 
   <url>
     <loc>https://www.hembit.in/our-story</loc>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
   </url>
 
   <url>
     <loc>https://www.hembit.in/founder-story</loc>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
   </url>
 
   <url>
     <loc>https://www.hembit.in/services</loc>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
 
   <url>
     <loc>https://www.hembit.in/hb-productions</loc>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
 
   <url>
     <loc>https://www.hembit.in/product/patandar-ox1-69a40580</loc>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
 
   <url>
     <loc>https://www.hembit.in/privacy-policy</loc>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.5</priority>
     <changefreq>yearly</changefreq>
   </url>
 
   <url>
     <loc>https://www.hembit.in/terms-of-use</loc>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.5</priority>
     <changefreq>yearly</changefreq>
   </url>

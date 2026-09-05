@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Seo, siteUrl } from '../components/Seo';
 
-const founderName = 'Aaryan Saroha';
-
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -19,18 +17,32 @@ const organizationSchema = {
 const founderSchema = {
   '@context': 'https://schema.org',
   '@type': 'ProfilePage',
-  name: `${founderName} | Founder of HEMBIT`,
+  name: 'Jaswinder Saroha and Aaryan Saroha | HEMBIT Founders',
   url: `${siteUrl}/founder-story`,
-  mainEntity: {
-    '@type': 'Person',
-    name: founderName,
-    jobTitle: 'Founder of HEMBIT',
-    worksFor: { '@type': 'Organization', name: 'HEMBIT', url: siteUrl },
-    sameAs: [
-      'https://www.linkedin.com/in/aaryan-saroha-4301a3378/',
-      'https://x.com/aaryan_sar60649',
-    ],
-  },
+  mainEntity: [
+    {
+      '@type': 'Person',
+      name: 'Jaswinder Saroha',
+      jobTitle: 'Founder of HEMBIT and Managing Director of Quantify Terminal',
+      worksFor: [
+        { '@type': 'Organization', name: 'HEMBIT', url: siteUrl },
+        { '@type': 'Organization', name: 'Quantify Terminal' },
+      ],
+    },
+    {
+      '@type': 'Person',
+      name: 'Aaryan Saroha',
+      jobTitle: 'Co-Founder of HEMBIT and Founder & CEO of Quantify Terminal',
+      worksFor: [
+        { '@type': 'Organization', name: 'HEMBIT', url: siteUrl },
+        { '@type': 'Organization', name: 'Quantify Terminal' },
+      ],
+      sameAs: [
+        'https://www.linkedin.com/in/aaryan-saroha-4301a3378/',
+        'https://x.com/aaryan_sar60649',
+      ],
+    },
+  ],
 };
 
 function ContentLayout({ eyebrow, title, children }) {
@@ -90,33 +102,74 @@ export function FounderStoryPage() {
   return (
     <>
       <Seo
-        title="Aaryan Saroha | Founder of HEMBIT"
-        description="Read the founder story of Aaryan Saroha, the entrepreneur behind HEMBIT, and how engineering, systems thinking, and expressive design shape the brand."
+        title="Jaswinder and Aaryan Saroha | HEMBIT Founders"
+        description="Meet HEMBIT founders Jaswinder Saroha and Aaryan Saroha, two brothers bringing mathematics, technology, financial intelligence, and creative design together."
         path="/founder-story"
         type="profile"
         schema={founderSchema}
       />
-      <ContentLayout eyebrow="FOUNDER STORY" title="Aaryan Saroha">
+      <ContentLayout eyebrow="FOUNDER STORY" title="Jaswinder & Aaryan Saroha">
         <p className="content-page-lead">
-          An entrepreneur building at the intersection of engineering, financial technology, and expressive design.
+          Two brothers. Distinct disciplines. One shared ambition to build something enduring.
         </p>
-        <h2>Building from first principles</h2>
+        <h2>Two perspectives, one direction</h2>
         <p>
-          Aaryan Saroha founded HEMBIT with a simple conviction: clothing can be expressive and exacting at the same time. The brand is a study in how a clear point of view becomes a product, how a product becomes a system, and how that system earns trust through consistent execution.
-        </p>
-        <p>
-          His wider work spans financial technology, quantitative analysis, and real-time systems. That background brings a systems mindset to HEMBIT: understand the underlying structure, remove what is unnecessary, and pay attention to the details people feel even when they cannot immediately name them.
-        </p>
-        <h2>One founder, several disciplines</h2>
-        <p>
-          Alongside HEMBIT, Aaryan is the founder of Venturs Forum and Quantify Terminal. Across those ventures, the common thread is deliberate building: bringing people, information, and tools together so better decisions can be made with greater clarity.
+          HEMBIT was founded by Jaswinder Saroha and Aaryan Saroha, two brothers whose distinct disciplines, perspectives, and strengths come together through a shared ambition to build something enduring.
         </p>
         <p>
-          He is also an author. His writing examines ambition, conviction, and the discipline required to continue pursuing difficult goals before the evidence is complete. Those questions matter to HEMBIT too. A brand is not only what it sells; it is the standard it keeps choosing when nobody is asking for an explanation.
+          What began as an idea around clothing evolved into a broader pursuit: to create a brand defined not by passing trends, but by identity, restraint, craftsmanship, and permanence.
         </p>
-        <h2>The direction of HEMBIT</h2>
+        <h2>Jaswinder Saroha</h2>
         <p>
-          HEMBIT is being built as a long-term fashion house: modern in its visual language, rigorous in its process, and human in the way it meets its community. The aim is not to make more noise. It is to make better pieces, tell more honest stories, and give people a reason to return.
+          Jaswinder Saroha, Founder of HEMBIT and Managing Director of Quantify Terminal, brings an analytical perspective shaped by mathematics and interests across quantitative finance, mathematical modelling, financial markets, systematic research, and algorithmic trading.
+        </p>
+        <p>
+          His mathematical foundation influences the way he approaches entrepreneurship and business strategy: through structure, precision, disciplined decision-making, and long-term thinking. Alongside HEMBIT, Jaswinder contributes to the development and direction of Quantify Terminal, a financial intelligence and analytics platform spanning market research, quantitative analysis, portfolio intelligence, risk management, algorithmic workflows, and financial technology.
+        </p>
+        <p>
+          His work across consumer business and financial technology brings a multidisciplinary perspective that combines mathematical thinking with practical business execution.
+        </p>
+        <h2>Aaryan Saroha</h2>
+        <p>
+          Aaryan Saroha, Co-Founder of HEMBIT and Founder & CEO of Quantify Terminal, represents the entrepreneurial, technological, financial, and creative dimension of the partnership.
+        </p>
+        <p>
+          An undergraduate at the Indian Institute of Technology Jammu, Aaryan's interests span entrepreneurship, technology, financial markets, financial technology, software and product engineering, artificial intelligence, and creative design.
+        </p>
+        <p>
+          As Founder & CEO of Quantify Terminal, Aaryan leads the vision and development of a financial technology platform focused on professional-grade market intelligence, quantitative research, portfolio analytics, risk management, and advanced financial workflows. His entrepreneurial work extends beyond technology into product direction, visual identity, digital experiences, branding, creative strategy, and design, disciplines that also influence the character and presentation of HEMBIT.
+        </p>
+        <h2>The HEMBIT philosophy</h2>
+        <p>
+          At the foundation of HEMBIT is a belief shared by both brothers: the world can be made better through design. Not design as decoration, but design as a way of thinking.
+        </p>
+        <p>
+          Design determines how an object feels, how a space is experienced, how technology becomes intuitive, how clothing becomes personal, and how an idea becomes part of culture. For Jaswinder and Aaryan, design is not confined to fashion. It exists wherever intention meets execution: in a garment, a product, a piece of technology, a business, or an entire system.
+        </p>
+        <p>
+          That belief shapes HEMBIT. What we create should have a reason to exist. Every proportion, material, silhouette, detail, and decision should contribute to something more considered than what came before.
+        </p>
+        <p>
+          HEMBIT does not see clothing simply as product, nor fashion as an endless cycle of reinvention. We see clothing as an extension of identity: something capable of carrying memory, character, confidence, and culture.
+        </p>
+        <p>
+          Our approach is intentionally timeless. Rather than designing around what is temporary, HEMBIT seeks to create pieces with permanence: considered silhouettes, enduring aesthetics, thoughtful construction, and a visual language that can remain relevant beyond a season.
+        </p>
+        <p>
+          There is power in restraint. There is confidence in simplicity. And there is permanence in design that does not need to demand attention in order to be remembered.
+        </p>
+        <h2>Built to endure</h2>
+        <p>
+          The ambition of HEMBIT is larger than any individual collection. It is to build a house with its own point of view, one that evolves without abandoning its identity and grows without becoming defined by the moment.
+        </p>
+        <p>
+          The things that surround us shape the way we experience the world. If those things can be designed with greater thought, purpose, and beauty, then the world itself can be experienced differently.
+        </p>
+        <p>
+          HEMBIT exists to contribute to that idea: creation over imitation, intention over excess, permanence over novelty, and building over following. Above all, it is a belief that design is one of the most powerful ways human beings can turn imagination into reality.
+        </p>
+        <p className="content-page-lead">
+          Timeless in character. Intentional in design. Built to endure.
         </p>
         <div className="content-page-actions">
           <a className="content-page-link" href="https://www.linkedin.com/in/aaryan-saroha-4301a3378/" target="_blank" rel="noreferrer">LinkedIn</a>
