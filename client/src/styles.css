@@ -115,6 +115,26 @@ body.home-view .topbar-wrap.dropdown-open {
   text-transform: uppercase;
   margin-bottom: 0.45rem;
 }
+
+.footer-region-selector nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.55rem;
+}
+
+.footer-region-selector nav a {
+  color: #555;
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.footer-region-selector nav a:hover {
+  color: #111;
+  text-decoration: underline;
+}
 :root {
   --bg: #ffffff;
   --surface: #ffffff;

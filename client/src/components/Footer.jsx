@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 
+const localizedHomePaths = ['/in/en', '/us/en', '/uk/en', '/eu/en'];
+
 export function Footer() {
   const location = useLocation();
-  const isHome = location.pathname === '/';
+  const isHome = location.pathname === '/' || localizedHomePaths.includes(location.pathname);
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
@@ -26,7 +28,7 @@ export function Footer() {
         <div className="footer-inner">
           <div className="footer-main-grid">
             <div className="footer-col footer-version-col">
-              <p className="footer-version">INDIA VERSION - ENGLISH</p>
+              <RegionSelector />
             </div>
 
             <nav className="footer-links footer-col footer-links-main">
@@ -75,7 +77,7 @@ export function Footer() {
       <div className="footer-inner">
         <div className="footer-main-grid">
           <div className="footer-col footer-version-col">
-            <p className="footer-version">INDIA VERSION - ENGLISH</p>
+              <RegionSelector />
           </div>
 
           <nav className="footer-links footer-col footer-links-main">
@@ -115,5 +117,19 @@ export function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+function RegionSelector() {
+  return (
+    <div className="footer-region-selector">
+      <p className="footer-version">REGION / LANGUAGE</p>
+      <nav aria-label="Region and language">
+        <Link to="/in/en">INDIA / ENGLISH</Link>
+        <Link to="/us/en">UNITED STATES / ENGLISH</Link>
+        <Link to="/uk/en">UNITED KINGDOM / ENGLISH</Link>
+        <Link to="/eu/en">EUROPE / ENGLISH</Link>
+      </nav>
+    </div>
   );
 }

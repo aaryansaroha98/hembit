@@ -2,6 +2,12 @@ import { useEffect } from 'react';
 
 const SITE_URL = 'https://www.hembit.in';
 const DEFAULT_IMAGE = `${SITE_URL}/favicon.png`;
+const regionalHomePaths = {
+  'en-IN': '/in/en',
+  'en-US': '/us/en',
+  'en-GB': '/uk/en',
+  'en-EU': '/eu/en',
+};
 
 function upsertMeta(attribute, value, content) {
   let element = document.head.querySelector(`meta[${attribute}="${value}"]`);
@@ -44,6 +50,26 @@ export function Seo({
       document.head.appendChild(canonical);
     }
     canonical.setAttribute('href', canonicalUrl);
+
+    Object.entries(regionalHomePaths).forEach(([language, regionalPath]) => {
+      let languageLink = document.head.querySelector(`link[rel="alternate"][hreflang="${language}"]`);
+      if (!languageLink) {
+        languageLink = document.createElement('link');
+        languageLink.setAttribute('rel', 'alternate');
+        languageLink.setAttribute('hreflang', language);
+        document.head.appendChild(languageLink);
+      }
+      languageLink.setAttribute('href', `${SITE_URL}${regionalPath}`);
+    });
+
+    let globalLanguageLink = document.head.querySelector('link[rel="alternate"][hreflang="x-default"]');
+    if (!globalLanguageLink) {
+      globalLanguageLink = document.createElement('link');
+      globalLanguageLink.setAttribute('rel', 'alternate');
+      globalLanguageLink.setAttribute('hreflang', 'x-default');
+      document.head.appendChild(globalLanguageLink);
+    }
+    globalLanguageLink.setAttribute('href', `${SITE_URL}/in/en`);
 
     const schemaScriptId = 'hembit-seo-schema';
     const existingSchema = document.getElementById(schemaScriptId);

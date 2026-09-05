@@ -2,9 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
-    <loc>https://www.hembit.in/</loc>
+    <loc>https://www.hembit.in/in/en</loc>
     <lastmod>2026-09-05</lastmod>
     <priority>1.0</priority>
+    <changefreq>daily</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.hembit.in/us/en</loc>
+    <lastmod>2026-09-05</lastmod>
+    <priority>0.9</priority>
+    <changefreq>daily</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.hembit.in/uk/en</loc>
+    <lastmod>2026-09-05</lastmod>
+    <priority>0.9</priority>
+    <changefreq>daily</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.hembit.in/eu/en</loc>
+    <lastmod>2026-09-05</lastmod>
+    <priority>0.9</priority>
     <changefreq>daily</changefreq>
   </url>
 

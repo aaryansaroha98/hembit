@@ -21,13 +21,16 @@ import { AdminPage } from './pages/AdminPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { Seo } from './components/Seo';
 
+const localizedHomePaths = ['/in/en', '/us/en', '/uk/en', '/eu/en'];
+const isLocalizedHomePath = (pathname) => localizedHomePaths.includes(pathname);
+
 function RouteSeo() {
   const { pathname } = useLocation();
   const contentRoute = pathname === '/our-story' || pathname === '/founder-story' || pathname === '/privacy-policy' || pathname === '/terms-of-use';
   if (contentRoute) return null;
 
   const privateRoute = /^\/(account|checkout|admin|order-confirmed)(\/|$)/.test(pathname);
-  const metadata = pathname === '/'
+  const metadata = (pathname === '/' || isLocalizedHomePath(pathname))
     ? {
         title: 'HEMBIT | Modern Clothing with Intention',
         description: 'Discover HEMBIT: modern clothing with a focused design language, expressive silhouettes, and quality rooted in intention.',
@@ -98,7 +101,7 @@ function ScrollToTop() {
 
 function MainLayout({ children }) {
   const location = useLocation();
-  const isHome = location.pathname === '/';
+  const isHome = location.pathname === '/' || isLocalizedHomePath(location.pathname);
   const isHbStoryRoute = /^\/hb-productions\/[^/]+$/.test(location.pathname);
 
   useEffect(() => {
@@ -130,12 +133,19 @@ export default function App() {
         <Routes>
         <Route
           path="/"
-          element={
-            <MainLayout>
-              <HomePage />
-            </MainLayout>
-          }
+          element={<Navigate to="/in/en" replace />}
         />
+        {localizedHomePaths.map((path) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <MainLayout>
+                <HomePage />
+              </MainLayout>
+            }
+          />
+        ))}
         <Route
           path="/shop"
           element={
