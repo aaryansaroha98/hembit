@@ -38,7 +38,6 @@ const founderSchema = {
         { '@type': 'Organization', name: 'Quantify Terminal' },
       ],
       sameAs: [
-        'https://www.linkedin.com/in/aaryan-saroha-4301a3378/',
         'https://x.com/aaryan_sar60649',
       ],
     },
@@ -89,10 +88,6 @@ export function OurStoryPage() {
         <p>
           We are building HEMBIT from India with a global point of view: direct in communication, careful in execution, and open to the people who give the clothes their meaning. That is the standard we use for the products we make and the service around them.
         </p>
-        <div className="content-page-actions">
-          <Link className="content-page-link" to="/shop">Explore the collection</Link>
-          <Link className="content-page-link" to="/founder-story">Meet the founder</Link>
-        </div>
       </ContentLayout>
     </>
   );
@@ -108,7 +103,7 @@ export function FounderStoryPage() {
         type="profile"
         schema={founderSchema}
       />
-      <ContentLayout eyebrow="FOUNDER STORY" title="Jaswinder & Aaryan Saroha">
+      <ContentLayout eyebrow="FOUNDER STORY" title="Jaswinder Saroha and Aaryan Saroha">
         <p className="content-page-lead">
           Two brothers. Distinct disciplines. One shared ambition to build something enduring.
         </p>
@@ -171,11 +166,6 @@ export function FounderStoryPage() {
         <p className="content-page-lead">
           Timeless in character. Intentional in design. Built to endure.
         </p>
-        <div className="content-page-actions">
-          <a className="content-page-link" href="https://www.linkedin.com/in/aaryan-saroha-4301a3378/" target="_blank" rel="noreferrer">LinkedIn</a>
-          <Link className="content-page-link" to="/our-story">About HEMBIT</Link>
-          <Link className="content-page-link" to="/shop">Shop HEMBIT</Link>
-        </div>
       </ContentLayout>
     </>
   );
