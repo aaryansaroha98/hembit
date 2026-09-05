@@ -97,7 +97,7 @@ export function FounderStoryPage() {
   return (
     <>
       <Seo
-        title="Jaswinder and Aaryan Saroha | HEMBIT Founders"
+        title="HEMBIT | Founder Story"
         description="Meet HEMBIT founders Jaswinder Saroha and Aaryan Saroha, two brothers bringing mathematics, technology, financial intelligence, and creative design together."
         path="/founder-story"
         type="profile"
